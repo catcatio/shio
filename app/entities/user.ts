@@ -1,27 +1,27 @@
 
 
 
-interface UserProviders{
+export interface UserProviders{
   lineId: string
 }
 
-interface UserChatSession {
+export interface UserChatSession {
   id: string
   session: string
   lastAccessed: Date
 }
 
-interface User {
+export interface User {
   displayName: string
 
   id: string
   providers:  UserProviders
-  stellarPublicKey: string
-  stellarEncryptedSecretKey: string
   aclTag: string
+  stellarPublicKey?: string
+  stellarEncryptedSecretKey?: string
 }
 
-interface UserPurchased {
+export interface UserPurchased {
   userId: string
   transactionId: string
   assetId: string
