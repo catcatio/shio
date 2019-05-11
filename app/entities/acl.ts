@@ -1,3 +1,5 @@
+import { CommonAttributes } from "./common";
+
 export enum Permission {
   OWNER = 'OWNER',
   WRITER = 'WRITER',
@@ -6,7 +8,7 @@ export enum Permission {
 
 export const SYSTEM_USER = 'system'
 
-export interface ACL {
+export interface ACL extends CommonAttributes {
   // shio::book::list::*
   // shio::book::read::<book_id>
   id: string
@@ -32,12 +34,18 @@ export class ResourceTag {
   toString() {
     return `${this.prefix}::${this.type}::${this.id}`
   }
+  withId(id: string){
+    return new ResourceTag({
+      ...this,
+      id,
+    })
+  }
 }
 
 export function newResourceTag(resourceType: string, resourceId?: string | number): ResourceTag {
   return new ResourceTag({
     prefix: 'shio',
     type: resourceType,
-    id: resourceId + '' || '*'
+    id: resourceId ? resourceId + '' : '*'
   })
 }

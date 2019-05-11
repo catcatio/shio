@@ -1,6 +1,6 @@
 
 
-interface AssetMetadataBook {
+export interface AssetMetadataBook {
     kind: 'AssetMetadataBook'
     coverImageURL: string
     title: string
@@ -8,14 +8,14 @@ interface AssetMetadataBook {
     teaser: string
 }
 
-interface AssetMetadataEvent {
+export interface AssetMetadataEvent {
     kind: 'AssetMetadataEvent'
     eventURL: string
 }
 
-type AssetMetadata = AssetMetadataBook | AssetMetadataEvent
+export type AssetMetadata = AssetMetadataBook | AssetMetadataEvent
 
-interface Asset {
+export interface Asset {
   id: string
   aclTag: string
 

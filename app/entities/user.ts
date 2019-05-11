@@ -1,3 +1,5 @@
+import { CommonAttributes } from "./common";
+import { Asset } from "./asset";
 
 
 
@@ -5,17 +7,18 @@ export interface UserProviders{
   lineId: string
 }
 
-export interface UserChatSession {
+export interface UserChatSession extends CommonAttributes {
   id: string
-  session: string
-  lastAccessed: Date
+  userId: string
+  sessionRefId?: string
+  provider: 'line'
+  providerId: string
+  lastAccessed?: Date
 }
 
-export interface User {
-  displayName: string
-
+export interface User extends CommonAttributes {
   id: string
-  providers:  UserProviders
+  displayName: string
   aclTag: string
   stellarPublicKey?: string
   stellarEncryptedSecretKey?: string
@@ -26,6 +29,5 @@ export interface UserPurchased {
   transactionId: string
   assetId: string
   aclTag: string
-
   asset?: Asset
 }

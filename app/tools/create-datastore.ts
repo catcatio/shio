@@ -9,3 +9,5 @@ export function CreateDatastoreInstance(apiEndpoint?: string) {
   console.info(`Connection datastore at: ${apiEndpoint || datastore.baseUrl_}`)
   return datastore
 }
+
+

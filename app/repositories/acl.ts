@@ -12,11 +12,17 @@ export interface ACLRepository {
   GetPermission(userId: string, resourceTag: ResourceTag, permission: Permission, ...opts: ACLRepositoryOperationOption[]): Promise<ACL | undefined>
   GetPermissionOrThrow(userId: string, resourceTag: ResourceTag, permission: Permission, ...opts: ACLRepositoryOperationOption[]): Promise<ACL>
   CreatePermission(userId: string, resourceTag: ResourceTag, permission: Permission, ...opts: ACLRepositoryOperationOption[]): Promise<void>
+
+  RevokeAllPermissionFromResource(userId: string, resourceTag: ResourceTag, ...opts: ACLRepositoryOperationOption[]): Promise<void>
 }
 
 export class DatastoreACLRepository implements ACLRepository {
-
-
+  async RevokeAllPermissionFromResource(userId: string, resourceTag: ResourceTag, ...opts: RepositoryOperationOption<ACL>[]): Promise<void> {
+    const options = composeRepositoryOptions(...opts)
+    await this.IsGranted(options.operationOwnerId, newResourceTag('acl'), Permission.OWNER)
+    const key = this.getACLKey(userId, resourceTag)
+    await this.db.delete(key)
+  }
   private db: Datastore
   private ACLKind = 'acl'
 
@@ -32,15 +38,13 @@ export class DatastoreACLRepository implements ACLRepository {
     return true
   }
   async IsGranted(userId: string, resourceTag: ResourceTag, permission: Permission): Promise<boolean> {
+    if (userId === SYSTEM_USER) {
+      return true
+    }
     const wildCardTag = newResourceTag(resourceTag.type, '*')
     const acl = await Promise.all([
       this.GetPermission(userId, resourceTag, permission, WithSystemOperation()),
-      this.GetPermission(
-        userId,
-        wildCardTag,
-        permission,
-        WithSystemOperation()
-      )
+      this.GetPermission(userId, wildCardTag, permission, WithSystemOperation())
     ])
     return !!acl[0] || !!acl[1]
   }
@@ -51,10 +55,7 @@ export class DatastoreACLRepository implements ACLRepository {
 
   async CreatePermission(userId: string, tag: ResourceTag, permission: Permission, ...opts: ACLRepositoryOperationOption[]): Promise<void> {
     const options = composeRepositoryOptions(...opts)
-    if (options.operationOwnerId !== SYSTEM_USER) {
-      await this.GetPermissionOrThrow(options.operationOwnerId, newResourceTag('acl'), Permission.WRITER)
-    }
-
+    await this.IsGrantedOrThrow(options.operationOwnerId, newResourceTag('acl'), Permission.WRITER)
     const key = this.getACLKey(userId, tag)
     const [existACL]: [ACL | undefined] = await this.db.get(key)
     const permissionSet = new Set<Permission>()
@@ -68,7 +69,9 @@ export class DatastoreACLRepository implements ACLRepository {
       resourceId: tag.id,
       resourcePrefix: tag.prefix,
       resourceType: tag.type,
-      permissions: Array.from(permissionSet)
+      permissions: Array.from(permissionSet),
+      createdAt: new Date(),
+      createdBy: options.operationOwnerId
     }
 
     await this.db.upsert({
@@ -88,9 +91,7 @@ export class DatastoreACLRepository implements ACLRepository {
 
   async GetPermission(userId: string, resourceTag: ResourceTag, permission: Permission, ...opts: ACLRepositoryOperationOption[]): Promise<ACL | undefined> {
     const options = composeRepositoryOptions(...opts)
-    if (options.operationOwnerId !== SYSTEM_USER) {
-      await this.GetPermissionOrThrow(userId, newResourceTag('acl'), permission, ...opts)
-    }
+    await this.IsGranted(options.operationOwnerId, newResourceTag('acl'), Permission.VIEWER)
     const query = this.db.createQuery(this.ACLKind).filter('__key__', this.getACLKey(userId, resourceTag))
     const [entities] = await this.db.runQuery(query)
     if (entities.length < 0) {

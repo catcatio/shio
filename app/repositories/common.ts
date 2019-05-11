@@ -12,6 +12,7 @@ export type WhereOperator<T> = Partial<{
 export type WhereConditions<T> = { [P in keyof T]?: WhereOperator<T[P]> }
 
 export type RepositoryOptions<T = any> = {
+  key?: string
   operationOwnerId: string
   requestId?: string
   where: WhereConditions<Partial<T>>[]
@@ -35,6 +36,7 @@ export function composeRepositoryOptions<T>(...opt: RepositoryOperationOption<T>
   )
 }
 
+
 export function WithWhere<T>(condition: WhereConditions<Partial<T>>): RepositoryOperationOption<T> {
   return function(opts) {
     opts.where.push(condition)
@@ -45,6 +47,13 @@ export function WithWhere<T>(condition: WhereConditions<Partial<T>>): Repository
 export function WithSystemOperation<T>(): RepositoryOperationOption<T> {
   return function(opts) {
     opts.operationOwnerId = SYSTEM_USER
+    return opts
+  }
+}
+
+export function WithKey(id: string): RepositoryOperationOption<any> {
+  return function(opts) {
+    opts.key = id
     return opts
   }
 }

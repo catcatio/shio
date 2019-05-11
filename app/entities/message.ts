@@ -3,7 +3,9 @@
 
 
 // Pubsub queue waiting for fullfillment
-interface IncomingMessage {
+export interface IncomingMessage {
+  provider: 'line'
+  providerId: string
   replyToken: string
   originalContext: string
   intent: string
@@ -13,13 +15,13 @@ interface IncomingMessage {
 }
 
 // Pubsub queue for reply
-enum OutgoingMessageType {
+export enum OutgoingMessageType {
   text,
   image,
   carousel
 }
 
-interface OutgoingMessage {
+export interface OutgoingMessage {
   replyToken: string
   type: OutgoingMessageType
 }

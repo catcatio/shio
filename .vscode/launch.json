@@ -28,7 +28,7 @@
       "name": "Run datastore playground",
       "type": "node",
       "request": "launch",
-      "args": ["${workspaceRoot}/cmd/datastore-playground.ts"],
+      "args": ["${workspaceRoot}/cmd/playground.ts"],
       "runtimeArgs": ["-r", "ts-node/register"],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
