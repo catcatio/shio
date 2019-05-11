@@ -22,8 +22,11 @@ async function Run() {
   const aclrepo = new DatastoreACLRepository(datastore)
   const userRepo = new DatastoreUserRepository(datastore)
 
+  console.time('execution time')
   await RunDatastoreMigration(datastore, aclrepo)
+  console.time('single execution time')
   await aclrepo.CreatePermission('N01', newResourceTag('book', '01'), Permission.VIEWER, WithSystemOperation())
+  console.timeEnd('single execution time')
   await aclrepo.CreatePermission(SYSTEM_USER, newResourceTag('book', '*'), Permission.VIEWER, WithSystemOperation())
   await aclrepo.GetPermissionOrThrow('N01', newResourceTag('book', '01'), Permission.VIEWER, WithSystemOperation())
   await aclrepo.GetPermission('N01', newResourceTag('book', '01'), Permission.OWNER, WithSystemOperation())
@@ -55,14 +58,13 @@ async function Run() {
     WithSystemOperation()
   )
   equal(user!.displayName, 'AIM')
+
   let isGranted = await aclrepo.IsGranted('N01', newResourceTag('book', '01'), Permission.OWNER)
   equal(isGranted, false)
   isGranted = await aclrepo.IsGranted('N01', newResourceTag('book', '01'), Permission.VIEWER)
   equal(isGranted, true)
   isGranted = await aclrepo.IsGranted(SYSTEM_USER, newResourceTag('book', '01'), Permission.VIEWER)
   equal(isGranted, true)
+  console.timeEnd('execution time')
 }
-
-console.time('execution time')
 Run()
-console.timeEnd('execution time')

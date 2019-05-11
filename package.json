@@ -11,8 +11,10 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.12",
     "@types/joi": "^14.3.3",
     "@types/winston": "^2.4.4",
+    "jest": "^24.8.0",
     "ts-node": "^8.1.0",
     "typescript": "^3.4.5"
   }
