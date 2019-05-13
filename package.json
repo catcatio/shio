@@ -5,6 +5,9 @@
   "repository": "git@github.com:catcatio/shio.git",
   "author": "Rungsikorn Rungsikavarnich <rungsikorn@me.com>",
   "license": "MIT",
+  "scripts": {
+    "test-integration": "yarn jest --config jest.integration.json"
+  },
   "dependencies": {
     "@google-cloud/datastore": "^3.1.2",
     "@google-cloud/pubsub": "^0.28.1",

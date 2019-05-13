@@ -6,7 +6,7 @@ import { WithSystemOperation, WithWhere, WithOperationOwner } from '../common'
 describe('DatastoreUserRepository test', () => {
   let aclrepo: DatastoreACLRepository
   let userRepo: DatastoreUserRepository
-  const datastore = CreateDatastoreInstance('http://localhost:8081')
+  const datastore = CreateDatastoreInstance('http://localhost:5545')
   beforeAll(async () => {
     aclrepo = new DatastoreACLRepository(datastore)
     userRepo = new DatastoreUserRepository(datastore)

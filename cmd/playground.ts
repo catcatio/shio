@@ -35,6 +35,40 @@ async function Run() {
   await RunDatastoreMigration(datastore, aclrepo)
   await RunCloudPubSubMigration(pubsub)
 
+  console.time('pubsubmessage')
+  messageRepo.SubscribeIncomingMessage(m => {
+    console.log(m)
+    if (m.intent === 'unsubscribeall') {
+      console.log('unsub...')
+      messageRepo.UnsubscribeAllIncomingMessage()
+    }
+  })
+
+  await messageRepo.CreateIncomingMessage(
+    {
+      intent: 'sayhi',
+      originalContext: 'Hi bot',
+      params: {},
+      provider: 'line',
+      providerId: 'N--1',
+      replyToken: 'reply-test-token'
+    },
+    WithSystemOperation()
+  )
+
+  await messageRepo.CreateIncomingMessage(
+    {
+      intent: 'unsubscribeall',
+      originalContext: 'Hi bot',
+      params: {},
+      provider: 'line',
+      providerId: 'N--1',
+      replyToken: 'reply-test-token'
+    },
+    WithSystemOperation()
+  )
+  console.timeEnd('pubsubmessage')
+
   console.timeEnd('execution time')
 }
 Run()

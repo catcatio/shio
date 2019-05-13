@@ -5,7 +5,7 @@ import { WithSystemOperation } from '../common';
 
 describe('DatastoreACLRepository test', () => {
   let aclrepo: DatastoreACLRepository
-  const datastore = CreateDatastoreInstance('http://localhost:8081')
+  const datastore = CreateDatastoreInstance('http://localhost:5545')
   beforeAll(async () => {
     aclrepo = new DatastoreACLRepository(datastore)
   })
@@ -14,6 +14,7 @@ describe('DatastoreACLRepository test', () => {
     const testTag = newResourceTag('test-something', '001')
     await aclrepo.CreatePermission('N0002', testTag, Permission.VIEWER, WithSystemOperation())
     await aclrepo.GetPermissionOrThrow('N0002', testTag, Permission.VIEWER)
+
     await aclrepo.IsGrantedOrThrow('N0002', testTag, Permission.VIEWER)
     expect(aclrepo.IsGrantedOrThrow('N0002', testTag, Permission.OWNER)).rejects.toThrow()
     expect(aclrepo.IsGrantedOrThrow('N0002', newResourceTag('test-something'), Permission.OWNER)).rejects.toThrow()

@@ -20,7 +20,6 @@ export interface UserRepository {
   FindOneUser(...options: UserRepositoryOperationOption[]): Promise<User | undefined>
   FindManyUser(...options: UserRepositoryOperationOption[]): Promise<PaginationResult<User>>
   RemoveUser(...options: UserRepositoryOperationOption[]): Promise<number>
-
   CreateUserChatSession(input: CreateUserChatSessionInput, ...options: RepositoryOperationOption<UserChatSession>[]): Promise<UserChatSession>
 }
 

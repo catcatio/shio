@@ -1,0 +1,96 @@
+steps:
+## Start CloudDatastore and CloudPubSub emulator
+- name: 'gcr.io/cloud-builders/gsutil'
+  args: ['cp', 'gs://$PROJECT_ID/credentials/builder/key.enc', './key.enc']
+- name: 'gcr.io/cloud-builders/gsutil'
+  args: ['cp', 'gs://$PROJECT_ID/credentials/builder/known_hosts', './known_hosts']
+
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: 
+    - kms
+    - decrypt
+    - --ciphertext-file=key.enc
+    - --plaintext-file=/root/.ssh/id_rsa
+    - --location=global
+    - --keyring=builder-git
+    - --key=github
+  volumes:
+  - name: 'ssh'
+    path: /root/.ssh
+# Set up git with key and domain.
+- name: 'gcr.io/cloud-builders/git'
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - |
+    chmod 600 /root/.ssh/id_rsa
+    cat <<EOF >/root/.ssh/config
+    Hostname github.com
+    IdentityFile /root/.ssh/id_rsa
+    EOF
+    mv known_hosts /root/.ssh/known_hosts
+  volumes:
+  - name: 'ssh'
+    path: /root/.ssh
+
+- name: 'gcr.io/cloud-builders/git'
+  args:
+  - clone
+  - git@github.com:catcatio/shio.git
+  volumes:
+  - name: 'ssh'
+    path: /root/.ssh
+
+- name: 'mhart/alpine-node:10'
+  env:
+  - 'YARN_CACHE_FOLDER=/.yarn-cache'
+  args:
+  - yarn
+  - install
+  volumes:
+  - name: 'node_modules'
+    path: /.yarn-cache
+
+- name: 'mhart/alpine-node:10'
+  volumes:
+  - name: 'node_modules'
+    path: /.yarn-cache
+  args:
+  
+
+- name: 'alpine'
+  args:
+  - tar
+  - cpzf
+  - 'yarn-cache.tar.gz'
+  - -C
+  - '/'
+  - '.yarn-cache'
+  volumes:
+  - name: 'node_modules'
+    path: /.yarn-cache
+
+
+- name: 'gcr.io/cloud-builders/gsutil'
+  args:
+    - cp
+    - yarn-cache.tar.gz
+    - gs://$PROJECT_ID/.cache/yarn-cache.tar.gz
+
+# - name: 'gcr.io/cloud-builders/docker'
+#   args: ['run','-d', '-p','5545:5545', '--name', 'my-datastore', '-e', 'CLOUDSDK_CORE_PROJECT=test', 'gcr.io/cloud-builders/gcloud', 'beta', 'emulators','datastore','start', '--host-port=0.0.0.0:5545']
+# - name: 'alpine'
+#   args: ['sleep', '2']
+# - name: 'gcr.io/cloud-builders/docker'
+#   args: ['run', '--network','host', 'appropriate/curl', '--retry', '4', '--retry-connrefused', '--retry-delay', '3', 'http://localhost:5545']
+
+# - name: 'gcr.io/cloud-builders/docker'
+#   args: ['run', '-d', '-p', '8085:8085', '--name', 'my-pubsub', '-e', 'CLOUDSDK_CORE_PROJECT=test', 'gcr.io/cloud-builders/gcloud', 'beta', 'emulators','pubsub','start', '--host-port=0.0.0.0:8085']
+# - name: 'alpine'
+#   args: ['sleep', '5']
+# - name: 'gcr.io/cloud-builders/docker'
+#   args: ['logs', 'my-pubsub']
+
+# - name: 'gcr.io/cloud-builders/docker'
+#   args: ['run', '--network','host', 'appropriate/curl', '--retry', '4', '--retry-connrefused', '--retry-delay', '3', 'http://localhost:8085']
+
