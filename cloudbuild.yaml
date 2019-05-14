@@ -1,5 +1,24 @@
 steps:
 ## Start CloudDatastore and CloudPubSub emulator
+### Datastore on :5545
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['run','-d', '-p','5545:5545', '--name', 'my-datastore', '-e', 'CLOUDSDK_CORE_PROJECT=test', 'gcr.io/cloud-builders/gcloud', 'beta', 'emulators','datastore','start', '--host-port=0.0.0.0:5545']
+- name: 'alpine'
+  args: ['sleep', '2']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['run', '--network','host', 'appropriate/curl', '--retry', '4', '--retry-connrefused', '--retry-delay', '3', 'http://localhost:5545']
+
+### Pubsub on :8085
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['run', '-d', '-p', '8085:8085', '--name', 'my-pubsub', '-e', 'CLOUDSDK_CORE_PROJECT=test', 'gcr.io/cloud-builders/gcloud', 'beta', 'emulators','pubsub','start', '--host-port=0.0.0.0:8085']
+- name: 'alpine'
+  args: ['sleep', '5']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['logs', 'my-pubsub']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['run', '--network','host', 'appropriate/curl', '--retry', '4', '--retry-connrefused', '--retry-delay', '3', 'http://localhost:8085']
+
+## Prepare source code
 - name: 'gcr.io/cloud-builders/gsutil'
   args: ['cp', 'gs://$PROJECT_ID/credentials/builder/key.enc', './key.enc']
 - name: 'gcr.io/cloud-builders/gsutil'
@@ -41,7 +60,15 @@ steps:
   - name: 'ssh'
     path: /root/.ssh
 
+- name: 'gcr.io/cloud-builders/git'
+  dir: shio
+  args:
+  - checkout
+  - develop
+
+### Install
 - name: 'mhart/alpine-node:10'
+  dir: 'shio'
   env:
   - 'YARN_CACHE_FOLDER=/.yarn-cache'
   args:
@@ -52,11 +79,13 @@ steps:
     path: /.yarn-cache
 
 - name: 'mhart/alpine-node:10'
+  dir: 'shio'
   volumes:
   - name: 'node_modules'
     path: /.yarn-cache
   args:
-  
+    - yarn
+    - test-integration
 
 - name: 'alpine'
   args:
@@ -77,20 +106,4 @@ steps:
     - yarn-cache.tar.gz
     - gs://$PROJECT_ID/.cache/yarn-cache.tar.gz
 
-# - name: 'gcr.io/cloud-builders/docker'
-#   args: ['run','-d', '-p','5545:5545', '--name', 'my-datastore', '-e', 'CLOUDSDK_CORE_PROJECT=test', 'gcr.io/cloud-builders/gcloud', 'beta', 'emulators','datastore','start', '--host-port=0.0.0.0:5545']
-# - name: 'alpine'
-#   args: ['sleep', '2']
-# - name: 'gcr.io/cloud-builders/docker'
-#   args: ['run', '--network','host', 'appropriate/curl', '--retry', '4', '--retry-connrefused', '--retry-delay', '3', 'http://localhost:5545']
-
-# - name: 'gcr.io/cloud-builders/docker'
-#   args: ['run', '-d', '-p', '8085:8085', '--name', 'my-pubsub', '-e', 'CLOUDSDK_CORE_PROJECT=test', 'gcr.io/cloud-builders/gcloud', 'beta', 'emulators','pubsub','start', '--host-port=0.0.0.0:8085']
-# - name: 'alpine'
-#   args: ['sleep', '5']
-# - name: 'gcr.io/cloud-builders/docker'
-#   args: ['logs', 'my-pubsub']
-
-# - name: 'gcr.io/cloud-builders/docker'
-#   args: ['run', '--network','host', 'appropriate/curl', '--retry', '4', '--retry-connrefused', '--retry-delay', '3', 'http://localhost:8085']
 
