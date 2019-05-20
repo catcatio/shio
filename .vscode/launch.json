@@ -33,6 +33,17 @@
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
       "internalConsoleOptions": "openOnSessionStart"
-    }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Jest Unit Tests",
+      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+      "args": [
+        "--config",
+        "${workspaceRoot}/jest.json"
+      ],
+      "internalConsoleOptions": "openOnSessionStart"
+  }
   ]
 }
