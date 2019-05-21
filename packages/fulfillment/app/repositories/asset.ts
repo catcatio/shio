@@ -1,5 +1,5 @@
 import { Asset } from "../entities/asset";
-import { PaginationResult } from "../entities/common";
+import { PaginationResult } from "@shio/foundation/entities";
 
 
 

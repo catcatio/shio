@@ -1,6 +1,7 @@
 import { User, UserChatSession } from '../entities/user'
 import { RepositoryOperationOption, JoiObjectSchema, composeRepositoryOptions, WithWhere, WithSystemOperation } from './common'
-import { Omit, PartialCommonAttributes, CommonAttributes, PaginationResult } from '../entities/common'
+import { Omit, PartialCommonAttributes, CommonAttributes} from '@shio/foundation'
+import {  PaginationResult } from '@shio/foundation/entities'
 import { Datastore } from '@google-cloud/datastore'
 import * as Joi from 'joi'
 import { newGlobalError, ErrorType } from '../entities/error'

@@ -1,8 +1,6 @@
-import { IncomingMessage, OutgoingMessage } from '../entities/message'
-import { PaginationResult, PartialCommonAttributes } from '../entities/common'
 import { RepositoryOperationOption, composeRepositoryOptions } from './common'
-import { PubSub, Topic, Subscription, Message } from '@google-cloud/pubsub'
-import { PUBSUB_INCOMING_MESSAGE_TOPIC, PUBSUB_FULLFILLMENT_SUBSCRIPTION } from './database'
+import { IncomingMessage, OutgoingMessage, PaginationResult } from '@shio/foundation/entities'
+import { CloudPubsubTransports } from '@shio/foundation'
 import { ACLRepository } from './acl'
 import { newResourceTag, Permission } from '../entities'
 
@@ -19,40 +17,28 @@ export interface MessageRepository {
 }
 
 export class CloudPubSubMessageRepository implements MessageRepository {
+
   private tag = newResourceTag('message')
-  private pubsub: PubSub
-  private topic: Topic
-  private subscription: Subscription
   private acl: ACLRepository
-  constructor(pubsub: PubSub, acl: ACLRepository) {
-    this.pubsub = pubsub
-    this.topic = this.pubsub.topic(PUBSUB_INCOMING_MESSAGE_TOPIC)
-    this.subscription = this.topic.subscription(PUBSUB_FULLFILLMENT_SUBSCRIPTION)
+  private pubsub: CloudPubsubTransports
+
+  constructor(pubsub: CloudPubsubTransports, acl: ACLRepository) {
     this.acl = acl
+    this.pubsub = pubsub
   }
 
   async CreateIncomingMessage(input: CreateIncomingMessageInput, ...opts: MessageRepositoryOperationOption[]): Promise<void> {
     const option = composeRepositoryOptions(...opts)
     await this.acl.IsGrantedOrThrow(option.operationOwnerId, this.tag, Permission.WRITER)
-    await this.topic.publishJSON({
-      ...input
-    })
+    await this.pubsub.PublishIncommingMessage(input)
   }
   async SubscribeIncomingMessage(callback: SubscribeIncomingMessageListener, ...opts: MessageRepositoryOperationOption[]) {
     const option = composeRepositoryOptions(...opts)
     await this.acl.IsGrantedOrThrow(option.operationOwnerId, this.tag, Permission.WRITER)
-    this.subscription.on('message', (message: Message) => {
-      const data = JSON.parse(message.data.toString('utf-8'))
-      const f = callback({ ...data })
-      if (f && typeof f.then === 'function') {
-        f.then(() => message.ack())
-      } else {
-        message.ack()
-      }
-    })
+    this.pubsub.SubscribeIncommingMessage(callback)
   }
   UnsubscribeAllIncomingMessage(): void {
-    this.subscription.removeAllListeners('message')
+    this.pubsub.UnsubscribeAllIncomingMessage()
   }
   CreateOutgoingMessage(): Promise<OutgoingMessage> {
     throw new Error('Method not implemented.')
