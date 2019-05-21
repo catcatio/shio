@@ -52,3 +52,17 @@ export interface MessagerResponder {
 export interface RequestHandler {
   handle(req: Request): any
 }
+
+export type Intent = {
+  name: string,
+  parameters: IntentParameters,
+}
+
+export type IntentParameters = {
+  [name: string]: string
+}
+
+export interface IntentDetector {
+  IsSupport(msgType: MessageType): boolean
+  detect(message: ParsedMessage): Promise<(Intent | empty)>
+}

@@ -13,6 +13,9 @@
     "dist/**/*"
   ],
   "dependencies": {
+    "@google-cloud/translate": "^4.0.1",
+    "@types/dialogflow": "^0.9.0",
+    "dialogflow": "^0.9.1"
   },
   "devDependencies": {
     "@types/jest": "^24.0.13",

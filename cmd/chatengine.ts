@@ -3,8 +3,7 @@ import { ChatEngine, LineRequestHandler, LineMessageParser } from 'chatengine'
 import * as bodyParser from 'body-parser'
 
 const start = async () => {
-  // const channelSecret = 'not_very_secret'
-  const channelSecret = 'test_secret'
+  const channelSecret = 'not_very_secret'
   let requestHandler = new LineRequestHandler(channelSecret)
   let messageParser = new LineMessageParser()
   let chatEngine = new ChatEngine(requestHandler, messageParser)

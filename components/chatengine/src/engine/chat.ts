@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 
 import { Request, Response, NextCallback, ParsedMessage, RequestHandler, MessageParser } from '../types'
 
-export type OnMessageReceiveCallback = (parsedMessage: ParsedMessage) => void
+export type OnMessageReceiveCallback = (message: ParsedMessage) => void
 
 export class ChatEngine extends EventEmitter {
   private _onMessageReceiveEventName = 'messagereceived'
