@@ -16,12 +16,12 @@ export type CreateUserChatSessionInput = Omit<PartialCommonAttributes<UserChatSe
 export interface UserRepository {
   CreateUser(input: CreateUserInput, ...options: UserRepositoryOperationOption[]): Promise<User>
   FindByUserId(id: string, ...options: UserRepositoryOperationOption[]): Promise<User | undefined>
-  FindByUserIdOrThrow(id: string, ...options: UserRepositoryOperationOption[]): Promise<User>
   FindOneUser(...options: UserRepositoryOperationOption[]): Promise<User | undefined>
   FindManyUser(...options: UserRepositoryOperationOption[]): Promise<PaginationResult<User>>
   RemoveUser(...options: UserRepositoryOperationOption[]): Promise<number>
   CreateUserChatSession(input: CreateUserChatSessionInput, ...options: RepositoryOperationOption<UserChatSession>[]): Promise<UserChatSession>
 }
+
 
 export class DatastoreUserRepository implements UserRepository {
   async FindByUserId(id: string, ...options: UserRepositoryOperationOption[]): Promise<User | undefined> {
@@ -29,13 +29,6 @@ export class DatastoreUserRepository implements UserRepository {
     await this.acl.IsGrantedOrThrow(option.operationOwnerId, this.aclTag.withId(id), Permission.VIEWER)
     const [entities] = await this.db.get(this.getUserKey(id))
     return toJSON(entities)
-  }
-  async FindByUserIdOrThrow(id: string, ...options: UserRepositoryOperationOption[]): Promise<User> {
-    const output = await this.FindByUserId(id, ...options)
-    if (!output) {
-      throw newGlobalError(ErrorType.NotFound, `User ID ${id} not exists`)
-    }
-    return output
   }
   private db: Datastore
   private acl: ACLRepository

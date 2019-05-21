@@ -1,7 +1,3 @@
-
-
-
-
 // Pubsub queue waiting for fullfillment
 export interface IncomingMessage {
   provider: 'line'

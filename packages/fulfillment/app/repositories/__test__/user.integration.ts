@@ -26,7 +26,7 @@ describe('DatastoreUserRepository test', () => {
           Equal: 'TEST_USER'
         }
       }),
-      WithSystemOperation()
+      WithSystemOperation(),
     )
   })
 })

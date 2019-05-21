@@ -1,27 +1,13 @@
 {
   "name": "shio",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
   "repository": "git@github.com:catcatio/shio.git",
-  "author": "Rungsikorn Rungsikavarnich <rungsikorn@me.com>",
-  "license": "MIT",
-  "scripts": {
-    "test-integration": "yarn jest --config jest.integration.json"
-  },
-  "dependencies": {
-    "@google-cloud/datastore": "^3.1.2",
-    "@google-cloud/pubsub": "^0.28.1",
-    "dataloader": "^1.4.0",
-    "joi": "^14.3.1",
-    "winston": "^3.2.1"
-  },
+  "author": "Octofox team <horseman@octofox.io>",
+  "workspaces": [
+    "packages/*"
+  ],
   "devDependencies": {
-    "@types/jest": "^24.0.12",
-    "@types/joi": "^14.3.3",
-    "@types/winston": "^2.4.4",
-    "jest": "^24.8.0",
-    "ts-jest": "^24.0.2",
-    "ts-node": "^8.1.0",
-    "typescript": "^3.4.5"
+    "lerna": "^2.9.0"
   }
 }

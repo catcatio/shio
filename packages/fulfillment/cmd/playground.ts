@@ -36,13 +36,13 @@ async function Run() {
   await RunCloudPubSubMigration(pubsub)
 
   console.time('pubsubmessage')
-  messageRepo.SubscribeIncomingMessage(m => {
+  await messageRepo.SubscribeIncomingMessage(m => {
     console.log(m)
     if (m.intent === 'unsubscribeall') {
       console.log('unsub...')
       messageRepo.UnsubscribeAllIncomingMessage()
     }
-  })
+  }, WithSystemOperation())
 
   await messageRepo.CreateIncomingMessage(
     {

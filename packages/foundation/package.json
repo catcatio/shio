@@ -1,0 +1,15 @@
+{
+  "name": "@shio/foundation",
+  "version": "1.0.0",
+  "scripts": {
+    "postinstall": "yarn tsc"
+  },
+  "devDependencies": {
+    "typescript": "^3.4.5"
+  },
+  "dependencies": {
+    "@google-cloud/datastore": "^3.1.2",
+    "@google-cloud/logging-winston": "^0.11.1",
+    "@google-cloud/pubsub": "^0.28.1"
+  }
+}

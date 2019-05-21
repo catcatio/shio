@@ -1,2 +1,13 @@
 {
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/*.js": true,
+    "**/*.js.map": true,
+    "**/*.d.ts": true,
+    "**/node_modules": true
+  }
 }

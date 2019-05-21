@@ -4,7 +4,7 @@
   "verbose": true,
   "globals": {
     "ts-jest": {
-      "skipBabel": true
+      "babelConfig": {}
     }
   },
   "transform": {
@@ -12,6 +12,8 @@
   },
   "reporters": ["default"],
   "testEnvironment": "node",
+  "globalSetup": "<rootDir>/__test__/integration-setup.ts",
+  "globalTeardown": "<rootDir>/__test__/integration-teardown.ts",
   "testMatch": ["<rootDir>/**/__test__/**/*.integration.ts"],
   "testPathIgnorePatterns": ["/node_modules/"],
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "node", "json"]

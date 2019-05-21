@@ -12,14 +12,14 @@ type SubscribeIncomingMessageListener = (message: IncomingMessage) => Promise<vo
 
 export interface MessageRepository {
   CreateIncomingMessage(input: CreateIncomingMessageInput, ...opts: MessageRepositoryOperationOption[]): Promise<void>
-  SubscribeIncomingMessage(listener: SubscribeIncomingMessageListener): void
+  SubscribeIncomingMessage(listener: SubscribeIncomingMessageListener, ...opts: MessageRepositoryOperationOption[]): void
   UnsubscribeAllIncomingMessage(): void
   CreateOutgoingMessage(): Promise<OutgoingMessage>
   FindManyOutgoingMessage(): Promise<PaginationResult<OutgoingMessage>>
 }
 
 export class CloudPubSubMessageRepository implements MessageRepository {
-  private tag = 'message'
+  private tag = newResourceTag('message')
   private pubsub: PubSub
   private topic: Topic
   private subscription: Subscription
@@ -33,12 +33,14 @@ export class CloudPubSubMessageRepository implements MessageRepository {
 
   async CreateIncomingMessage(input: CreateIncomingMessageInput, ...opts: MessageRepositoryOperationOption[]): Promise<void> {
     const option = composeRepositoryOptions(...opts)
-    await this.acl.IsGrantedOrThrow(option.operationOwnerId, newResourceTag('message'), Permission.WRITER)
+    await this.acl.IsGrantedOrThrow(option.operationOwnerId, this.tag, Permission.WRITER)
     await this.topic.publishJSON({
       ...input
     })
   }
-  SubscribeIncomingMessage(callback: SubscribeIncomingMessageListener) {
+  async SubscribeIncomingMessage(callback: SubscribeIncomingMessageListener, ...opts: MessageRepositoryOperationOption[]) {
+    const option = composeRepositoryOptions(...opts)
+    await this.acl.IsGrantedOrThrow(option.operationOwnerId, this.tag, Permission.WRITER)
     this.subscription.on('message', (message: Message) => {
       const data = JSON.parse(message.data.toString('utf-8'))
       const f = callback({ ...data })
