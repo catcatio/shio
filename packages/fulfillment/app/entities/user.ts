@@ -1,5 +1,6 @@
 import { CommonAttributes } from "./common";
 import { Asset } from "./asset";
+import { MessageProvider } from "@shio/foundation/entities";
 
 
 
@@ -11,7 +12,7 @@ export interface UserChatSession extends CommonAttributes {
   id: string
   userId: string
   sessionRefId?: string
-  provider: 'line'
+  provider: MessageProvider
   providerId: string
   lastAccessed?: Date
 }

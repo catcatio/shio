@@ -35,8 +35,8 @@ export type IncommingMessageType =
   | 'accountLink'
   | 'unknown'
 
-type MessageProvider = 'line' | 'facebook'
-type MessageLanguageCode = 'th' | 'en'
+export type MessageProvider = 'line' | 'facebook'
+export type MessageLanguageCode = 'th' | 'en'
 
 export interface IncomingMessage {
   intent: MessageIntent

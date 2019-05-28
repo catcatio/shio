@@ -2,7 +2,9 @@
 
 interface FollowEventMessageIntent {
   name: 'follow'
-  parameters: { }
+  parameters: { 
+    displayName: string
+  }
 }
 interface FollowEventMessageFulfillment {
   name: 'follow'

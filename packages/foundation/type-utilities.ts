@@ -13,3 +13,10 @@ export type CommonAttributes = {
 }
 
 export type PartialCommonAttributes<T extends CommonAttributes> = Omit<T, keyof CommonAttributes> & Partial<CommonAttributes>
+
+export type FunctionOption<T> = (option: T) => T
+export function composeFunctionOptions<T>(initial: T, ...options: FunctionOption<T>[]) {
+  return options.reduce((current, next) => {
+    return next(current)
+  },initial)
+}

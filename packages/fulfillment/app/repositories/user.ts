@@ -1,57 +1,47 @@
+import * as Joi from 'joi'
 import { User, UserChatSession } from '../entities/user'
 import { RepositoryOperationOption, JoiObjectSchema, composeRepositoryOptions, WithWhere, WithSystemOperation } from './common'
 import { Omit, PartialCommonAttributes, CommonAttributes} from '@shio/foundation'
 import {  PaginationResult } from '@shio/foundation/entities'
 import { Datastore } from '@google-cloud/datastore'
-import * as Joi from 'joi'
-import { newGlobalError, ErrorType } from '../entities/error'
-import { newResourceTag, Permission } from '../entities'
-import { ACLRepository, DatastoreACLRepository } from './acl'
-import { applyFilter } from './database/filter'
-import { toJSON } from './database/toJSON'
+import { newGlobalError } from '../entities/error'
+import { newResourceTag } from '../entities'
+import { toJSON, applyFilter } from '../helpers/datastore';
 
 export type UserRepositoryOperationOption = RepositoryOperationOption<User>
 
 export type CreateUserInput = Omit<PartialCommonAttributes<User>, 'id' | 'aclTag'>
 export type CreateUserChatSessionInput = Omit<PartialCommonAttributes<UserChatSession>, 'id'>
 export interface UserRepository {
-  CreateUser(input: CreateUserInput, ...options: UserRepositoryOperationOption[]): Promise<User>
-  FindByUserId(id: string, ...options: UserRepositoryOperationOption[]): Promise<User | undefined>
-  FindOneUser(...options: UserRepositoryOperationOption[]): Promise<User | undefined>
-  FindManyUser(...options: UserRepositoryOperationOption[]): Promise<PaginationResult<User>>
-  RemoveUser(...options: UserRepositoryOperationOption[]): Promise<number>
-  CreateUserChatSession(input: CreateUserChatSessionInput, ...options: RepositoryOperationOption<UserChatSession>[]): Promise<UserChatSession>
+  create(input: CreateUserInput, ...options: UserRepositoryOperationOption[]): Promise<User>
+  findById(id: string, ...options: UserRepositoryOperationOption[]): Promise<User | undefined>
+  findOne(...options: UserRepositoryOperationOption[]): Promise<User | undefined>
+  findMany(...options: UserRepositoryOperationOption[]): Promise<PaginationResult<User>>
+  remove(...options: UserRepositoryOperationOption[]): Promise<number>
+
+  createChatSession(input: CreateUserChatSessionInput, ...options: RepositoryOperationOption<UserChatSession>[]): Promise<UserChatSession>
 }
 
 
 export class DatastoreUserRepository implements UserRepository {
-  async FindByUserId(id: string, ...options: UserRepositoryOperationOption[]): Promise<User | undefined> {
+  async findById(id: string, ...options: UserRepositoryOperationOption[]): Promise<User | undefined> {
     const option = composeRepositoryOptions(...options)
-    await this.acl.IsGrantedOrThrow(option.operationOwnerId, this.aclTag.withId(id), Permission.VIEWER)
     const [entities] = await this.db.get(this.getUserKey(id))
     return toJSON(entities)
   }
   private db: Datastore
-  private acl: ACLRepository
   private UserKind = 'user'
   private UserChatSessionKind = 'user-chat-session'
   private aclTag = newResourceTag(this.UserKind)
 
-  constructor(db: Datastore)
-  constructor(db: Datastore, acl?: ACLRepository) {
+  constructor(db: Datastore) {
     this.db = db
-    if (acl) {
-      this.acl = acl
-    } else {
-      this.acl = new DatastoreACLRepository(db)
-    }
   }
 
-  async CreateUserChatSession(input: CreateUserChatSessionInput, ...options: RepositoryOperationOption<User>[]): Promise<UserChatSession> {
+  async createChatSession(input: CreateUserChatSessionInput, ...options: RepositoryOperationOption<User>[]): Promise<UserChatSession> {
     const option = composeRepositoryOptions(...options)
-    await this.acl.IsGrantedOrThrow(option.operationOwnerId, newResourceTag(this.UserKind, input.userId), Permission.WRITER)
 
-    const k = this.getUserChatSessionKey(`${input.provider}.${input.providerId}`)
+    const k = this.getUserChatSessionKey(input.userId, `${input.provider}.${input.providerId}`)
     input.createdAt = new Date()
     input.createdBy = option.operationOwnerId
     await this.db.upsert({
@@ -68,9 +58,8 @@ export class DatastoreUserRepository implements UserRepository {
     return toJSON(entities[0])
   }
 
-  async FindManyUser(...options: RepositoryOperationOption<User>[]): Promise<PaginationResult<User>> {
+  async findMany(...options: RepositoryOperationOption<User>[]): Promise<PaginationResult<User>> {
     const option = composeRepositoryOptions(...options)
-    await this.acl.IsGrantedOrThrow(option.operationOwnerId, newResourceTag(this.UserKind), Permission.VIEWER)
 
     let query = applyFilter(this.db.createQuery(this.UserKind), option)
       .limit(option.limit)
@@ -84,19 +73,18 @@ export class DatastoreUserRepository implements UserRepository {
     }
   }
 
-  async RemoveUser(...options: RepositoryOperationOption<User>[]): Promise<number> {
+  async remove(...options: RepositoryOperationOption<User>[]): Promise<number> {
     const option = composeRepositoryOptions(...options)
-    await this.acl.IsGrantedOrThrow(option.operationOwnerId, newResourceTag(this.UserKind), Permission.OWNER)
-    const users = await this.FindManyUser(...options, WithSystemOperation())
+    const users = await this.findMany(...options, WithSystemOperation())
     await this.db.delete(users.records.map(user => this.getUserKey(user.id)))
     return users.records.length
   }
 
-  private getUserChatSessionKey(chatSessionId: string) {
+  private getUserChatSessionKey(userId: string, chatSessionId: string) {
     if (Number.isInteger(parseInt(chatSessionId))) {
-      return this.db.key([this.UserChatSessionKind, parseInt(chatSessionId)])
+      return this.db.key([this.UserKind, userId, this.UserChatSessionKind, parseInt(chatSessionId)])
     } else {
-      return this.db.key([this.UserChatSessionKind, chatSessionId])
+      return this.db.key([this.UserKind, userId,this.UserChatSessionKind, chatSessionId])
     }
   }
   private getUserKey(userId: string) {
@@ -107,9 +95,8 @@ export class DatastoreUserRepository implements UserRepository {
     }
   }
 
-  async FindOneUser(...options: RepositoryOperationOption<User>[]): Promise<User | undefined> {
+  async findOne(...options: RepositoryOperationOption<User>[]): Promise<User | undefined> {
     const option = composeRepositoryOptions(...options)
-    await this.acl.IsGrantedOrThrow(option.operationOwnerId, newResourceTag(this.UserKind), Permission.VIEWER)
     let query = applyFilter(this.db.createQuery(this.UserKind), option).limit(1)
     const [entities] = await this.db.runQuery(query, {})
 
@@ -125,9 +112,8 @@ export class DatastoreUserRepository implements UserRepository {
     stellarEncryptedSecretKey: Joi.string(),
     stellarPublicKey: Joi.string()
   }
-  async CreateUser(input: CreateUserInput, ...option: UserRepositoryOperationOption[]): Promise<User> {
+  async create(input: CreateUserInput, ...option: UserRepositoryOperationOption[]): Promise<User> {
     const options = composeRepositoryOptions(...option)
-    await this.acl.IsGrantedOrThrow(options.operationOwnerId, this.aclTag, Permission.WRITER)
 
     const JoiCreateUserInput = Joi.object().keys(this.CreateUserInputSchema)
     const { error, value } = JoiCreateUserInput.validate(input)
@@ -148,10 +134,7 @@ export class DatastoreUserRepository implements UserRepository {
         key: key,
         data: data
       }),
-      this.acl.CreatePermission(key.id, this.aclTag.withId(key.id), Permission.VIEWER, WithSystemOperation())
     ])
-    await this.acl.CreatePermission(key.id, this.aclTag.withId(key.id), Permission.WRITER, WithSystemOperation())
-
     const [entities] = await this.db.get(key)
     return toJSON(entities)
   }

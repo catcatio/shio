@@ -26,6 +26,16 @@ export class DatastoreACLRepository implements ACLRepository {
   private db: Datastore
   private ACLKind = 'acl'
 
+  public prepare() {
+    return Promise.all([
+      this.CreatePermission(SYSTEM_USER, newResourceTag('acl', '*'), Permission.OWNER, WithSystemOperation()),
+      this.CreatePermission(SYSTEM_USER, newResourceTag('user', '*'), Permission.OWNER, WithSystemOperation()),
+      this.CreatePermission(SYSTEM_USER, newResourceTag('asset', '*'), Permission.OWNER, WithSystemOperation()),
+      this.CreatePermission(SYSTEM_USER, newResourceTag('payment', '*'), Permission.OWNER, WithSystemOperation()),
+      this.CreatePermission(SYSTEM_USER, newResourceTag('transaction', '*'), Permission.OWNER, WithSystemOperation())
+    ])
+  }
+
   constructor(datastore: Datastore) {
     this.db = datastore
   }

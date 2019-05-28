@@ -1,17 +1,17 @@
 import { DatastoreACLRepository } from '../acl'
-import { CreateDatastoreInstance } from '../../tools'
 import { newResourceTag, Permission } from '../../entities'
-import { WithSystemOperation } from '../common';
+import { WithSystemOperation } from '../common'
+import { createDatastoreInstance, WithDatastoreAPIEndpoint } from '@shio/foundation'
 
 describe('DatastoreACLRepository test', () => {
   let aclrepo: DatastoreACLRepository
-  const datastore = CreateDatastoreInstance('http://localhost:5545')
   beforeAll(async () => {
+    const datastore = await createDatastoreInstance(WithDatastoreAPIEndpoint('http://localhost:5545'))
     aclrepo = new DatastoreACLRepository(datastore)
   })
 
   it('should create ACL record by specific resouce ID', async () => {
-    const testTag = newResourceTag('test-something', '001')
+    const testTag = newResourceTag('test-somethings', '001')
     await aclrepo.CreatePermission('N0002', testTag, Permission.VIEWER, WithSystemOperation())
     await aclrepo.GetPermissionOrThrow('N0002', testTag, Permission.VIEWER)
 
@@ -30,6 +30,5 @@ describe('DatastoreACLRepository test', () => {
     await aclrepo.RevokeAllPermissionFromResource('N0002', testTag, WithSystemOperation())
   })
 
-  afterAll(async () => {
-  })
+  afterAll(async () => {})
 })

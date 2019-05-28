@@ -1,26 +1,26 @@
-import { DatastoreACLRepository } from '../acl'
-import { CreateDatastoreInstance } from '../../tools'
 import { DatastoreUserRepository } from '../user'
 import { WithSystemOperation, WithWhere, WithOperationOwner } from '../common'
+import { createDatastoreInstance, WithDatastoreAPIEndpoint } from '@shio/foundation';
 
 describe('DatastoreUserRepository test', () => {
-  let aclrepo: DatastoreACLRepository
   let userRepo: DatastoreUserRepository
-  const datastore = CreateDatastoreInstance('http://localhost:5545')
+  const datastore = createDatastoreInstance(
+    WithDatastoreAPIEndpoint('http://localhost:5545')
+  )
   beforeAll(async () => {
-    aclrepo = new DatastoreACLRepository(datastore)
     userRepo = new DatastoreUserRepository(datastore)
   })
 
   it('should create user, grant permission to self viewing and remove user correctly', async () => {
-    const k = await userRepo.CreateUser(
+    const k = await userRepo.create(
       {
         displayName: 'TEST_USER'
       },
       WithSystemOperation()
     )
-    await userRepo.FindByUserId(k.id, WithOperationOwner(k.id))
-    await userRepo.RemoveUser(
+    const user = await userRepo.findById(k.id, WithOperationOwner(k.id))
+    expect(user!.displayName).toEqual("TEST_USER")
+    await userRepo.remove(
       WithWhere({
         displayName: {
           Equal: 'TEST_USER'

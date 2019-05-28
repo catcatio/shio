@@ -1,7 +1,6 @@
 import { logger } from "../logger";
 
 
-
 describe('Logger test', ()=> {
 
   it('should able to log', () => {

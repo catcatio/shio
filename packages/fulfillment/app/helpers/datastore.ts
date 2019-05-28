@@ -1,5 +1,20 @@
-import { RepositoryOptions } from '../common'
-import { Query } from '@google-cloud/datastore'
+
+import { Datastore, Query } from "@google-cloud/datastore";
+import { entity } from "@google-cloud/datastore/build/src/entity";
+import { RepositoryOptions } from "../repositories";
+
+export function toJSON(entity: any) {
+  if (typeof entity === 'undefined' || !entity) {
+    return undefined
+  }
+  const { [Datastore.KEY]: key , ...data} = entity
+  const k: entity.Key = key
+  const id = k.name || k.id
+  return {
+    id,
+    ...data
+  }
+}
 
 function addFilter(Query: Query, key: string, value: any, op: string) {
   switch (typeof value) {

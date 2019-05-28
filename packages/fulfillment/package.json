@@ -5,8 +5,25 @@
   "repository": "git@github.com:catcatio/shio.git",
   "author": "Rungsikorn Rungsikavarnich <rungsikorn@me.com>",
   "license": "MIT",
+  "nodemonConfig": {
+    "delay": "1500",
+    "verbose": false,
+    "debug": false,
+    "exec": "node --inspect=9229 -r ts-node/register ./cmd/local.ts",
+    "ignore": [
+      "node_modules",
+      "routes.ts",
+      "cmd/playground.ts"
+    ],
+    "watch": [
+      "*.ts"
+    ],
+    "ext": "ts, tsx",
+    "inspect": true
+  },
   "scripts": {
-    "test-integration": "yarn jest --config jest.integration.json",
+    "dev": "nodemon",
+    "integration": "yarn jest --config jest.integration.json",
     "cloudbuild-reloadcache": "gcloud builds submit --config cloudbuild.node_modules.yaml",
     "cloudbuild-build": "gcloud builds submit --config cloudbuild.yaml"
   },
@@ -26,6 +43,7 @@
     "@types/node-fetch": "^2.3.4",
     "@types/winston": "^2.4.4",
     "jest": "^24.8.0",
+    "nodemon": "^1.19.1",
     "ora": "^3.4.0",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.1.0",

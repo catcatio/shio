@@ -25,12 +25,12 @@
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
-      "name": "Run datastore playground",
+      "name": "Run fulfillment playground",
       "type": "node",
       "request": "launch",
-      "args": ["${workspaceRoot}/cmd/playground.ts"],
+      "args": ["${workspaceRoot}/packages/fulfillment/cmd/playground.ts"],
       "runtimeArgs": ["-r", "ts-node/register"],
-      "cwd": "${workspaceRoot}",
+      "cwd": "${workspaceRoot}/packages/fulfillment",
       "protocol": "inspector",
       "internalConsoleOptions": "openOnSessionStart"
     },
