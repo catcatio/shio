@@ -1,3 +1,4 @@
+import { Entity } from 'dialogflow';
 import * as http from "http";
 
 export type MessageType = 'textMessage' | 'imageMessage' | 'videoMessage' | 'audioMessage' | 'fileMessage' | 'locationMessage' | 'stickerMessage' |
@@ -60,6 +61,17 @@ export type Intent = {
 
 export type IntentParameters = {
   [name: string]: string
+}
+
+export interface EntityType {
+  name?: string
+  id: string
+  kind: string
+  entities: Entity[]
+}
+
+export interface ExportedAgent {
+  agentContent: Buffer
 }
 
 export interface IntentDetector {
