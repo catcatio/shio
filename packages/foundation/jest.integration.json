@@ -15,7 +15,6 @@
   "globalSetup": "<rootDir>/__test__/integration-setup.ts",
   "globalTeardown": "<rootDir>/__test__/integration-teardown.ts",
   "testMatch": ["<rootDir>/**/__test__/**/*.integration.ts"],
-  "setupFiles": ["<rootDir>/__test__/setup.ts"],
   "testPathIgnorePatterns": ["/node_modules/"],
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "node", "json"]
 }

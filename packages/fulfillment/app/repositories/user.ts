@@ -9,6 +9,7 @@ import { newResourceTag } from '../entities'
 import { toJSON, applyFilter } from '../helpers/datastore';
 
 export type UserRepositoryOperationOption = RepositoryOperationOption<User>
+export type UserChatSessionOperationOption = RepositoryOperationOption<UserChatSession>
 
 export type CreateUserInput = Omit<PartialCommonAttributes<User>, 'id' | 'aclTag'>
 export type CreateUserChatSessionInput = Omit<PartialCommonAttributes<UserChatSession>, 'id'>
@@ -20,10 +21,26 @@ export interface UserRepository {
   remove(...options: UserRepositoryOperationOption[]): Promise<number>
 
   createChatSession(input: CreateUserChatSessionInput, ...options: RepositoryOperationOption<UserChatSession>[]): Promise<UserChatSession>
+  findOneChatSession(...options: UserChatSessionOperationOption[]): Promise<UserChatSession | undefined>
 }
 
 
 export class DatastoreUserRepository implements UserRepository {
+
+  async findOneChatSession(...options: RepositoryOperationOption<UserChatSession>[]): Promise<UserChatSession | undefined> {
+    const option = composeRepositoryOptions(...options)
+    let query = applyFilter(this.db.createQuery(this.UserChatSessionKind), option)
+      .limit(option.limit)
+      .offset(option.offset)
+
+    const [entities] = await this.db.runQuery(query)
+    if (entities.length < 1) {
+      return undefined
+    }
+    const output = entities[0]
+    return toJSON(output)
+  }
+
   async findById(id: string, ...options: UserRepositoryOperationOption[]): Promise<User | undefined> {
     const option = composeRepositoryOptions(...options)
     const [entities] = await this.db.get(this.getUserKey(id))

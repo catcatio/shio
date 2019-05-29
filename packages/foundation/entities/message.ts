@@ -48,11 +48,28 @@ export interface IncomingMessage {
   source: IncommingMessageSource
   timestamp: number
   original: any
+
+  requestId: string
 }
 
 export interface OutgoingMessage {
-  fulfillment: MessageFulfillment
+  fulfillment: MessageFulfillment[]
   provider: MessageProvider
   replyToken?: string
   languageCode: MessageLanguageCode
+  source: IncommingMessageSource
+
+  requestId: string
+}
+
+export function createOutgoingFromIncomingMessage(incoming: IncomingMessage, fulfillment: MessageFulfillment | MessageFulfillment[]): OutgoingMessage {
+
+  if(!Array.isArray(fulfillment)) {
+    fulfillment = [fulfillment]
+  }
+  return {
+    fulfillment,
+    ...incoming,
+  }
+
 }

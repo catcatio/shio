@@ -1,36 +1,35 @@
 import { CloudPubsubTransports, newLogger } from '@shio/foundation'
-import { BoardingUsecase } from '../usecases/boarding'
+import { FulfillmentEndpoint } from '../endpoints';
+import { createOutgoingFromIncomingMessage } from '@shio/foundation/entities';
 
-export function registerPubsub(pubsub: CloudPubsubTransports, boarding: BoardingUsecase) {
 
+
+export function registerPubsub(pubsub: CloudPubsubTransports, endpoint: FulfillmentEndpoint) {
   const log = newLogger()
 
   pubsub.SubscribeIncommingMessage(async (message, ack) => {
-    log.info(`Incoming message from ${message.provider}`)
-    switch (message.intent.name) {
-      case 'follow':
-        const output = await boarding.userFollow({
-          displayName: message.intent.parameters.displayName,
-          provider: message.provider,
-          providerId: message.source.userId
-        })
-        log.info(JSON.stringify(output))
-        pubsub.PublishOutgoingMessage({
-          fulfillment: {
-            name: 'follow',
-            parameters: {
-              isCompleted: true
-            }
-          },
-          languageCode: message.languageCode,
-          provider: message.provider,
-          replyToken: message.replyToken,
-        })
-        ack()
-        break
-      default:
-        ack()
-        break
+    log.withUserId(message.source.userId).info(`Incoming message from ${message.provider}`)
+    try {
+      switch (message.intent.name) {
+        case 'follow':
+          const outgoingMessage = await endpoint.follow(message)
+          if (outgoingMessage) {
+            await pubsub.PublishOutgoingMessage(outgoingMessage)
+          }
+          ack()
+          break
+        default:
+          ack()
+          break
+      }
+    } catch (e) {
+      await pubsub.PublishOutgoingMessage(createOutgoingFromIncomingMessage(message, {
+        name: 'error',
+        parameters: {
+          reason: JSON.stringify(e),
+        }
+      }))
+      ack()
     }
   })
 }

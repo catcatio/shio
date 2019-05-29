@@ -1,17 +1,32 @@
-import { createLogger, transports, format } from 'winston'
+import { createLogger, transports, format, Logger } from 'winston'
 import { LoggingWinston } from '@google-cloud/logging-winston'
-
-
 
 interface ShioLoggerMeta {
   userId?: string
   requestId?: string
-  fields?: {[key: string]: string}
+  fields?: { [key: string]: string }
 }
-interface ShioLogger {
-  info(message :string, ...meta: ShioLoggerMeta[]): void
-  error(message: string)
+export class ShioLogger {
+  private logger: Logger
+  private meta: ShioLoggerMeta
+  constructor(logger: Logger, meta: ShioLoggerMeta = {}) {
+    this.logger = logger
+    this.meta = meta
+  }
+  withUserId(value: string): ShioLogger {
+    return new ShioLogger(this.logger, {
+      ...this.meta,
+      userId: value
+    })
+  }
+  info(message: string): void {
+    this.logger.info(message, this.meta)
+  }
+  error(message: string) {
+    this.logger.error(message, this.meta)
+  }
 }
+
 export const logger = newLogger()
 
 /**
@@ -36,12 +51,10 @@ export function newLogger(): ShioLogger {
     const stackdriverTransport = new LoggingWinston({})
     loggerTransports.push(stackdriverTransport)
   }
-
-  return createLogger({
+  const logger = createLogger({
     transports: loggerTransports,
     format: format.printf(info => {
-
-      let requestId = ""
+      let requestId = ''
       if (typeof info.requestId === 'string') {
         requestId = `(${info.requestId})`
       }
@@ -54,9 +67,12 @@ export function newLogger(): ShioLogger {
         info.fields = {}
       }
 
-      const fieldStr = Object.keys(info.fields).map(k => `${k}=${info.fields[k]}`).join(',')
+      const fieldStr = Object.keys(info.fields)
+        .map(k => `${k}=${info.fields[k]}`)
+        .join(',')
 
       return `${new Date().toISOString()} | ${info.userId} ${requestId} | ${info.level.toUpperCase()} | ${info.message} | ${fieldStr} `
     })
   })
+  return new ShioLogger(logger)
 }

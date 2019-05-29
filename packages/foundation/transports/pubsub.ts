@@ -24,8 +24,8 @@ export interface CloudPubsubTransports {
 
 export class CloudPubsubTransports implements CloudPubsubTransports {
   private pubsub: PubSub
-  private incomingTopic: Topic
-  private incomingSubscription: Subscription
+  public incomingTopic: Topic
+  public incomingSubscription: Subscription
   private outgoingTopic: Topic
   private outgoingSubscription: Subscription
 
@@ -33,6 +33,7 @@ export class CloudPubsubTransports implements CloudPubsubTransports {
   constructor(pubsub: PubSub, serviceName: string) {
     this.pubsub = pubsub
     this.serviceName = serviceName
+
     this.incomingTopic = this.pubsub.topic(PUBSUB_INCOMING_MESSAGE_TOPIC)
     this.incomingSubscription = this.incomingTopic.subscription(PUBSUB_FULLFILLMENT_SUBSCRIPTION)
     this.outgoingTopic = this.pubsub.topic(PUBSUB_OUTGOING_MESSAGE_TOPIC)
@@ -41,21 +42,26 @@ export class CloudPubsubTransports implements CloudPubsubTransports {
 
   async prepare() {
     const incomingMessageTopic = this.pubsub.topic(PUBSUB_INCOMING_MESSAGE_TOPIC)
-    const incomingMessageSubscription = incomingMessageTopic.subscription(PUBSUB_FULLFILLMENT_SUBSCRIPTION)
     const outgoingMessageTopic = this.pubsub.topic(PUBSUB_OUTGOING_MESSAGE_TOPIC)
+    await Promise.all([incomingMessageTopic.get({ autoCreate: true }), outgoingMessageTopic.get({ autoCreate: true })])
+
+    const incomingMessageSubscription = incomingMessageTopic.subscription(PUBSUB_FULLFILLMENT_SUBSCRIPTION)
     const outogingMessageSubscription = outgoingMessageTopic.subscription(PUBSUB_OUTGOING_SUBSCRIPTION)
-    await Promise.all([
-      incomingMessageTopic.get({ autoCreate: true }),
-      incomingMessageSubscription.get({ autoCreate: true }),
-      outgoingMessageTopic.get({ autoCreate: true }),
-      outogingMessageSubscription.get({ autoCreate: true })
-    ])
+    await Promise.all([incomingMessageSubscription.get({ autoCreate: true }), outogingMessageSubscription.get({ autoCreate: true })])
     return {
       incomingMessageTopic,
       incomingMessageSubscription,
       outgoingMessageTopic,
       outogingMessageSubscription
     }
+  }
+
+  async purge() {
+    await this.incomingSubscription.delete()
+    await this.incomingTopic.delete()
+    const { incomingMessageTopic, incomingMessageSubscription} = await this.prepare()
+    this.incomingTopic = incomingMessageTopic
+    this.incomingSubscription = incomingMessageSubscription
   }
 
   async PublishIncommingMessage(input: PublishIncommingMessageInput): Promise<void> {
@@ -68,11 +74,12 @@ export class CloudPubsubTransports implements CloudPubsubTransports {
   SubscribeIncommingMessage(listener: SubscribeIncomingMessageListener): void {
     this.incomingSubscription.on('message', (message: Message) => {
       const data = JSON.parse(message.data.toString('utf-8'))
-      message.ack()
-      // const f = listener({ ...data })
-      // if (f && typeof f.then === 'function') {
-      //   f.then()
-      // }
+      const f = listener({ ...data }, () => {
+        message.ack()
+      })
+      if (f && typeof f.then === 'function') {
+        f.then()
+      }
     })
   }
 
@@ -92,7 +99,9 @@ export class CloudPubsubTransports implements CloudPubsubTransports {
   SubscribeOutgoingMessage(listener: SubscribeOutgoingMessageListener): void {
     this.outgoingSubscription.on('message', function(message: Message) {
       const data = JSON.parse(message.data.toString('utf-8'))
-      const f = listener({ ...data }, message.ack.bind(this))
+      const f = listener({ ...data }, () => {
+        message.ack()
+      })
       if (f && typeof f.then === 'function') {
         f.then()
       }

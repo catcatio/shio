@@ -1,13 +1,11 @@
 import { DatastoreUserRepository } from '../user'
 import { WithSystemOperation, WithWhere, WithOperationOwner } from '../common'
-import { createDatastoreInstance, WithDatastoreAPIEndpoint } from '@shio/foundation';
+import { createDatastoreInstance, WithDatastoreAPIEndpoint } from '@shio/foundation'
 
 describe('DatastoreUserRepository test', () => {
   let userRepo: DatastoreUserRepository
-  const datastore = createDatastoreInstance(
-    WithDatastoreAPIEndpoint('http://localhost:5545')
-  )
   beforeAll(async () => {
+    const datastore = await createDatastoreInstance(WithDatastoreAPIEndpoint('http://localhost:5545'))
     userRepo = new DatastoreUserRepository(datastore)
   })
 
@@ -19,14 +17,14 @@ describe('DatastoreUserRepository test', () => {
       WithSystemOperation()
     )
     const user = await userRepo.findById(k.id, WithOperationOwner(k.id))
-    expect(user!.displayName).toEqual("TEST_USER")
+    expect(user!.displayName).toEqual('TEST_USER')
     await userRepo.remove(
       WithWhere({
         displayName: {
           Equal: 'TEST_USER'
         }
       }),
-      WithSystemOperation(),
+      WithSystemOperation()
     )
   })
 })

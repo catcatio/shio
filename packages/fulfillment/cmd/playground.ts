@@ -8,6 +8,7 @@ import {
   WithPubsubProjectId,
   WithDatastoreProjectId
 } from '@shio/foundation'
+import * as uuid from 'uuid/v4'
 
 // if you want to use local development datastore server
 // insert datastore endpoint to CrateDatastoreInstance
@@ -35,9 +36,15 @@ async function init() {
 
 async function Run() {
   const { pubsub, datastore } = await init()
-
   const cloudpubsub = new CloudPubsubTransports(pubsub, 'playground')
-  cloudpubsub.PublishIncommingMessage({
+
+  cloudpubsub.SubscribeOutgoingMessage(async (message, ack) => {
+    console.log(message.fulfillment[0])
+    ack()
+  })
+
+  cloudpubsub.PublishIncommingMessage(
+    {
     intent: {
       name: 'follow',
       parameters: {
@@ -47,13 +54,14 @@ async function Run() {
     languageCode: 'th',
     provider: 'line',
     source: {
-      userId: 'AIM-01',
+      userId: uuid().toString(),
       type: 'user'
     },
     timestamp: Date.now(),
     type: 'follow',
-    original: {},
-  })
+    original: {}
+  }
+  )
 
   // Please cleanup after commit
   // if anything exists in this function

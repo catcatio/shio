@@ -14,7 +14,7 @@ import {
 } from '@shio/foundation'
 import { DefaultBoardingUsecase } from './usecases/boarding'
 import { registerPubsub } from './transports/pubsub'
-import { prepare } from './prepare';
+import { createFulfillmentEndpoint } from './endpoints';
 
 export async function bootstrap(config: Config) {
 
@@ -50,6 +50,17 @@ export async function bootstrap(config: Config) {
   const userRepository = new DatastoreUserRepository(datastore)
   const boardingUsecase = new DefaultBoardingUsecase(userRepository, acl)
 
+  const endpoints = createFulfillmentEndpoint(boardingUsecase)
   log.info('registry pubsub...')
-  registerPubsub(pubsub, boardingUsecase)
+  registerPubsub(pubsub, endpoints)
+
+  return {
+    pubsub,
+    close: () => {
+      log.info('Gracefully shutting down service....')
+      pubsub.UnsubscribeAllIncomingMessage()
+      pubsub.UnsubscribeAllOutgoingMessage()
+      log.info('Service is shutdown!!')
+    }
+  }
 }

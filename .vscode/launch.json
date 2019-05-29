@@ -15,23 +15,44 @@
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
-      "name": "Start local development",
+      "name": "[Fulfillment] Run local development",
       "type": "node",
       "request": "launch",
-      "args": ["${workspaceRoot}/index.ts"],
       "runtimeArgs": ["-r", "ts-node/register"],
-      "cwd": "${workspaceRoot}",
+      "args": ["${workspaceRoot}/packages/fulfillment/cmd/local.ts"],
+      "cwd": "${workspaceRoot}/packages/fulfillment",
       "protocol": "inspector",
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
-      "name": "Run fulfillment playground",
+      "name": "[Fulfillment] Run playground",
       "type": "node",
       "request": "launch",
       "args": ["${workspaceRoot}/packages/fulfillment/cmd/playground.ts"],
+      "cwd": "${workspaceRoot}/packages/fulfillment",
       "runtimeArgs": ["-r", "ts-node/register"],
+      "protocol": "inspector",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      "name": "[Fulfillment] Integration test",
+      "type": "node",
+      "request": "launch",
+      "env": {
+        "FULFILLMENT_INTEGRATION_DEBUG": "1"
+      },
+      "args": [
+        "${workspaceRoot}/node_modules/.bin/jest",
+        "--config",
+        "${workspaceRoot}/packages/fulfillment/jest.integration.json",
+        "--runInBand",
+        "--coverage",
+        "false",
+        "${relativeFile}"
+      ],
       "cwd": "${workspaceRoot}/packages/fulfillment",
       "protocol": "inspector",
+      "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
@@ -39,11 +60,8 @@
       "request": "launch",
       "name": "Jest Unit Tests",
       "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "args": [
-        "--config",
-        "${workspaceRoot}/jest.json"
-      ],
+      "args": ["--config", "${workspaceRoot}/jest.json"],
       "internalConsoleOptions": "openOnSessionStart"
-  }
+    }
   ]
 }

@@ -5,7 +5,7 @@ import { ClientConfig } from '@google-cloud/pubsub/build/src/pubsub';
 
 export type PubsubOption = FunctionOption<ClientConfig>
 
-export const WithPubsubEndpoint = (endpoint: string): PubsubOption => (option) => {
+export const WithPubsubEndpoint = (endpoint?: string): PubsubOption => (option) => {
   option.apiEndpoint = endpoint
   return option
 }
