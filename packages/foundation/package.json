@@ -2,7 +2,8 @@
   "name": "@shio/foundation",
   "version": "1.0.0",
   "scripts": {
-    "postinstall": "yarn tsc",
+    "build":"yarn tsc",
+    "postinstall": "yarn build",
     "clean": "find -E . -regex '.*\\.(js|map|d\\.ts)' -not -path \"**/node_modules/*\" -not -path  \"./.next/*\" -delete",
     "integration": "yarn jest --config jest.integration.json"
   },

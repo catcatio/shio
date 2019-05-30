@@ -23,6 +23,7 @@
   },
   "scripts": {
     "dev": "nodemon",
+    "build": "yarn tsc",
     "integration": "yarn jest --runInBand --config jest.integration.json",
     "unit": "yarn jest --runInBand --config jest.unit.json",
     "cloudbuild-reloadcache": "gcloud builds submit --config cloudbuild.node_modules.yaml",
