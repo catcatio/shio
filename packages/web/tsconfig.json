@@ -4,5 +4,5 @@
     "allowJs": false,
     "declaration": true,
   },
-  "exclude": ["dist", "node_modules", "./**/__mocks__"]
+  "exclude": ["node_modules"]
 }

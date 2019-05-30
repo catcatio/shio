@@ -43,3 +43,9 @@ export default function validateSignature(
     stringToBuffer(signature, 'base64'),
   );
 }
+
+export const makeSignature = (body: string | Buffer, channelSecret: string): string => {
+  return createHmac('SHA256', channelSecret)
+  .update(body)
+  .digest('base64')
+}
