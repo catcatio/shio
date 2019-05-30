@@ -1,4 +1,4 @@
-import { ParsedMessage, Intent, IntentDetector } from "@shio/chatengine/types";
+import { ParsedMessage, Intent, IntentDetector } from "@shio-bot/chatengine/types";
 
 export const incomingMessageHandler = (intentDetector: IntentDetector) => {
   const handle = async (msg: ParsedMessage) => {

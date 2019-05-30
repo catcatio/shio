@@ -1,4 +1,4 @@
-import { LineSettings } from "@shio/chatengine/types";
+import { LineSettings } from "@shio-bot/chatengine/types";
 
 export type Configurations = {
   port: number

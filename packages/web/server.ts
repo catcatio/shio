@@ -1,7 +1,7 @@
 import * as express from 'express'
 import { Router } from 'express'
 import { Configurations } from './types'
-import { LineRequestHandler, LineMessageParser, ChatEngine, DialogFlowIntentDetector } from '@shio/chatengine'
+import { LineRequestHandler, LineMessageParser, ChatEngine, DialogFlowIntentDetector } from '@shio-bot/chatengine'
 import * as bodyParser from 'body-parser'
 import { incomingMessageHandler } from './handlers';
 
