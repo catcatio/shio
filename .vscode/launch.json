@@ -84,6 +84,16 @@
       "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
       "args": ["--config", "${workspaceRoot}/jest.json"],
       "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Jest Current File",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": ["${relativeFile}", "--config", "${workspaceRoot}/jest.json"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "disableOptimisticBPs": true
     }
   ]
 }
