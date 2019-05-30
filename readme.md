@@ -19,9 +19,6 @@ $ docker run -d --name shio-datastore -p 5545:5545 -e CLOUDSDK_CORE_PROJECT=test
 $ docker run -d --rm --name shio-pubsub -p 8085:8085 -e CLOUDSDK_CORE_PROJECT=test gcr.io/cloud-builders/gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
 ```
 
-
-
-
 ### Cloud build configuration
 - Encrpyted your SSH key for github clone by creating keyring name `builder-git` and key name `github`
   ```
@@ -32,3 +29,12 @@ $ docker run -d --rm --name shio-pubsub -p 8085:8085 -e CLOUDSDK_CORE_PROJECT=te
     ### you will retreive .enc file
   ```
 - You need to grant `Cloud stroage Writer, Viewer` and `KMS Decrpytor` permission to cloudbuild service account
+
+### Trigger cloud build
+```
+## node_modules yarn cache
+gcloud builds submit --config ./cloudbuild.node_modules.yaml
+
+## Run pipeline include unit and integration test of each package
+gcloud builds submit --config ./cloudbuild.yaml
+```

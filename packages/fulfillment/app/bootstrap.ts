@@ -7,7 +7,7 @@ import {
   WithDatastoreAPIEndpoint,
   WithPubsubEndpoint,
   PubsubOption,
-  CloudPubsubTransports,
+  CloudPubsubTransport,
   newLogger,
   createCloudPubSubInstance,
   WithPubsubProjectId
@@ -40,7 +40,7 @@ export async function bootstrap(config: Config) {
   const cloudpubsub = createCloudPubSubInstance(...pubsubOptions)
 
   const acl = new DatastoreACLRepository(datastore)
-  const pubsub = new CloudPubsubTransports(cloudpubsub, 'fulfillment')
+  const pubsub = new CloudPubsubTransport(cloudpubsub, 'fulfillment')
 
   log.info('prepare data....')
   await acl.prepare()

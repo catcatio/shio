@@ -1,5 +1,5 @@
 import config from './config'
-import { createCloudPubSubInstance, WithPubsubProjectId, WithPubsubEndpoint, CloudPubsubTransports, GetEnvString } from '@shio/foundation'
+import { createCloudPubSubInstance, WithPubsubProjectId, WithPubsubEndpoint, CloudPubsubTransport, GetEnvString } from '@shio/foundation'
 import { OutgoingMessage, IncomingMessage } from '@shio/foundation/entities'
 import { MessageFulfillment } from '@shio/foundation/entities/intent'
 import { NarrowUnion } from '../app/endpoints/default'
@@ -13,7 +13,7 @@ export function expectFulfillment<Intent extends MessageFulfillment['name']>(nam
 
 export const createPubsubIntegrationClient = () => {
   const ps = createCloudPubSubInstance(WithPubsubProjectId(config.projectId), WithPubsubEndpoint(config.pubsubEndpoint))
-  const pubsub = new CloudPubsubTransports(ps, 'integration-test-follow-intent')
+  const pubsub = new CloudPubsubTransport(ps, 'integration-test-follow-intent')
 
   return {
     pubsub,

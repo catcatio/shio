@@ -1,20 +1,23 @@
 
-
+export const FollowEventMessageIntentKind = 'follow'
 export interface FollowEventMessageIntent {
-  name: 'follow'
+  name: typeof FollowEventMessageIntentKind
   parameters: { 
     displayName: string
   }
 }
 
+const UnfollowEventMessageIntentKind = 'unfollow'
 export interface UnfollowEventMessageIntent {
-  name: 'unfollow',
+  name: typeof UnfollowEventMessageIntentKind,
   parameters: {
     reason?: string
   }
 }
+
+export const FollowEventMessageFulfillmentKind = 'follow'
 export interface FollowEventMessageFulfillment {
-  name: 'follow'
+  name: typeof FollowEventMessageFulfillmentKind
   parameters: {
     isCompleted: boolean
     userId?: string
@@ -22,9 +25,9 @@ export interface FollowEventMessageFulfillment {
     description?: string
   }
 }
-
+export const ErrorEventMessageFulfillmentKind = 'error'
 export interface ErrorEventMessageFulfillment {
-  name: 'error',
+  name: typeof ErrorEventMessageFulfillmentKind,
   parameters: {
     reason: string
   }

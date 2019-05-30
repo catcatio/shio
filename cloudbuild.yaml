@@ -1,3 +1,6 @@
+substitutions:
+    _BRANCH: develop # default branch to build value
+
 steps:
 ## Start CloudDatastore and CloudPubSub emulator
 ### Datastore on :5545
@@ -91,7 +94,7 @@ steps:
   dir: shio
   args:
   - checkout
-  - develop
+  - ${_BRANCH}
 
 # ## Install dependencies
 # #### YARN INSTALL
@@ -102,9 +105,19 @@ steps:
   args:
   - yarn
   - install
-  
+
+- name: 'mhart/alpine-node:10'
+  dir: 'shio'
+  env:
+  - 'YARN_CACHE_FOLDER=/workspace/.yarn-cache'
+  args:
+  - yarn
+  - lerna
+  - bootstrap
+
 
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'foundation unit test'
   args:
   - run
   - --network
@@ -115,4 +128,64 @@ steps:
   - /workspace/shio:/workspace/shio
   - mhart/alpine-node:10
   - yarn
-  - test-integration
+  - lerna
+  - run
+  - unit
+  - --scope
+  - "@shio/foundation"
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'foundation integration test'
+  args:
+  - run
+  - --network
+  - host
+  - -w
+  - /workspace/shio
+  - -v
+  - /workspace/shio:/workspace/shio
+  - mhart/alpine-node:10
+  - yarn
+  - lerna
+  - run
+  - integration
+  - --scope
+  - "@shio/foundation"
+
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'fulfillment unit test'
+  args:
+  - run
+  - --network
+  - host
+  - -w
+  - /workspace/shio
+  - -v
+  - /workspace/shio:/workspace/shio
+  - mhart/alpine-node:10
+  - yarn
+  - lerna
+  - run
+  - unit
+  - --scope
+  - "@shio/fulfillment"
+
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'fulfillment integration test'
+  args:
+  - run
+  - --network
+  - host
+  - -w
+  - /workspace/shio
+  - -v
+  - /workspace/shio:/workspace/shio
+  - mhart/alpine-node:10
+  - yarn
+  - lerna
+  - run
+  - integration
+  - --scope
+  - "@shio/fulfillment"

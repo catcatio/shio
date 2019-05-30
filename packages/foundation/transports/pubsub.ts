@@ -6,13 +6,13 @@ export const PUBSUB_FULLFILLMENT_SUBSCRIPTION = 'shio-fullfillment-service'
 export const PUBSUB_OUTGOING_MESSAGE_TOPIC = 'shio-outgoing-message'
 export const PUBSUB_OUTGOING_SUBSCRIPTION = 'shio-outgoing-subscription'
 
-interface PublishIncommingMessageInput extends IncomingMessage {}
-type SubscribeIncomingMessageListener = (message: IncomingMessage, acknowledge: () => void) => Promise<void> | void
+export interface PublishIncommingMessageInput extends IncomingMessage {}
+export type SubscribeIncomingMessageListener = (message: IncomingMessage, acknowledge: () => void) => Promise<void> | void
 
-interface PublishOutgoingMessageInput extends OutgoingMessage {}
-type SubscribeOutgoingMessageListener = (message: OutgoingMessage, acknowledge: () => void) => Promise<void> | void
+export interface PublishOutgoingMessageInput extends OutgoingMessage {}
+export type SubscribeOutgoingMessageListener = (message: OutgoingMessage, acknowledge: () => void) => Promise<void> | void
 
-export interface CloudPubsubTransports {
+export interface PubsubTransport {
   PublishIncommingMessage(input: PublishIncommingMessageInput): Promise<void>
   SubscribeIncommingMessage(listener: SubscribeIncomingMessageListener): void
   UnsubscribeAllIncomingMessage(): void
@@ -22,7 +22,7 @@ export interface CloudPubsubTransports {
   UnsubscribeAllOutgoingMessage(): void
 }
 
-export class CloudPubsubTransports implements CloudPubsubTransports {
+export class CloudPubsubTransport implements PubsubTransport {
   private pubsub: PubSub
   public incomingTopic: Topic
   public incomingSubscription: Subscription
@@ -41,27 +41,32 @@ export class CloudPubsubTransports implements CloudPubsubTransports {
   }
 
   async prepare() {
-    const incomingMessageTopic = this.pubsub.topic(PUBSUB_INCOMING_MESSAGE_TOPIC)
-    const outgoingMessageTopic = this.pubsub.topic(PUBSUB_OUTGOING_MESSAGE_TOPIC)
-    await Promise.all([incomingMessageTopic.get({ autoCreate: true }), outgoingMessageTopic.get({ autoCreate: true })])
+    this.incomingTopic = this.pubsub.topic(PUBSUB_INCOMING_MESSAGE_TOPIC)
+    this.outgoingTopic = this.pubsub.topic(PUBSUB_OUTGOING_MESSAGE_TOPIC)
+    await Promise.all([this.incomingTopic.get({ autoCreate: true }), this.outgoingTopic.get({ autoCreate: true })])
 
-    const incomingMessageSubscription = incomingMessageTopic.subscription(PUBSUB_FULLFILLMENT_SUBSCRIPTION)
-    const outogingMessageSubscription = outgoingMessageTopic.subscription(PUBSUB_OUTGOING_SUBSCRIPTION)
-    await Promise.all([incomingMessageSubscription.get({ autoCreate: true }), outogingMessageSubscription.get({ autoCreate: true })])
-    return {
-      incomingMessageTopic,
-      incomingMessageSubscription,
-      outgoingMessageTopic,
-      outogingMessageSubscription
-    }
+    this.incomingSubscription = this.incomingTopic.subscription(PUBSUB_FULLFILLMENT_SUBSCRIPTION)
+    this.outgoingSubscription = this.outgoingTopic.subscription(PUBSUB_OUTGOING_SUBSCRIPTION)
+    await Promise.all([this.incomingSubscription.get({ autoCreate: true }), this.outgoingSubscription.get({ autoCreate: true })])
   }
 
+  // purge method will remove subscription channel of
+  // incoming and outgoing message and create new one
+  // please aware that you need to re subscribe the subscription
+  // channel again after purge
   async purge() {
-    await this.incomingSubscription.delete()
-    await this.incomingTopic.delete()
-    const { incomingMessageTopic, incomingMessageSubscription} = await this.prepare()
-    this.incomingTopic = incomingMessageTopic
-    this.incomingSubscription = incomingMessageSubscription
+
+    this.UnsubscribeAllIncomingMessage()
+    this.UnsubscribeAllOutgoingMessage()
+
+    if(await this.incomingTopic.exists()[0] && await this.incomingSubscription.exists()[0]) {
+      await this.incomingSubscription.delete()
+    }
+
+    if (await this.outgoingTopic.exists()[0] && await this.outgoingSubscription.exists()[0]) {
+      await this.outgoingSubscription.delete()
+    }
+    await this.prepare()
   }
 
   async PublishIncommingMessage(input: PublishIncommingMessageInput): Promise<void> {

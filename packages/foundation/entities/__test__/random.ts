@@ -1,7 +1,7 @@
 import { FollowEventMessageIntent, FollowEventMessageFulfillment, MessageIntent } from '../intent'
 import { IncomingMessage } from '../message'
+import { ulid } from 'ulid'
 import * as uuid from 'uuid/v4'
-
 export function randomFollowMessageIntent(): FollowEventMessageIntent {
   return {
     name: 'follow',
@@ -33,6 +33,6 @@ export function randomIncomingMessage(intent: MessageIntent = randomFollowMessag
     timestamp: Date.now(),
     type: 'follow',
     original: {},
-    requestId: uuid.toString()
+    requestId: ulid().toString()
   }
 }

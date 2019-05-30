@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "postinstall": "yarn tsc",
-    "clean": "find -E . -regex '.*\\.(js|map|d\\.ts)' -not -path \"**\/node_modules\/*\" -not -path  \".\/.next\/*\" -delete",
+    "clean": "find -E . -regex '.*\\.(js|map|d\\.ts)' -not -path \"**/node_modules/*\" -not -path  \"./.next/*\" -delete",
     "integration": "yarn jest --config jest.integration.json"
   },
   "devDependencies": {
@@ -12,6 +12,7 @@
   "dependencies": {
     "@google-cloud/datastore": "^3.1.2",
     "@google-cloud/logging-winston": "^0.11.1",
-    "@google-cloud/pubsub": "^0.28.1"
+    "@google-cloud/pubsub": "^0.28.1",
+    "ulid": "^2.3.0"
   }
 }

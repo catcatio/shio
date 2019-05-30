@@ -2,7 +2,7 @@ import { DatastoreUserRepository, WithSystemOperation, DatastoreACLRepository } 
 import {
   createDatastoreInstance,
   createCloudPubSubInstance,
-  CloudPubsubTransports,
+  CloudPubsubTransport,
   WithDatastoreAPIEndpoint,
   WithPubsubEndpoint,
   WithPubsubProjectId,
@@ -36,7 +36,7 @@ async function init() {
 
 async function Run() {
   const { pubsub, datastore } = await init()
-  const cloudpubsub = new CloudPubsubTransports(pubsub, 'playground')
+  const cloudpubsub = new CloudPubsubTransport(pubsub, 'playground')
 
   cloudpubsub.SubscribeOutgoingMessage(async (message, ack) => {
     console.log(message.fulfillment[0])
@@ -59,7 +59,8 @@ async function Run() {
     },
     timestamp: Date.now(),
     type: 'follow',
-    original: {}
+    original: {},
+    requestId: ""
   }
   )
 

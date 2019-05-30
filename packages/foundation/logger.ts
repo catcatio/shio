@@ -1,9 +1,11 @@
 import { createLogger, transports, format, Logger } from 'winston'
 import { LoggingWinston } from '@google-cloud/logging-winston'
+import { MessageProvider } from './entities'
 
 interface ShioLoggerMeta {
   userId?: string
   requestId?: string
+  provider?: MessageProvider
   fields?: { [key: string]: string }
 }
 export class ShioLogger {
@@ -13,10 +15,28 @@ export class ShioLogger {
     this.logger = logger
     this.meta = meta
   }
+  withFields(value: ShioLoggerMeta['fields']) {
+    return new ShioLogger(this.logger, {
+      ...this.meta,
+      fields: value,
+    })
+  }
   withUserId(value: string): ShioLogger {
     return new ShioLogger(this.logger, {
       ...this.meta,
       userId: value
+    })
+  }
+  withProviderName(value: MessageProvider): ShioLogger {
+    return new ShioLogger(this.logger, {
+      ...this.meta,
+      provider: value
+    })
+  }
+  withRequestId(value: string): ShioLogger {
+    return new ShioLogger(this.logger, {
+      ...this.meta,
+      requestId: value
     })
   }
   info(message: string): void {
@@ -54,9 +74,9 @@ export function newLogger(): ShioLogger {
   const logger = createLogger({
     transports: loggerTransports,
     format: format.printf(info => {
-      let requestId = ''
+      let requestId = '<no-request-id>'
       if (typeof info.requestId === 'string') {
-        requestId = `(${info.requestId})`
+        requestId = `${info.requestId}`
       }
 
       if (typeof info.userId === 'undefined') {
@@ -71,7 +91,7 @@ export function newLogger(): ShioLogger {
         .map(k => `${k}=${info.fields[k]}`)
         .join(',')
 
-      return `${new Date().toISOString()} | ${info.userId} ${requestId} | ${info.level.toUpperCase()} | ${info.message} | ${fieldStr} `
+      return [new Date().toDateString(), requestId, info.provider, info.userId, info.level.toUpperCase(), info.message, fieldStr].join(' | ')
     })
   })
   return new ShioLogger(logger)
