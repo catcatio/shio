@@ -1,1 +1,1 @@
-import { GetEnvString } from '@shio/foundation'
+import { GetEnvString } from '@shio-bot/foundation'

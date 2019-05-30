@@ -1,11 +1,14 @@
 {
-  "name": "@shio/foundation",
-  "version": "1.0.0",
+  "name": "@shio-bot/foundation",
+  "version": "1.0.3",
+  "private": false,
+  "license": "MIT",
+  "main": "index.js",
   "scripts": {
     "build":"yarn tsc",
-    "postinstall": "yarn build",
     "clean": "find -E . -regex '.*\\.(js|map|d\\.ts)' -not -path \"**/node_modules/*\" -not -path  \"./.next/*\" -delete",
-    "integration": "yarn jest --config jest.integration.json"
+    "integration": "yarn jest --config jest.integration.json",
+    "prepublish": "yarn build"
   },
   "devDependencies": {
     "typescript": "^3.4.5"

@@ -1,5 +1,5 @@
-import { MessageIntent } from '@shio/foundation/entities/intent'
-import { OutgoingMessage, IncomingMessage } from '@shio/foundation/entities'
+import { MessageIntent } from '@shio-bot/foundation/entities/intent'
+import { OutgoingMessage, IncomingMessage } from '@shio-bot/foundation/entities'
 
 export type NarrowUnion<T, N> = T extends { name: N } ? T : never
 

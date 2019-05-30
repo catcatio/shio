@@ -1,4 +1,4 @@
-import { MessageProvider } from "@shio/foundation/entities";
+import { MessageProvider } from "@shio-bot/foundation/entities";
 import { GlobalError, ErrorType } from "../entities/error";
 
 

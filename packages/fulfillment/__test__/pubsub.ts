@@ -1,7 +1,7 @@
 import config from './config'
-import { createCloudPubSubInstance, WithPubsubProjectId, WithPubsubEndpoint, CloudPubsubTransport, GetEnvString } from '@shio/foundation'
-import { OutgoingMessage, IncomingMessage } from '@shio/foundation/entities'
-import { MessageFulfillment } from '@shio/foundation/entities/intent'
+import { createCloudPubSubInstance, WithPubsubProjectId, WithPubsubEndpoint, CloudPubsubTransport, GetEnvString } from '@shio-bot/foundation'
+import { OutgoingMessage, IncomingMessage } from '@shio-bot/foundation/entities'
+import { MessageFulfillment } from '@shio-bot/foundation/entities/intent'
 import { NarrowUnion } from '../app/endpoints/default'
 
 export function expectFulfillment<Intent extends MessageFulfillment['name']>(name: Intent, assertFunction: (fulfillment: NarrowUnion<MessageFulfillment, Intent>) => void) {

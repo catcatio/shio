@@ -1,4 +1,4 @@
-import { MessageProvider } from '@shio/foundation/entities'
+import { MessageProvider } from '@shio-bot/foundation/entities'
 import { User, UserChatSession } from '../entities'
 import { UserRepository, WithSystemOperation, ACLRepository, WithWhere } from '../repositories'
 import { createUserError } from './errors';

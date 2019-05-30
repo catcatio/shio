@@ -53,10 +53,10 @@ export const logger = newLogger()
  * Logger configuration
  *
  * Environment variables
- * @SHIO_LOG_DISABLE_CONSOLE
+ * @shio-bot_LOG_DISABLE_CONSOLE
  * @value 1 disable console logger
  *
- * @SHIO_LOG_TRANSPORT_STACKDRIVER
+ * @shio-bot_LOG_TRANSPORT_STACKDRIVER
  * @value 1 use stackdriver logging transport
  *
  */

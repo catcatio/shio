@@ -7,7 +7,7 @@ import {
   WithPubsubEndpoint,
   WithPubsubProjectId,
   WithDatastoreProjectId
-} from '@shio/foundation'
+} from '@shio-bot/foundation'
 import * as uuid from 'uuid/v4'
 
 // if you want to use local development datastore server

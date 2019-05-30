@@ -1,5 +1,5 @@
 import { BoardingUsecase } from '../usecases/boarding'
-import { createOutgoingFromIncomingMessage } from '@shio/foundation/entities'
+import { createOutgoingFromIncomingMessage } from '@shio-bot/foundation/entities'
 import { EndpointFuntion, createEndpointFunction } from './default'
 import { GlobalError } from '../entities/error'
 

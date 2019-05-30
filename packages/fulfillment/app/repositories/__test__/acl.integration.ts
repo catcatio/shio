@@ -1,7 +1,7 @@
 import { DatastoreACLRepository } from '../acl'
 import { newResourceTag, Permission } from '../../entities'
 import { WithSystemOperation } from '../common'
-import { createDatastoreInstance, WithDatastoreAPIEndpoint } from '@shio/foundation'
+import { createDatastoreInstance, WithDatastoreAPIEndpoint } from '@shio-bot/foundation'
 
 describe('DatastoreACLRepository test', () => {
   let aclrepo: DatastoreACLRepository

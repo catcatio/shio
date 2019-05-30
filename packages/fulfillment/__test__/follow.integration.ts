@@ -1,4 +1,4 @@
-import { randomFollowMessageIntent, randomIncomingMessage } from '@shio/foundation/entities/__test__/random'
+import { randomFollowMessageIntent, randomIncomingMessage } from '@shio-bot/foundation/entities/__test__/random'
 import { createPubsubIntegrationClient, expectFulfillment } from './pubsub';
 
 describe('Follow intent test', () => {

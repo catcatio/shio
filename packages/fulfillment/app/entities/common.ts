@@ -1,2 +1,2 @@
 
-export { CommonAttributes, Omit, PartialCommonAttributes, UnPromise } from '@shio/foundation'
+export { CommonAttributes, Omit, PartialCommonAttributes, UnPromise } from '@shio-bot/foundation'

@@ -132,7 +132,7 @@ steps:
   - run
   - unit
   - --scope
-  - "@shio/foundation"
+  - "@shio-bot/foundation"
 
 - name: 'gcr.io/cloud-builders/docker'
   id: 'foundation integration test'
@@ -150,7 +150,7 @@ steps:
   - run
   - integration
   - --scope
-  - "@shio/foundation"
+  - "@shio-bot/foundation"
 
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -169,7 +169,7 @@ steps:
   - run
   - unit
   - --scope
-  - "@shio/fulfillment"
+  - "@shio-bot/fulfillment"
 
 
 - name: 'gcr.io/cloud-builders/docker'
@@ -188,4 +188,4 @@ steps:
   - run
   - integration
   - --scope
-  - "@shio/fulfillment"
+  - "@shio-bot/fulfillment"

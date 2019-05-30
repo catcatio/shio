@@ -1,7 +1,8 @@
 {
-  "name": "@shio/fulfillment",
+  "name": "@shio-bot/fulfillment",
   "version": "1.0.0",
   "main": "index.js",
+  "private": true,
   "repository": "git@github.com:catcatio/shio.git",
   "author": "Rungsikorn Rungsikavarnich <rungsikorn@me.com>",
   "license": "MIT",
@@ -22,19 +23,22 @@
     "inspect": true
   },
   "scripts": {
+    "start":"node cmd/entry.js",
     "dev": "nodemon",
     "build": "yarn tsc",
     "integration": "yarn jest --runInBand --config jest.integration.json",
     "unit": "yarn jest --runInBand --config jest.unit.json",
     "cloudbuild-reloadcache": "gcloud builds submit --config cloudbuild.node_modules.yaml",
     "cloudbuild-build": "gcloud builds submit --config cloudbuild.yaml",
-    "clean": "find -E . -regex '.*\\.(js|map|d\\.ts)' -not -path \"**/node_modules/*\" -not -path  \"./.next/*\" -delete"
+    "clean": "find -E . -regex '.*\\.(js|map|d\\.ts)' -not -path \"**/node_modules/*\" -not -path  \"./.next/*\" -delete",
+    "gcp-deploy": "yarn build && gcloud app deploy service.yaml",
+    "gcp-logs": "gcloud app logs tail -s fulfillment"
   },
   "dependencies": {
     "@google-cloud/datastore": "^3.1.2",
     "@google-cloud/logging-winston": "^0.11.1",
     "@google-cloud/pubsub": "^0.28.1",
-    "@shio/foundation": "^1.0.0",
+    "@shio-bot/foundation": "^1.0.3",
     "dataloader": "^1.4.0",
     "joi": "^14.3.1",
     "node-fetch": "^2.6.0",
@@ -42,6 +46,7 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
+    "typescript": "^3.4.5",
     "@types/jest": "^24.0.12",
     "@types/joi": "^14.3.3",
     "@types/node-fetch": "^2.3.4",
@@ -52,7 +57,6 @@
     "ora": "^3.4.0",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.1.0",
-    "typescript": "^3.4.5",
     "uuid": "^3.3.2"
   }
 }

@@ -11,7 +11,7 @@ import {
   newLogger,
   createCloudPubSubInstance,
   WithPubsubProjectId
-} from '@shio/foundation'
+} from '@shio-bot/foundation'
 import { DefaultBoardingUsecase } from './usecases/boarding'
 import { registerPubsub } from './transports/pubsub'
 import { createFulfillmentEndpoint } from './endpoints';

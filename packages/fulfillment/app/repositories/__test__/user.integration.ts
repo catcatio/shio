@@ -1,6 +1,6 @@
 import { DatastoreUserRepository } from '../user'
 import { WithSystemOperation, WithWhere, WithOperationOwner } from '../common'
-import { createDatastoreInstance, WithDatastoreAPIEndpoint } from '@shio/foundation'
+import { createDatastoreInstance, WithDatastoreAPIEndpoint } from '@shio-bot/foundation'
 
 describe('DatastoreUserRepository test', () => {
   let userRepo: DatastoreUserRepository

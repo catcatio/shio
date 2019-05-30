@@ -1,6 +1,6 @@
 import { CommonAttributes } from "./common";
 import { Asset } from "./asset";
-import { MessageProvider } from "@shio/foundation/entities";
+import { MessageProvider } from "@shio-bot/foundation/entities";
 
 
 
