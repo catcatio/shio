@@ -1,6 +1,6 @@
-import { getSource, lineProvider } from "../parsers";
-import { ParsedMessage } from "../../types";
-import { EventParser, Event } from "./types";
+import { getSource, lineProvider } from '../parsers'
+import { ParsedMessage } from '../../types'
+import { EventParser, Event } from './types'
 
 const eventType = 'follow'
 

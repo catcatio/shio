@@ -1,4 +1,4 @@
-import { ParsedMessage } from "../../types";
+import { ParsedMessage } from '../../types'
 
 export type EventParser = (event: any) => ParsedMessage
 
@@ -7,12 +7,12 @@ export type EventParsers = {
 }
 
 export type Event = {
-  replyToken: string,
-  type: string,
-  source: any,
-  timestamp: number,
+  replyToken: string
+  type: string
+  source: any
+  timestamp: number
 
-  message: any,
-  beacon: any,
-  postback: any,
+  message: any
+  beacon: any
+  postback: any
 }

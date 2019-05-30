@@ -1,13 +1,11 @@
 import * as fs from 'fs-extra'
 import * as zip from 'adm-zip'
 import { AgentsClient } from 'dialogflow'
-import { DefaultDialogFlowAdmin } from "../admin";
-
+import { DefaultDialogFlowAdmin } from '../admin'
 
 jest.spyOn(global.console, 'log').mockImplementation(() => jest.fn())
 
 describe('exportAgent function', () => {
-
   beforeEach(async () => {
     jest.clearAllMocks()
   })
@@ -28,13 +26,13 @@ describe('exportAgent function', () => {
   })
 
   it('failed, no result from dialogflow api', async () => {
-    (AgentsClient.prototype.exportAgent as any) = jest.fn().mockResolvedValueOnce([])
+    ;(AgentsClient.prototype.exportAgent as any) = jest.fn().mockResolvedValueOnce([])
     const admin = new DefaultDialogFlowAdmin({}, 'fake-project-id', 'fake-path')
     await expect(admin.ExportAgent()).rejects.toThrow()
   })
 
   it('failed, result from dialogflow api is wrong format', async () => {
-    (AgentsClient.prototype.exportAgent as any) = jest.fn().mockResolvedValueOnce([{ result: { agentContens: '' } }])
+    ;(AgentsClient.prototype.exportAgent as any) = jest.fn().mockResolvedValueOnce([{ result: { agentContens: '' } }])
     const admin = new DefaultDialogFlowAdmin({}, 'fake-project-id', 'fake-path')
     await expect(admin.ExportAgent()).rejects.toThrow()
   })

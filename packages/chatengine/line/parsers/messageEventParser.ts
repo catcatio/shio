@@ -1,6 +1,6 @@
-import { MessageType, ParsedMessage } from "../../types";
-import { getSource, lineProvider } from "../parsers";
-import { EventParser, Event } from "./types";
+import { MessageType, ParsedMessage } from '../../types'
+import { getSource, lineProvider } from '../parsers'
+import { EventParser, Event } from './types'
 
 const eventType = 'message'
 /**
@@ -32,11 +32,8 @@ const eventType = 'message'
 */
 
 const handler: EventParser = (event: Event): ParsedMessage => {
-
   let type = `${event.message.type}Message`
-  let message = event.message.type === 'text'
-    ? event.message.text
-    : event.message
+  let message = event.message.type === 'text' ? event.message.text : event.message
 
   console.log(type, event)
   return {

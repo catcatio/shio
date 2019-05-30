@@ -1,16 +1,16 @@
 import { Request, RequestHandler } from '../types'
 import validateSignature from './validate-signature'
 
-const bodyToJson = (body: any) : object => {
+const bodyToJson = (body: any): object => {
   if (typeof body !== 'string' && !Buffer.isBuffer(body)) {
     return body
   }
 
-  const strBody = Buffer.isBuffer(body) ? body.toString() : body;
+  const strBody = Buffer.isBuffer(body) ? body.toString() : body
   return JSON.parse(strBody)
 }
 
-const bodyToString = (body: any) : string => {
+const bodyToString = (body: any): string => {
   if (typeof body == 'string') {
     return body
   }
@@ -55,8 +55,7 @@ export class LineNonValidateRequestHandler implements RequestHandler {
     }
 
     // convert body to JSON object
-    const strBody = Buffer.isBuffer(req.body) ? req.body.toString() : req.body;
+    const strBody = Buffer.isBuffer(req.body) ? req.body.toString() : req.body
     return JSON.parse(strBody)
   }
-
 }

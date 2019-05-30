@@ -1,6 +1,6 @@
-import { getSource, lineProvider } from "../parsers";
-import { ParsedMessage } from "../../types";
-import { EventParser, Event } from "./types";
+import { getSource, lineProvider } from '../parsers'
+import { ParsedMessage } from '../../types'
+import { EventParser, Event } from './types'
 
 const eventType = 'postback'
 
@@ -23,18 +23,18 @@ const eventType = 'postback'
  */
 
 const handler: EventParser = (event: Event): ParsedMessage => {
-   console.log(eventType, event)
-   return {
-      replyToken: event.replyToken,
-      message: event.postback,
-      type: eventType,
-      timestamp: event.timestamp,
-      source: getSource(event.source),
-      provider: lineProvider
-   }
+  console.log(eventType, event)
+  return {
+    replyToken: event.replyToken,
+    message: event.postback,
+    type: eventType,
+    timestamp: event.timestamp,
+    source: getSource(event.source),
+    provider: lineProvider
+  }
 }
 
 export = {
-   handler,
-   eventType
+  handler,
+  eventType
 }

@@ -25,7 +25,7 @@ export class ChatEngine extends EventEmitter {
       msgs.forEach(m => this.emit(this._onMessageReceiveEventName, m))
 
       next && next()
-    } catch(err) {
+    } catch (err) {
       next && next(err)
     }
   }

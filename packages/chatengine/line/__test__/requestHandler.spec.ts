@@ -1,11 +1,10 @@
-import { LineRequestHandler } from '../requestHandler';
-import { deepStrictEqual } from 'assert';
+import { LineRequestHandler } from '../requestHandler'
+import { deepStrictEqual } from 'assert'
 
 describe('LineRequestHandler test', () => {
   it('should throw error if channelSecret is empty', () => {
     const channelSecret = ''
-    expect(() => new LineRequestHandler(channelSecret))
-      .toThrow('no channel secret')
+    expect(() => new LineRequestHandler(channelSecret)).toThrow('no channel secret')
   })
 
   it('should throw error of header not found', () => {
@@ -13,11 +12,10 @@ describe('LineRequestHandler test', () => {
     let handler = new LineRequestHandler(channelSecret)
 
     let req: any = {
-      'headers': {},
+      headers: {}
     }
 
-    expect(() => handler.handle(req))
-      .toThrow('no signature')
+    expect(() => handler.handle(req)).toThrow('no signature')
   })
 
   it('should be able to return event object (body is string)', () => {
@@ -27,21 +25,21 @@ describe('LineRequestHandler test', () => {
       message: {
         id: 'test_event_message_id',
         text: 'this is test message.',
-        type: 'text',
+        type: 'text'
       },
       replyToken: 'test_reply_token',
       source: {
         groupId: 'test_group_id',
-        type: 'group',
+        type: 'group'
       },
       timestamp: 0,
-      type: 'message',
+      type: 'message'
     }
     let req: any = {
-      'headers': { 'x-line-signature': 'wqJD7WAIZhWcXThMCf8jZnwG3Hmn7EF36plkQGkj48w=' },
-      'body': JSON.stringify({
+      headers: { 'x-line-signature': 'wqJD7WAIZhWcXThMCf8jZnwG3Hmn7EF36plkQGkj48w=' },
+      body: JSON.stringify({
         events: [event],
-        destination: "Uaaaabbbbccccddddeeeeffff",
+        destination: 'Uaaaabbbbccccddddeeeeffff'
       })
     }
 
@@ -60,22 +58,25 @@ describe('LineRequestHandler test', () => {
       message: {
         id: 'test_event_message_id',
         text: 'this is test message.',
-        type: 'text',
+        type: 'text'
       },
       replyToken: 'test_reply_token',
       source: {
         groupId: 'test_group_id',
-        type: 'group',
+        type: 'group'
       },
       timestamp: 0,
-      type: 'message',
+      type: 'message'
     }
     let req: any = {
-      'headers': { 'x-line-signature': 'wqJD7WAIZhWcXThMCf8jZnwG3Hmn7EF36plkQGkj48w=' },
-      'body': Buffer.from(JSON.stringify({
-        events: [event],
-        destination: "Uaaaabbbbccccddddeeeeffff",
-      }), 'utf-8')
+      headers: { 'x-line-signature': 'wqJD7WAIZhWcXThMCf8jZnwG3Hmn7EF36plkQGkj48w=' },
+      body: Buffer.from(
+        JSON.stringify({
+          events: [event],
+          destination: 'Uaaaabbbbccccddddeeeeffff'
+        }),
+        'utf-8'
+      )
     }
 
     let rawMsg = handler.handle(req)
@@ -93,21 +94,21 @@ describe('LineRequestHandler test', () => {
       message: {
         id: 'test_event_message_id',
         text: 'this is test message.',
-        type: 'text',
+        type: 'text'
       },
       replyToken: 'test_reply_token',
       source: {
         groupId: 'test_group_id',
-        type: 'group',
+        type: 'group'
       },
       timestamp: 0,
-      type: 'message',
+      type: 'message'
     }
     let req: any = {
-      'headers': { 'x-line-signature': 'wqJD7WAIZhWcXThMCf8jZnwG3Hmn7EF36plkQGkj48w=' },
-      'body': {
+      headers: { 'x-line-signature': 'wqJD7WAIZhWcXThMCf8jZnwG3Hmn7EF36plkQGkj48w=' },
+      body: {
         events: [event],
-        destination: "Uaaaabbbbccccddddeeeeffff",
+        destination: 'Uaaaabbbbccccddddeeeeffff'
       }
     }
 
@@ -123,8 +124,8 @@ describe('LineRequestHandler test', () => {
     let handler = new LineRequestHandler(channelSecret)
 
     let req: any = {
-      'headers': { 'x-shio-debug': 'true' },
-      'body': '{"events":[]}'
+      headers: { 'x-shio-debug': 'true' },
+      body: '{"events":[]}'
     }
 
     let rawMsg = handler.handle(req)

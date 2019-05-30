@@ -1,5 +1,5 @@
-import { ClientOptions, AgentsClient, IntentsClient } from "dialogflow";
-import { ExportedAgent, empty } from "../types";
+import { ClientOptions, AgentsClient, IntentsClient } from 'dialogflow'
+import { ExportedAgent, empty } from '../types'
 
 import * as AdmZip from 'adm-zip'
 import * as fs from 'fs-extra'
@@ -10,11 +10,7 @@ export interface DialogFlowAdmin {
 }
 
 export class DefaultDialogFlowAdmin implements DialogFlowAdmin {
-  constructor(
-    private clientOption: ClientOptions,
-    private projectId: string,
-    private folderPath?: string,
-  ) { }
+  constructor(private clientOption: ClientOptions, private projectId: string, private folderPath?: string) {}
 
   async ExportAgent(): Promise<void> {
     if (!this.folderPath) {
@@ -67,9 +63,15 @@ export class DefaultDialogFlowAdmin implements DialogFlowAdmin {
   }
 
   private convertToExportAgentResponse(operation: any): ExportedAgent | empty {
-    if (!operation) { return }
-    if (!operation.result) { return }
-    if (!operation.result.agentContent) { return }
+    if (!operation) {
+      return
+    }
+    if (!operation.result) {
+      return
+    }
+    if (!operation.result.agentContent) {
+      return
+    }
     return { agentContent: operation.result.agentContent }
   }
 }

@@ -1,4 +1,4 @@
-import { LineSettings } from "@shio-bot/chatengine/types";
+import { LineSettings } from '@shio-bot/chatengine/types'
 
 export type Configurations = {
   serviceName: string

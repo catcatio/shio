@@ -8,7 +8,7 @@ function __setMockPaths(newMockPaths: string[]) {
 
 fs.__setMockPaths = __setMockPaths
 fs.mockPaths = mockPaths
-fs.existsSync = jest.fn((directoryPath) => mockPaths.indexOf(directoryPath) != -1)
-fs.mkdirSync = jest.fn((directoryPath) => mockPaths.push(directoryPath))
+fs.existsSync = jest.fn(directoryPath => mockPaths.indexOf(directoryPath) != -1)
+fs.mkdirSync = jest.fn(directoryPath => mockPaths.push(directoryPath))
 
 export = fs

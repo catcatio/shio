@@ -1,6 +1,6 @@
-import { ParsedMessage } from "../../types";
+import { ParsedMessage } from '../../types'
 import { getSource, lineProvider } from '../parsers'
-import { EventParser, Event } from "./types";
+import { EventParser, Event } from './types'
 
 const eventType = 'beacon'
 
@@ -18,7 +18,7 @@ const eventType = 'beacon'
   }
 }*/
 
-const handler : EventParser = (event: Event): ParsedMessage => {
+const handler: EventParser = (event: Event): ParsedMessage => {
   console.log(eventType, event)
   return {
     replyToken: event.replyToken,

@@ -6,6 +6,4 @@ const mockImportAgent = jest.fn().mockResolvedValue([])
 AgentsClient.prototype.exportAgent = mockExportAgent
 AgentsClient.prototype.importAgent = mockImportAgent
 
-export {
-  AgentsClient,
-}
+export { AgentsClient }

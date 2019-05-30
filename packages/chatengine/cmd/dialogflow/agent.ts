@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import * as yargs from 'yargs'
-import { DefaultDialogFlowAdmin, DialogFlowAdmin } from '../../dialogflow/admin';
+import { DefaultDialogFlowAdmin, DialogFlowAdmin } from '../../dialogflow/admin'
 
 yargs
   .command(
@@ -34,12 +34,11 @@ yargs
       }
     },
     async opts => {
-      const dialogflowAdmin: DialogFlowAdmin = new DefaultDialogFlowAdmin(
-        { keyFilename: opts.keyFilename }, opts.projectId, opts.exportDir,
-      )
+      const dialogflowAdmin: DialogFlowAdmin = new DefaultDialogFlowAdmin({ keyFilename: opts.keyFilename }, opts.projectId, opts.exportDir)
       await dialogflowAdmin.ExportAgent().catch(err => console.error(err.message))
-    },
-  ).command(
+    }
+  )
+  .command(
     'import',
     'Import Dialogflow agent',
     {
@@ -69,15 +68,12 @@ yargs
       }
     },
     async opts => {
-      const dialogflowAdmin: DialogFlowAdmin = new DefaultDialogFlowAdmin(
-        { keyFilename: opts.keyFilename }, opts.projectId, opts.importDir,
-      )
+      const dialogflowAdmin: DialogFlowAdmin = new DefaultDialogFlowAdmin({ keyFilename: opts.keyFilename }, opts.projectId, opts.importDir)
       await dialogflowAdmin.ImportAgent().catch(err => console.error(err.message))
-    },
+    }
   )
   .version('0.0.1')
   .wrap(120)
   .recommendCommands()
   .help()
-  .strict()
-  .argv
+  .strict().argv

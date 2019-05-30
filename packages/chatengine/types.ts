@@ -1,20 +1,36 @@
-import * as http from "http";
+import { Entity } from 'dialogflow'
+import * as http from 'http'
 
-export type MessageType = 'textMessage' | 'imageMessage' | 'videoMessage' | 'audioMessage' | 'fileMessage' | 'locationMessage' | 'stickerMessage' |
-  'follow' | 'unfollow' | 'postback' | 'join' | 'leave' | 'postback' | 'beacon' | 'accountLink' | 'unknown'
+export type MessageType =
+  | 'textMessage'
+  | 'imageMessage'
+  | 'videoMessage'
+  | 'audioMessage'
+  | 'fileMessage'
+  | 'locationMessage'
+  | 'stickerMessage'
+  | 'follow'
+  | 'unfollow'
+  | 'postback'
+  | 'join'
+  | 'leave'
+  | 'postback'
+  | 'beacon'
+  | 'accountLink'
+  | 'unknown'
 
-export type Request = http.IncomingMessage & { body: any };
-export type Response = http.ServerResponse;
-export type NextCallback = (err?: Error) => void;
+export type Request = http.IncomingMessage & { body: any }
+export type Response = http.ServerResponse
+export type NextCallback = (err?: Error) => void
 
 export type ParsedMessage = {
-  message?: string | object,
-  type: MessageType,
-  replyToken: string,
-  timestamp: number,
-  source: Source,
-  provider: string,
-  original?: any,
+  message?: string | object
+  type: MessageType
+  replyToken: string
+  timestamp: number
+  source: Source
+  provider: string
+  original?: any
 }
 
 export type empty = null | undefined
@@ -22,19 +38,19 @@ export type empty = null | undefined
 export type Source = User | Room | Group
 
 export type User = {
-  userId: string,
+  userId: string
   type: 'user'
 }
 
 export type Room = {
-  userId: string,
-  roomId: string,
+  userId: string
+  roomId: string
   type: 'room'
 }
 
 export type Group = {
-  userId: string,
-  groupId: string,
+  userId: string
+  groupId: string
   type: 'group'
 }
 
@@ -55,8 +71,8 @@ export interface RequestHandler {
 }
 
 export type Intent = {
-  name: string,
-  parameters: IntentParameters,
+  name: string
+  parameters: IntentParameters
 }
 
 export type IntentParameters = {
@@ -65,7 +81,7 @@ export type IntentParameters = {
 
 export interface IntentDetector {
   isSupport(msgType: MessageType): boolean
-  detect(message: ParsedMessage): Promise<(Intent | empty)>
+  detect(message: ParsedMessage): Promise<Intent | empty>
 }
 
 // export type MessagingClient = ILineMessagingClient
@@ -140,7 +156,7 @@ export interface LineConfig {
 }
 
 export type LineSettings = {
-  clientConfig: LineConfig,
+  clientConfig: LineConfig
   apiEndPoint?: string
 }
 
@@ -149,13 +165,13 @@ export type LinePaySettings = {
     channelId: string
     channelSecret: string
     isSandbox: boolean
-  },
+  }
   apiEndpoint: string
   confirmUrl: string
 }
 
 export type ProvidersSettings = {
-  line?: LineSettings,
+  line?: LineSettings
   linePay?: LinePaySettings
 }
 
@@ -168,7 +184,18 @@ export type GoogleServiceAccountKey = {
   credentials: {
     client_email: string
     private_key: string
-  },
+  }
   apiKey: string
   projectId: string
+}
+
+export interface EntityType {
+  name?: string
+  id: string
+  kind: string
+  entities: Entity[]
+}
+
+export interface ExportedAgent {
+  agentContent: Buffer
 }

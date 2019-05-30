@@ -12,7 +12,7 @@
     "dialogflow": {
       "credentials": {
         "client_email": "",
-      "private_key": ""
+        "private_key": ""
       },
       "projectId": ""
     }
@@ -20,7 +20,7 @@
   "pubsub": {
     "credentials": {
       "client_email": "",
-    "private_key": ""
+      "private_key": ""
     },
     "projectId": ""
   }

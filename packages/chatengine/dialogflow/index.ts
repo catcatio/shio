@@ -1,10 +1,9 @@
 import { IntentDetector, ParsedMessage, Intent, empty, MessageType, IntentParameters } from '../types'
 import { SessionsClient } from 'dialogflow'
-import structjson from '../utils/dialogflow/structjson';
+import structjson from '../utils/dialogflow/structjson'
 
 export class DialogFlowIntentDetector implements IntentDetector {
-  constructor(private clientOption: any) {
-  }
+  constructor(private clientOption: any) {}
 
   isSupport(msgType: MessageType): boolean {
     return msgType === 'textMessage'
@@ -32,7 +31,7 @@ export class DialogFlowIntentDetector implements IntentDetector {
         text: {
           text: parsedMessage.message as string,
           languageCode: languageCode
-        },
+        }
       },
       queryParams: {
         // https://github.com/dialogflow/dialogflow-nodejs-client-v2/issues/9
@@ -40,18 +39,17 @@ export class DialogFlowIntentDetector implements IntentDetector {
       }
     }
 
-    const responses = await sessionClient.detectIntent(query);
+    const responses = await sessionClient.detectIntent(query)
     let params: IntentParameters = {}
     let fields = responses[0].queryResult.parameters['fields']
-    fields && Object.keys(fields).forEach(
-      f => {
+    fields &&
+      Object.keys(fields).forEach(f => {
         console.log(f)
         params[f] = fields[f][fields[f]['kind']]
-      }
-    )
+      })
     return {
-      'name': responses[0].queryResult.action,
-      'parameters': params
+      name: responses[0].queryResult.action,
+      parameters: params
     }
   }
 }

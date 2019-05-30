@@ -1,11 +1,9 @@
 import { default as fetch, Request } from 'node-fetch'
-import { URLSearchParams } from 'url';
+import { URLSearchParams } from 'url'
 
 const buildParams = (url: string, params: any): string => {
   let urlParams = !params ? '' : new URLSearchParams(params).toString()
-  return urlParams
-    ? `${url}${url.includes('?') ? '&' : '?'}${urlParams}`
-    : url
+  return urlParams ? `${url}${url.includes('?') ? '&' : '?'}${urlParams}` : url
 }
 
 export default class HTTPClient {
@@ -22,10 +20,9 @@ export default class HTTPClient {
     return fetch(url, {
       method: 'GET',
       headers: Object.assign({}, this.defaultHeaders, headers)
+    }).then(response => {
+      return (response.json() as unknown) as T
     })
-      .then(response => {
-        return response.json() as unknown as T
-      })
   }
 
   public async post<T>(url: string, body?: any, headers?: any): Promise<T> {
@@ -34,11 +31,10 @@ export default class HTTPClient {
     return fetch(url, {
       method: 'POST',
       headers: Object.assign({}, this.defaultHeaders, headers),
-      body: body,
+      body: body
+    }).then(response => {
+      return (response.json() as unknown) as T
     })
-      .then(response => {
-        return response.json() as unknown as T
-      })
   }
 
   public async put<T>(url: string, body?: any, headers?: any): Promise<T> {
@@ -47,11 +43,10 @@ export default class HTTPClient {
     return fetch(url, {
       method: 'POST',
       headers: Object.assign({}, this.defaultHeaders, headers),
-      body: body,
+      body: body
+    }).then(response => {
+      return (response.json() as unknown) as T
     })
-      .then(response => {
-        return response.json() as unknown as T
-      })
   }
 
   public async delete<T>(url: string, params?: any, headers?: any): Promise<T> {
@@ -59,16 +54,13 @@ export default class HTTPClient {
 
     return fetch(url, {
       method: 'DELETE',
-      headers: Object.assign({}, this.defaultHeaders, headers),
+      headers: Object.assign({}, this.defaultHeaders, headers)
+    }).then(response => {
+      return (response.json() as unknown) as T
     })
-      .then(response => {
-        return response.json() as unknown as T
-      })
   }
 
   private wrapError(err: any): Error {
     return null as any
   }
-
 }
-

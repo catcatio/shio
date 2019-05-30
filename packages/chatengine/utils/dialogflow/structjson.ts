@@ -34,14 +34,10 @@ function jsonToStructProto(json) {
 const JSON_SIMPLE_TYPE_TO_PROTO_KIND_MAP = {
   [typeof 0]: 'numberValue',
   [typeof '']: 'stringValue',
-  [typeof false]: 'boolValue',
+  [typeof false]: 'boolValue'
 }
 
-const JSON_SIMPLE_VALUE_KINDS = new Set([
-  'numberValue',
-  'stringValue',
-  'boolValue',
-])
+const JSON_SIMPLE_VALUE_KINDS = new Set(['numberValue', 'stringValue', 'boolValue'])
 
 function jsonValueToProto(value) {
   const valueProto: any = {}
@@ -100,5 +96,5 @@ function valueProtoToJson(proto) {
 
 export default {
   jsonToStructProto,
-  structProtoToJson,
+  structProtoToJson
 }

@@ -1,14 +1,17 @@
-import { LineMessageParser } from '../messageParser';
+import { LineMessageParser } from '../messageParser'
 
 describe('LineMessageParser test', () => {
   it('should be able to parse system validation event', () => {
     let parser = new LineMessageParser()
     let rawMsgs = {
-      events: [{
-        replyToken: '00000000000000000000000000000000'
-      }, {
-        replyToken: 'ffffffffffffffffffffffffffffffff'
-      }]
+      events: [
+        {
+          replyToken: '00000000000000000000000000000000'
+        },
+        {
+          replyToken: 'ffffffffffffffffffffffffffffffff'
+        }
+      ]
     }
     let msgs = parser.parse(rawMsgs)
 
@@ -20,15 +23,17 @@ describe('LineMessageParser test', () => {
   it('should be able to parse follow event', () => {
     let parser = new LineMessageParser()
     let rawMsgs = {
-      events: [{
-        'replyToken': 'nHuyWiB7yP5Zw52FIkcQobQuGDXCTA',
-        'type': 'follow',
-        'timestamp': 1462629479859,
-        'source': {
-          'type': 'user',
-          'userId': 'U4af4980629'
+      events: [
+        {
+          replyToken: 'nHuyWiB7yP5Zw52FIkcQobQuGDXCTA',
+          type: 'follow',
+          timestamp: 1462629479859,
+          source: {
+            type: 'user',
+            userId: 'U4af4980629'
+          }
         }
-      }]
+      ]
     }
     let msgs = parser.parse(rawMsgs)
 
@@ -47,14 +52,16 @@ describe('LineMessageParser test', () => {
   it('should be able to parse unfollow event', () => {
     let parser = new LineMessageParser()
     let rawMsgs = {
-      events: [{
-        "type": "unfollow",
-        "timestamp": 1462629479859,
-        "source": {
-          "type": "user",
-          "userId": "U4af4980629"
+      events: [
+        {
+          type: 'unfollow',
+          timestamp: 1462629479859,
+          source: {
+            type: 'user',
+            userId: 'U4af4980629'
+          }
         }
-      }]
+      ]
     }
     let msgs = parser.parse(rawMsgs)
 
@@ -73,19 +80,21 @@ describe('LineMessageParser test', () => {
   it('should be able to parse beacon event', () => {
     let parser = new LineMessageParser()
     let rawMsgs = {
-      events: [{
-        "replyToken": "nHuyWiB7yP5Zw52FIkcQobQuGDXCTA",
-        "type": "beacon",
-        "timestamp": 1462629479859,
-        "source": {
-          "type": "user",
-          "userId": "U4af4980629"
-        },
-        "beacon": {
-          "hwid": "d41d8cd98f",
-          "type": "enter"
+      events: [
+        {
+          replyToken: 'nHuyWiB7yP5Zw52FIkcQobQuGDXCTA',
+          type: 'beacon',
+          timestamp: 1462629479859,
+          source: {
+            type: 'user',
+            userId: 'U4af4980629'
+          },
+          beacon: {
+            hwid: 'd41d8cd98f',
+            type: 'enter'
+          }
         }
-      }]
+      ]
     }
     let msgs = parser.parse(rawMsgs)
 
@@ -105,21 +114,23 @@ describe('LineMessageParser test', () => {
   it('should be able to parse postback event', () => {
     let parser = new LineMessageParser()
     let rawMsgs = {
-      events: [{
-        "type": "postback",
-        "replyToken": "b60d432864f44d079f6d8efe86cf404b",
-        "source": {
-          "userId": "U91eeaf62d",
-          "type": "user"
-        },
-        "timestamp": 1513669370317,
-        "postback": {
-          "data": "storeId=12345",
-          "params": {
-            "datetime": "2017-12-25T01:00"
+      events: [
+        {
+          type: 'postback',
+          replyToken: 'b60d432864f44d079f6d8efe86cf404b',
+          source: {
+            userId: 'U91eeaf62d',
+            type: 'user'
+          },
+          timestamp: 1513669370317,
+          postback: {
+            data: 'storeId=12345',
+            params: {
+              datetime: '2017-12-25T01:00'
+            }
           }
         }
-      }]
+      ]
     }
     let msgs = parser.parse(rawMsgs)
 
@@ -139,16 +150,17 @@ describe('LineMessageParser test', () => {
   it('should be able to parse unknown event', () => {
     let parser = new LineMessageParser()
     let rawMsgs = {
-      events: [{
-        "type": "notexistingevent",
-        "replyToken": "b60d432864f44d079f6d8efe86cf404b",
-        "source": {
-          "userId": "U91eeaf62d",
-          "type": "user"
-        },
-        "timestamp": 1513669370317,
-
-      }]
+      events: [
+        {
+          type: 'notexistingevent',
+          replyToken: 'b60d432864f44d079f6d8efe86cf404b',
+          source: {
+            userId: 'U91eeaf62d',
+            type: 'user'
+          },
+          timestamp: 1513669370317
+        }
+      ]
     }
     let msgs = parser.parse(rawMsgs)
 
@@ -167,20 +179,22 @@ describe('LineMessageParser test', () => {
   it('should be able to parse text message event', () => {
     let parser = new LineMessageParser()
     let rawMsgs = {
-      events: [{
-        "replyToken": "nHuyWiB7yP5Zw52FIkcQobQuGDXCTA",
-        "type": "message",
-        "timestamp": 1462629479859,
-        "source": {
-          "type": "user",
-          "userId": "U4af4980629"
-        },
-        "message": {
-          "id": "325708",
-          "type": "text",
-          "text": "Hello, world!"
+      events: [
+        {
+          replyToken: 'nHuyWiB7yP5Zw52FIkcQobQuGDXCTA',
+          type: 'message',
+          timestamp: 1462629479859,
+          source: {
+            type: 'user',
+            userId: 'U4af4980629'
+          },
+          message: {
+            id: '325708',
+            type: 'text',
+            text: 'Hello, world!'
+          }
         }
-      }]
+      ]
     }
     let msgs = parser.parse(rawMsgs)
 
@@ -199,22 +213,24 @@ describe('LineMessageParser test', () => {
   it('should be able to parse other message event', () => {
     let parser = new LineMessageParser()
     let rawMsgs = {
-      events: [{
-        "replyToken": "nHuyWiB7yP5Zw52FIkcQobQuGDXCTA",
-        "type": "message",
-        "timestamp": 1462629479859,
-        "source": {
-          "type": "user",
-          "userId": "U4af4980629"
-        },
-        "message": {
-          "id": "325708",
-          "type": "image",
-          "contentProvider": {
-            "type": "line"
+      events: [
+        {
+          replyToken: 'nHuyWiB7yP5Zw52FIkcQobQuGDXCTA',
+          type: 'message',
+          timestamp: 1462629479859,
+          source: {
+            type: 'user',
+            userId: 'U4af4980629'
+          },
+          message: {
+            id: '325708',
+            type: 'image',
+            contentProvider: {
+              type: 'line'
+            }
           }
         }
-      }]
+      ]
     }
     let msgs = parser.parse(rawMsgs)
 
@@ -234,35 +250,38 @@ describe('LineMessageParser test', () => {
   it('should be able to parse multiple events', () => {
     let parser = new LineMessageParser()
     let rawMsgs = {
-      events: [{
-        "replyToken": "nHuyWiB7yP5Zw52FIkcQobQuGDXCTA",
-        "type": "message",
-        "timestamp": 1462629479859,
-        "source": {
-          "type": "user",
-          "userId": "U4af4980629"
+      events: [
+        {
+          replyToken: 'nHuyWiB7yP5Zw52FIkcQobQuGDXCTA',
+          type: 'message',
+          timestamp: 1462629479859,
+          source: {
+            type: 'user',
+            userId: 'U4af4980629'
+          },
+          message: {
+            id: '325708',
+            type: 'text',
+            text: 'Hello, world!'
+          }
         },
-        "message": {
-          "id": "325708",
-          "type": "text",
-          "text": "Hello, world!"
-        }
-      }, {
-        "replyToken": "nHuyWiB7yP5Zw52FIkcQobQuGDXCBB",
-        "type": "message",
-        "timestamp": 1462629479860,
-        "source": {
-          "type": "user",
-          "userId": "U4af4980629"
-        },
-        "message": {
-          "id": "325709",
-          "type": "image",
-          "contentProvider": {
-            "type": "line"
+        {
+          replyToken: 'nHuyWiB7yP5Zw52FIkcQobQuGDXCBB',
+          type: 'message',
+          timestamp: 1462629479860,
+          source: {
+            type: 'user',
+            userId: 'U4af4980629'
+          },
+          message: {
+            id: '325709',
+            type: 'image',
+            contentProvider: {
+              type: 'line'
+            }
           }
         }
-      }]
+      ]
     }
     let msgs = parser.parse(rawMsgs)
 

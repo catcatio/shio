@@ -1,5 +1,5 @@
 import { server } from './server'
-import { Configurations } from './types';
+import { Configurations } from './types'
 
 let config: Configurations = require('./config.json')
 

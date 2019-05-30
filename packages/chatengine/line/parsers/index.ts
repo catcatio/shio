@@ -1,11 +1,11 @@
-import { Source, ParsedMessage } from "../../types";
-import { EventParsers, Event } from "./types";
-import messageEventParser = require("./messageEventParser");
-import followEventParser = require("./followEventParser");
-import unfollowEventParser = require("./unfollowEventParser");
-import postbackEventParser = require("./postbackEventHandler");
-import beaconEventParser = require("./beaconEventParser");
-import defaultEventParser = require("./defaultEventParser");
+import { Source, ParsedMessage } from '../../types'
+import { EventParsers, Event } from './types'
+import messageEventParser = require('./messageEventParser')
+import followEventParser = require('./followEventParser')
+import unfollowEventParser = require('./unfollowEventParser')
+import postbackEventParser = require('./postbackEventHandler')
+import beaconEventParser = require('./beaconEventParser')
+import defaultEventParser = require('./defaultEventParser')
 
 export const lineProvider = 'line'
 
@@ -21,19 +21,19 @@ export const getSource = (source: any): Source => {
     case 'user':
       return {
         type: 'user',
-        userId: source.userId,
+        userId: source.userId
       }
     case 'room':
       return {
         type: 'room',
         roomId: source.roomId,
-        userId: source.userId,
+        userId: source.userId
       }
     case 'group':
       return {
         type: 'group',
         groupId: source.groupId,
-        userId: source.userId,
+        userId: source.userId
       }
     default:
       return {
@@ -61,8 +61,7 @@ const eventParsers: EventParsers = {
 }
 
 const isSystemVerificationEvent = ({ replyToken }) => {
-  return replyToken === '00000000000000000000000000000000' ||
-    replyToken === 'ffffffffffffffffffffffffffffffff'
+  return replyToken === '00000000000000000000000000000000' || replyToken === 'ffffffffffffffffffffffffffffffff'
 }
 
 export default (event: Event): ParsedMessage | null => {

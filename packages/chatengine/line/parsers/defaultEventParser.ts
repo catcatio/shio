@@ -1,6 +1,6 @@
-import { ParsedMessage } from "../../types";
-import { getSource, lineProvider } from "../parsers";
-import { EventParser, Event } from "./types";
+import { ParsedMessage } from '../../types'
+import { getSource, lineProvider } from '../parsers'
+import { EventParser, Event } from './types'
 
 const eventType = '*'
 
