@@ -14,11 +14,12 @@ export type ParsedMessage = {
   timestamp: number,
   source: Source,
   provider: string,
+  original?: any,
 }
 
 export type empty = null | undefined
 
-export type Source = User | Room | Group | empty
+export type Source = User | Room | Group
 
 export type User = {
   userId: string,
@@ -125,7 +126,7 @@ export interface LineMessageClientGetProfileOutput {
   provider: 'line'
 }
 
-export interface IMessagingClient {
+export interface MessagingClient {
   sendImage(input: MessageClientSendImageInput): Promise<MessageClientSendImageOutput>
   sendMessage(input: MessageClientSendMessageInput): Promise<MessageClientSendMessageOutput>
   sendCustomMessages(input: MessageClientSendCustomMessagesInput): Promise<MessageClientSendCustomMessagesOutput>

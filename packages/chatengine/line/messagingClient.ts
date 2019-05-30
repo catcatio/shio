@@ -1,9 +1,8 @@
-import { IMessagingClient, LineMessageClientSendImageInput, LineMessageClientSendImageOutput, LineMessageClientSendMessageInput, LineMessageClientSendMessageOutput, LineMessageClientSendCustomMessagesInput, LineMessageClientSendCustomMessagesOutput, LineMessageClientGetProfileInput, LineMessageClientGetProfileOutput, LineSettings, LineConfig } from '../types'
+import { MessagingClient, LineMessageClientSendImageInput, LineMessageClientSendImageOutput, LineMessageClientSendMessageInput, LineMessageClientSendMessageOutput, LineMessageClientSendCustomMessagesInput, LineMessageClientSendCustomMessagesOutput, LineMessageClientGetProfileInput, LineMessageClientGetProfileOutput, LineSettings, LineConfig } from '../types'
 import { Client as LineClient, ImageMessage, Message, TextMessage, HTTPError } from "@line/bot-sdk";
-import { truncate } from 'fs';
 
 const defaultApiEndpoint: string = 'https://api.line.me/v2/bot/'
-export class LineMessagingClient implements IMessagingClient {
+export class LineMessagingClient implements MessagingClient {
   private apiEndPoint: string
   private lineConfig: LineConfig
   private lineClient: LineClient
@@ -38,7 +37,7 @@ export class LineMessagingClient implements IMessagingClient {
           if (this.isInvalidTokenError(err)) {
             return this.lineClient.pushMessage(to, messages)
           }
-          return err
+          throw err
         })
     } else {
       return this.lineClient.pushMessage(to, messages)
@@ -57,7 +56,7 @@ export class LineMessagingClient implements IMessagingClient {
     }
 
 
-    let retsult = await this.tryReplyAndPush(input.replyToken, input.to, msgs)
+    await this.tryReplyAndPush(input.replyToken, input.to, msgs)
 
     return {
       provider: 'line',
@@ -70,7 +69,7 @@ export class LineMessagingClient implements IMessagingClient {
       ? input.text.map(t => ({ 'type': 'text', 'text': t, }))
       : [{ 'type': 'text', 'text': input.text, }]
 
-    let retsult = await this.tryReplyAndPush(input.replyToken, input.to, msgs)
+    await this.tryReplyAndPush(input.replyToken, input.to, msgs)
 
     return {
       provider: 'line',

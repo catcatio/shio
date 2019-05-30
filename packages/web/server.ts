@@ -2,8 +2,10 @@ import * as express from 'express'
 import { Router } from 'express'
 import { Configurations } from './types'
 import { LineRequestHandler, LineMessageParser, ChatEngine, DialogFlowIntentDetector } from '@shio-bot/chatengine'
+import { LineMessagingClient } from '@shio-bot/chatengine/line/messagingClient'
 import * as bodyParser from 'body-parser'
-import { incomingMessageHandler } from './handlers';
+import { incomingMessageHandler, outgoingMessageHandler } from './handlers';
+import { CloudPubsubTransport, createCloudPubSubInstance, WithGoogleAuthOptions } from '../foundation';
 
 export const chatEndpoint = (config: Configurations): Router => {
   const channelSecret = config.chatEngine.line.clientConfig.channelSecret
@@ -11,15 +13,19 @@ export const chatEndpoint = (config: Configurations): Router => {
   let messageParser = new LineMessageParser()
   let chatEngine = new ChatEngine(requestHandler, messageParser)
   let intentDetector = new DialogFlowIntentDetector(config.chatEngine.dialogflow)
-  let messageHandler = incomingMessageHandler(intentDetector)
+  let pubsub = createCloudPubSubInstance(WithGoogleAuthOptions(config.pubsub))
+  let cloudPubSub = new CloudPubsubTransport(pubsub, config.serviceName)
+  let lineClient = new LineMessagingClient(config.chatEngine.line)
+  let inMsgHandler = incomingMessageHandler(intentDetector, cloudPubSub)
+  let outMsgHandler = outgoingMessageHandler(lineClient)
 
-  chatEngine.onMessageReceived((msg) => {
-    messageHandler.handle(msg)
-  })
+
+  cloudPubSub.SubscribeOutgoingMessage(outMsgHandler)
+  chatEngine.onMessageReceived(inMsgHandler.handle)
 
   let router: Router = express.Router()
 
-  // TODO: move this to chat engine
+  // NC:TODO: move this to chat engine
   router.post('/line', chatEngine.middleware.bind(chatEngine), (req, res) => { res.send('OK') })
   return router
 }

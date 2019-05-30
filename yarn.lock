@@ -256,25 +256,10 @@
     split-array-stream "^2.0.0"
     stream-events "^1.0.4"
 
-"@google-cloud/paginator@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@google-cloud/paginator/-/paginator-1.0.0.tgz#35549a463fd7072a3caf550e79d28d88a24af3f3"
-  integrity sha512-U0Pa2k05mZlRmIGTl81VBv+cYbGsg3E/+IeNasUSk1EisC0fADSwB/o8QJ9yL0knUEAVzOEyErPXnvbMq0IM6w==
-  dependencies:
-    arrify "^2.0.0"
-    extend "^3.0.1"
-    split-array-stream "^2.0.0"
-    stream-events "^1.0.4"
-
 "@google-cloud/precise-date@^0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@google-cloud/precise-date/-/precise-date-0.1.0.tgz#02ccda04b4413fa64f098fc93db51e95af5c855a"
   integrity sha512-nXt4AskYjmDLRIO+nquVVppjiLE5ficFRP3WF1JYtPnSRFRpuMusa1kysPsD/yOxt5NMmvlkUCkaFI4rHYeckQ==
-
-"@google-cloud/precise-date@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@google-cloud/precise-date/-/precise-date-1.0.0.tgz#07943161c3d687f7a0b5c8620f230a952a8eaef8"
-  integrity sha512-HnaBtUD3LGU300xSc52JD2xLwwf01NjLIldSst8vKvIQGj5p98BGVp1GPtV7feQuh0ZVTTWB5valI8N8QEMDnQ==
 
 "@google-cloud/projectify@^0.3.0", "@google-cloud/projectify@^0.3.2":
   version "0.3.3"
@@ -318,30 +303,6 @@
     lodash.merge "^4.6.0"
     lodash.snakecase "^4.1.1"
     p-defer "^1.0.0"
-    protobufjs "^6.8.1"
-
-"@google-cloud/pubsub@^0.29.1":
-  version "0.29.1"
-  resolved "https://registry.yarnpkg.com/@google-cloud/pubsub/-/pubsub-0.29.1.tgz#2759413aaf87a9e3b2deb41e9e81c18ccedadd3d"
-  integrity sha512-uSYHjUK4teQe5qszHy50JxzJgyuhnzmtPeX+WPUabMBAST4Qkdo6sltsy3Gx1A/ZanTY3R6ORG0f2E4mQ8tASA==
-  dependencies:
-    "@google-cloud/paginator" "^1.0.0"
-    "@google-cloud/precise-date" "^1.0.0"
-    "@google-cloud/projectify" "^1.0.0"
-    "@google-cloud/promisify" "^1.0.0"
-    "@sindresorhus/is" "^0.15.0"
-    "@types/duplexify" "^3.6.0"
-    "@types/long" "^4.0.0"
-    arrify "^2.0.0"
-    async-each "^1.0.1"
-    extend "^3.0.1"
-    google-auth-library "^3.0.0"
-    google-gax "^1.0.0"
-    grpc "^1.20.3"
-    is-stream-ended "^0.1.4"
-    lodash.merge "^4.6.0"
-    lodash.snakecase "^4.1.1"
-    p-defer "^2.0.1"
     protobufjs "^6.8.1"
 
 "@google-cloud/translate@^4.0.1":
@@ -625,6 +586,18 @@
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
+
+"@shio-bot/foundation@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@shio-bot/foundation/-/foundation-1.0.4.tgz#4c390c481099f6e259fdd6302cc5358a51ecca1c"
+  integrity sha512-EMAKjqBj3YWXceE+GB33F/2Pu54EGi/BJFDkAtuNCGnVqOB0MXkXC+q61YDkAvqoeCiXWqSmDNFl/ehLqBHJ7w==
+  dependencies:
+    "@google-cloud/datastore" "^3.1.2"
+    "@google-cloud/logging-winston" "^0.11.1"
+    "@google-cloud/pubsub" "^0.28.1"
+    body-parser "^1.19.0"
+    express "^4.17.1"
+    ulid "^2.3.0"
 
 "@sindresorhus/is@^0.15.0":
   version "0.15.0"
@@ -3077,17 +3050,6 @@ grpc@^1.16.0:
     node-pre-gyp "^0.13.0"
     protobufjs "^5.0.3"
 
-grpc@^1.20.3:
-  version "1.21.1"
-  resolved "https://registry.yarnpkg.com/grpc/-/grpc-1.21.1.tgz#541c0f4bccffcf6aef200536179594633d4579cf"
-  integrity sha512-PFsZQazf62nP05a0xm23mlImMuw5oVlqF/0zakmsdqJgvbABe+d6VThY2PfhqJmWEL/FhQ6QNYsxS5EAM6++7g==
-  dependencies:
-    lodash.camelcase "^4.3.0"
-    lodash.clone "^4.5.0"
-    nan "^2.13.2"
-    node-pre-gyp "^0.13.0"
-    protobufjs "^5.0.3"
-
 gtoken@^2.3.2:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/gtoken/-/gtoken-2.3.3.tgz#8a7fe155c5ce0c4b71c886cfb282a9060d94a641"
@@ -5132,11 +5094,6 @@ p-defer@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/p-defer/-/p-defer-1.0.0.tgz#9f6eb182f6c9aa8cd743004a7d4f96b196b0fb0c"
   integrity sha1-n26xgvbJqozXQwBKfU+WsZaw+ww=
-
-p-defer@^2.0.1:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/p-defer/-/p-defer-2.1.0.tgz#d9c97b40f8fb5c256a70b4aabec3c1c8c42f1fae"
-  integrity sha512-xMwL9id1bHn/UfNGFEMFwlULOprQUEOg6vhqSfr6oKxPFB0oSh0zhGq/9/tPSE+cyij2+RW6H8+0Ke4xsPdZ7Q==
 
 p-each-series@^1.0.0:
   version "1.0.0"

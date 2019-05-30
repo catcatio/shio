@@ -41,8 +41,6 @@ export class DialogFlowIntentDetector implements IntentDetector {
     }
 
     const responses = await sessionClient.detectIntent(query);
-
-    console.log(JSON.stringify(responses[0], null, 2))
     let params: IntentParameters = {}
     let fields = responses[0].queryResult.parameters['fields']
     fields && Object.keys(fields).forEach(

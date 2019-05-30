@@ -68,5 +68,7 @@ const isSystemVerificationEvent = ({ replyToken }) => {
 export default (event: Event): ParsedMessage | null => {
   if (isSystemVerificationEvent(event)) return null
   const eventParser = eventParsers[event.type] || defaultEventParser.handler
-  return eventParser(event)
+  let msg = eventParser(event)
+  msg.original = event
+  return msg
 }
