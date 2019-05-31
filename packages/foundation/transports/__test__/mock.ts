@@ -1,6 +1,6 @@
-import { CloudPubsubTransport, PubsubTransport, SubscribeIncomingMessageListener, SubscribeOutgoingMessageListener } from '../pubsub'
+import { CloudPubsubMessageChannelTransport, MessageChannelTransport, SubscribeIncomingMessageListener, SubscribeOutgoingMessageListener } from '../pubsub'
 
-export class __mock__CloudPubsubTransports implements PubsubTransport {
+export class __mock__CloudPubsubTransports implements MessageChannelTransport {
   incomingSubs: SubscribeIncomingMessageListener[] = []
   outgoingSubs: SubscribeOutgoingMessageListener[] = []
 

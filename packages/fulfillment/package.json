@@ -10,7 +10,7 @@
     "delay": "1500",
     "verbose": false,
     "debug": false,
-    "exec": "node --inspect=9229 -r ts-node/register ./cmd/local.ts",
+    "exec": "node -r ts-node/register ./cmd/local.ts",
     "ignore": [
       "node_modules",
       "routes.ts",
@@ -24,9 +24,9 @@
   },
   "scripts": {
     "start":"node cmd/entry.js",
-    "dev": "nodemon",
+    "dev": "sh ../../scripts/clean.bash && nodemon",
     "build": "yarn tsc",
-    "integration": "yarn jest --runInBand --config jest.integration.json",
+    "integration": "yarn jest --config jest.integration.json",
     "unit": "yarn jest --runInBand --config jest.unit.json",
     "cloudbuild-reloadcache": "gcloud builds submit --config cloudbuild.node_modules.yaml",
     "cloudbuild-build": "gcloud builds submit --config cloudbuild.yaml",

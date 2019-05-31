@@ -587,18 +587,6 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@shio-bot/foundation@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@shio-bot/foundation/-/foundation-1.0.4.tgz#4c390c481099f6e259fdd6302cc5358a51ecca1c"
-  integrity sha512-EMAKjqBj3YWXceE+GB33F/2Pu54EGi/BJFDkAtuNCGnVqOB0MXkXC+q61YDkAvqoeCiXWqSmDNFl/ehLqBHJ7w==
-  dependencies:
-    "@google-cloud/datastore" "^3.1.2"
-    "@google-cloud/logging-winston" "^0.11.1"
-    "@google-cloud/pubsub" "^0.28.1"
-    body-parser "^1.19.0"
-    express "^4.17.1"
-    ulid "^2.3.0"
-
 "@sindresorhus/is@^0.15.0":
   version "0.15.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.15.0.tgz#96915baa05e6a6a1d137badf4984d3fc05820bb6"
@@ -644,7 +632,7 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/body-parser@*", "@types/body-parser@^1.16.8":
+"@types/body-parser@*", "@types/body-parser@^1.16.8", "@types/body-parser@^1.17.0":
   version "1.17.0"
   resolved "https://registry.yarnpkg.com/@types/body-parser/-/body-parser-1.17.0.tgz#9f5c9d9bd04bb54be32d5eb9fc0d8c974e6cf58c"
   integrity sha512-a2+YeUjPkztKJu5aIF2yArYFQQp8d51wZ7DavSHjFuY1mqVgidGyzEQ41JIVNy82fXj8yPgy2vJmfIywgESW6w==

@@ -1,8 +1,8 @@
-import { PubsubTransport, newLogger } from '@shio-bot/foundation'
+import { MessageChannelTransport, newLogger } from '@shio-bot/foundation'
 import { FulfillmentEndpoint } from '../endpoints'
 import { createOutgoingFromIncomingMessage, OutgoingMessage } from '@shio-bot/foundation/entities'
 
-export function registerPubsub(pubsub: PubsubTransport, endpoint: FulfillmentEndpoint) {
+export function registerPubsub(pubsub: MessageChannelTransport, endpoint: FulfillmentEndpoint) {
   const log = newLogger()
 
   pubsub.SubscribeIncommingMessage(async (message, ack) => {

@@ -18,7 +18,10 @@ export const WithGoogleAuthOptions = (authOption: GoogleAuthOptions): PubsubOpti
   return Object.assign({}, option, authOption)
 }
 
-export function createCloudPubSubInstance(...options: PubsubOption[]) {
+export async function createCloudPubSubInstance(...options: PubsubOption[]) {
   const option = composeFunctionOptions<ClientConfig>({ }, ...options)
-  return new PubSub(option)
+  return new PubSub({
+    ...option,
+    
+  })
 }

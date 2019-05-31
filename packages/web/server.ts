@@ -5,16 +5,19 @@ import { LineRequestHandler, LineMessageParser, ChatEngine, DialogFlowIntentDete
 import { LineMessagingClient } from '@shio-bot/chatengine/line/messagingClient'
 import * as bodyParser from 'body-parser'
 import { incomingMessageHandler, outgoingMessageHandler } from './handlers'
-import { CloudPubsubTransport, createCloudPubSubInstance, WithGoogleAuthOptions } from '../foundation'
+import { CloudPubsubMessageChannelTransport as CloudPubsubTransport, createCloudPubSubInstance, WithGoogleAuthOptions } from '../foundation'
 
-export const chatEndpoint = (config: Configurations): Router => {
+export const chatEndpoint = async (config: Configurations): Promise<Router> => {
   const channelSecret = config.chatEngine.line.clientConfig.channelSecret
   let requestHandler = new LineRequestHandler(channelSecret)
   let messageParser = new LineMessageParser()
   let chatEngine = new ChatEngine(requestHandler, messageParser)
   let intentDetector = new DialogFlowIntentDetector(config.chatEngine.dialogflow)
-  let pubsub = createCloudPubSubInstance(WithGoogleAuthOptions(config.pubsub))
-  let cloudPubSub = new CloudPubsubTransport(pubsub, config.serviceName)
+  let pubsub = await createCloudPubSubInstance(WithGoogleAuthOptions(config.pubsub))
+  let cloudPubSub = new CloudPubsubTransport({
+    pubsub,
+    serviceName: config.serviceName
+  })
   let lineClient = new LineMessagingClient(config.chatEngine.line)
   let inMsgHandler = incomingMessageHandler(intentDetector, cloudPubSub)
   let outMsgHandler = outgoingMessageHandler(lineClient)
@@ -33,11 +36,12 @@ export const chatEndpoint = (config: Configurations): Router => {
 
 export const server = (config: Configurations) => {
   const start = async () =>
-    new Promise((resolve, reject) => {
+    new Promise(async (resolve, reject) => {
       let app = express()
       app.use(bodyParser.urlencoded({ extended: true }))
       app.use(bodyParser.json())
-      app.use('/chat', chatEndpoint(config))
+      const endpoint = await chatEndpoint(config)
+      app.use('/chat', endpoint)
 
       app.listen(config.port, () => {
         console.log(`started on ${config.port}`)

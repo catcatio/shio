@@ -1,18 +1,22 @@
 import { randomFollowMessageIntent, randomIncomingMessage } from '@shio-bot/foundation/entities/__test__/random'
 import { createPubsubIntegrationClient, expectFulfillment } from './pubsub';
+import { UnPromise } from '../app/entities';
 
 describe('Follow intent test', () => {
 
-  let pubsub: ReturnType<typeof createPubsubIntegrationClient>
+  let outgoingPubsub: UnPromise< ReturnType<typeof createPubsubIntegrationClient>>
 
+  jest.setTimeout(60*1000)
 
-  beforeAll(() => {
-    pubsub = createPubsubIntegrationClient()
+  beforeAll(async () => {
+    outgoingPubsub = await createPubsubIntegrationClient()
+    await outgoingPubsub.start()
   })
 
   test('Create new user', async () => {
     const incomingMessage = randomIncomingMessage(randomFollowMessageIntent())
-    let message = await pubsub.sendIncomingMessage(incomingMessage)
+    let message = await outgoingPubsub.sendIncomingMessage(incomingMessage)
+
     expect(message.source.userId).toEqual(incomingMessage.source.userId)
     expectFulfillment('follow', (fulfillment) => {
       expect(fulfillment.parameters.isCompleted).toBeTruthy()
@@ -20,7 +24,7 @@ describe('Follow intent test', () => {
       expect(fulfillment.parameters.chatSessionId).toBeDefined()
     })(message)
 
-    message = await pubsub.sendIncomingMessage(incomingMessage)
+    message = await outgoingPubsub.sendIncomingMessage(incomingMessage)
     expect(message.source.userId).toEqual(incomingMessage.source.userId)
     expectFulfillment('follow', (fulfillment) => {
       expect(fulfillment.parameters.isCompleted).toBeFalsy()
@@ -31,8 +35,8 @@ describe('Follow intent test', () => {
   })
 
 
-  afterAll(() => {
-    pubsub.clean()
+  afterAll(async () => {
+    await outgoingPubsub.clean()
   })
 })
 

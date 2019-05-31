@@ -1,8 +1,8 @@
 import { ParsedMessage, Intent, IntentDetector } from '@shio-bot/chatengine/types'
-import { CloudPubsubTransport, PublishIncommingMessageInput } from '@shio-bot/foundation'
+import { CloudPubsubMessageChannelTransport, PublishIncommingMessageInput } from '@shio-bot/foundation'
 import { v4 as uuid } from 'uuid'
 
-export const incomingMessageHandler = (intentDetector: IntentDetector, pubsub: CloudPubsubTransport) => {
+export const incomingMessageHandler = (intentDetector: IntentDetector, pubsub: CloudPubsubMessageChannelTransport) => {
   const handle = async (msg: ParsedMessage) => {
     // get intent
     let intent = intentDetector.isSupport(msg.type) ? await intentDetector.detect(msg) : await Promise.resolve({ name: `${msg.type}`, parameters: {} } as Intent)
