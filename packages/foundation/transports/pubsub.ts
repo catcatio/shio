@@ -72,13 +72,24 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
         res.status(403).end('Outgoing listener does not registered')
         return
       }
-
       const message = Buffer.from(req.body.message.data, 'base64').toString('utf-8')
-      const f = this.outgoingListenerFunction(JSON.parse(message), () => {
-        res.status(200).send()
-      })
-      if (f && typeof f.then === 'function') {
-        f.then()
+      try {
+        const f = this.outgoingListenerFunction(JSON.parse(message), () => {
+          res.status(200).send()
+        })
+        if (f && typeof f.then === 'function') {
+          f.then()
+        }
+      } catch (e) {
+        // HANDLE INVALID PAYLOAD
+        this.log
+          .withFields({
+            body: JSON.stringify(req.body),
+            payloadMessage: message,
+            error: e
+          })
+          .error('outgoing message handle error')
+        res.status(200).end()
       }
     })
 
@@ -89,11 +100,23 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
       }
 
       const message = Buffer.from(req.body.message.data, 'base64').toString('utf-8')
-      const f = this.incomingListenerFunction(JSON.parse(message), () => {
-        res.status(200).send()
-      })
-      if (f && typeof f.then === 'function') {
-        f.then()
+      try {
+        const f = this.incomingListenerFunction(JSON.parse(message), () => {
+          res.status(200).send()
+        })
+        if (f && typeof f.then === 'function') {
+          f.then()
+        }
+      } catch (e) {
+        // HANDLE INVALID PAYLOAD
+        this.log
+          .withFields({
+            body: req.body,
+            payloadMessage: message,
+            error: e
+          })
+          .error('incomming message handle error')
+        res.status(200).end()
       }
     })
   }
@@ -153,8 +176,6 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
     })
   }
 
-
-
   // Cloud pubsub topic management utility function
   // to prepare pubsub for service
   // use this utility function before service start
@@ -170,7 +191,7 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
           pushEndpoint: incomingPushEndpointHost + '/incoming'
         }
       })
-    } 
+    }
   }
 
   async createOutgoingSubscriptionConfig(outgoingPushEndpointHost: string) {
@@ -210,6 +231,4 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
       await this.outgoingSubscription.delete()
     }
   }
-
-
 }

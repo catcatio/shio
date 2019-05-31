@@ -22,9 +22,13 @@ export function LoadConfig(): Config {
 
 async function run() {
   const config = LoadConfig()
-  await bootstrap({
+  const service = await bootstrap({
     ...config,
     dev: false,
+  })
+
+  process.on('beforeExit', () => {
+    service.close().then()
   })
 }
 

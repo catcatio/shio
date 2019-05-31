@@ -52,9 +52,7 @@ export async function bootstrap(config: Config) {
   log.info('registry pubsub...')
 
   registerPubsub(pubsub, endpoints)
-
   pubsub.start(atoi(config.port))
-
   return {
     pubsub,
     close: async () => {
