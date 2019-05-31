@@ -18,7 +18,7 @@ export class ShioLogger {
   withFields(value: ShioLoggerMeta['fields']) {
     return new ShioLogger(this.logger, {
       ...this.meta,
-      fields: value,
+      fields: value
     })
   }
   withUserId(value: string): ShioLogger {
@@ -91,7 +91,10 @@ export function newLogger(): ShioLogger {
         .map(k => `${k}=${info.fields[k]}`)
         .join(',')
 
-      return [new Date().toDateString(), requestId, info.provider, info.userId, info.level.toUpperCase(), info.message, fieldStr].join(' | ')
+      return info.message
+        .split('\n')
+        .map((m) => [new Date().toISOString(), requestId, info.provider || '<none>', info.userId, info.level.toUpperCase(), fieldStr, m].filter(item => item).join(' | '))
+        .join('\n')
     })
   })
   return new ShioLogger(logger)

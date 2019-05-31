@@ -14,11 +14,9 @@ export function expectFulfillment<Intent extends MessageFulfillment['name']>(nam
 export const createPubsubIntegrationClient = async () => {
   const ps = await createCloudPubSubInstance(WithPubsubProjectId(config.projectId), WithPubsubEndpoint(config.pubsubEndpoint))
   const log = newLogger().withUserId('integration-test')
-  let host: string = config.host
 
   const pubsub = new CloudPubsubMessageChannelTransport({
     pubsub: ps,
-    host,
     serviceName: 'integration-test-follow-intent'
   })
 
@@ -27,7 +25,7 @@ export const createPubsubIntegrationClient = async () => {
     pubsub,
     async start() {
       pubsub.start(8091)
-      await pubsub.setOutgoingSubscriptionConfig('http://host.docker.internal:8091')
+      await pubsub.createOutgoingSubscriptionConfig('http://host.docker.internal:8091')
     },
     sendIncomingMessage: (m: IncomingMessage): Promise<OutgoingMessage> => {
       if (GetEnvString('FULFILLMENT_INTEGRATION_DEBUG') === '1') {

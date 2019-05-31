@@ -9,7 +9,7 @@ export default async () => {
   const { pubsub } = await createPubsubIntegrationClient()
   await pubsub.purge()
   await pubsub.prepareTopic()
-  await pubsub.setIncomingSubscriptionConfig(config.host)
+  await pubsub.createIncomingSubscriptionConfig(config.host)
 
   const app = await bootstrap({
     ...config

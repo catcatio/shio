@@ -38,7 +38,6 @@ async function Run() {
   const host = 'http://host.docker.internal:8080'
   const { pubsub, datastore } = await init()
   const cloudpubsub = new CloudPubsubMessageChannelTransport({
-    host,
     pubsub,
     serviceName: 'playground'
   })

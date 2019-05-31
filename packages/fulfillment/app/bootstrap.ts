@@ -37,7 +37,6 @@ export async function bootstrap(config: Config) {
 
   const acl = new DatastoreACLRepository(datastore)
   const pubsub = new CloudPubsubMessageChannelTransport({
-    host: config.host,
     pubsub: cloudpubsub,
     serviceName: 'fulfillment'
   })
