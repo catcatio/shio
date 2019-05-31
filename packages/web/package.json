@@ -1,12 +1,13 @@
 {
   "name": "@shio-bot/web",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "app/index.ts",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
     "clean": "find -E . -regex '.*\\.(info|js|map|d\\.ts)' -not -path \"**/node_modules/*\" -not -path  \"./.next/*\" -delete && rm -rf dist",
     "test": "tsc && jest --config jest.unit.json",
+    "dev": "ts-node .",
     "postinstall": "tsc"
   },
   "dependencies": {

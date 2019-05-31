@@ -5,7 +5,7 @@ import { LineRequestHandler, LineMessageParser, ChatEngine, DialogFlowIntentDete
 import { LineMessagingClient } from '@shio-bot/chatengine/line/messagingClient'
 import * as bodyParser from 'body-parser'
 import { incomingMessageHandler, outgoingMessageHandler } from './handlers'
-import { CloudPubsubMessageChannelTransport as CloudPubsubTransport, createCloudPubSubInstance, WithClientConfig } from '../foundation'
+import { CloudPubsubMessageChannelTransport as CloudPubsubTransport, createCloudPubSubInstance, WithClientConfig } from '@shio-bot/foundation'
 
 export const chatEndpoint = async (config: Configurations): Promise<Router> => {
   const channelSecret = config.chatEngine.line.clientConfig.channelSecret
