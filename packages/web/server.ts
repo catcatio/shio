@@ -5,7 +5,7 @@ import { LineRequestHandler, LineMessageParser, ChatEngine, DialogFlowIntentDete
 import { LineMessagingClient } from '@shio-bot/chatengine/line/messagingClient'
 import * as bodyParser from 'body-parser'
 import { incomingMessageHandler, outgoingMessageHandler } from './handlers'
-import { CloudPubsubMessageChannelTransport as CloudPubsubTransport, createCloudPubSubInstance, WithGoogleAuthOptions } from '../foundation'
+import { CloudPubsubMessageChannelTransport as CloudPubsubTransport, createCloudPubSubInstance, WithClientConfig } from '../foundation'
 
 export const chatEndpoint = async (config: Configurations): Promise<Router> => {
   const channelSecret = config.chatEngine.line.clientConfig.channelSecret
@@ -13,7 +13,7 @@ export const chatEndpoint = async (config: Configurations): Promise<Router> => {
   let messageParser = new LineMessageParser()
   let chatEngine = new ChatEngine(requestHandler, messageParser)
   let intentDetector = new DialogFlowIntentDetector(config.chatEngine.dialogflow)
-  let pubsub = await createCloudPubSubInstance(WithGoogleAuthOptions(config.pubsub))
+  let pubsub = await createCloudPubSubInstance(WithClientConfig(config.pubsub))
   let cloudPubSub = new CloudPubsubTransport({
     pubsub,
     serviceName: config.serviceName
