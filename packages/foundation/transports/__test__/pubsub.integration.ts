@@ -52,6 +52,8 @@ describe('CloudPubsub messageing transports integration testing', () => {
 
     // Try to subscribe and publish message to topic
     // Set both subscription push endpoint to this instance
+    // THIS MUST DO IN MIGRATION SCRIPT OR CONFIG IT BY HAND
+    // DO NOT CALL THIS FUNCTION ON SERVICE
     await pubsub.createIncomingSubscriptionConfig(host)
 
     // Send new incoming message to IncomingMesageTopic
@@ -75,7 +77,11 @@ describe('CloudPubsub messageing transports integration testing', () => {
   })
 
   test('Outgoing publish and subscription', async () => {
+    // THIS MUST DO IN MIGRATION SCRIPT OR CONFIG IT BY HAND
+    // DO NOT CALL THIS FUNCTION ON SERVICE
     await pubsub.createOutgoingSubscriptionConfig(host)
+
+    // begin publish message
     const outgoingMessage = randomOutgoingMessage(randomFollowMessageFulfillment())
     const subscriptionChannel = jest.fn()
 
