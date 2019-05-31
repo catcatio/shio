@@ -3,12 +3,30 @@
   "version": "1.0.0",
   "main": "app/index.ts",
   "license": "MIT",
+  "nodemonConfig": {
+    "delay": "1500",
+    "verbose": false,
+    "debug": false,
+    "exec": "node --inspect=9239 -r ts-node/register ./cmd/local.ts",
+    "ignore": [
+      "node_modules",
+      "routes.ts",
+      "cmd/playground.ts"
+    ],
+    "watch": [
+      "*.ts"
+    ],
+    "ext": "ts, tsx",
+    "inspect": true
+  },
   "scripts": {
+    "start": "node cmd/entry.js",
+    "predev": "yarn build",
+    "dev": "nodemon",
     "build": "tsc",
     "clean": "find -E . -regex '.*\\.(info|js|map|d\\.ts)' -not -path \"**/node_modules/*\" -not -path  \"./.next/*\" -delete && rm -rf dist",
     "test": "tsc && jest --config jest.unit.json",
-    "dev": "ts-node .",
-    "postinstall": "tsc"
+    "postinstall": "yarn build"
   },
   "dependencies": {
     "@shio-bot/chatengine": "^1.0.0",

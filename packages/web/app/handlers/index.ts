@@ -1,4 +1,4 @@
-import { incomingMessageHandler } from './incomingHandler'
-import { outgoingMessageHandler } from './outgoingHandler'
+import { intentMessageHandler } from './incomingHandler'
+import { fulfillmentMessageHandler } from './outgoingHandler'
 
-export { incomingMessageHandler, outgoingMessageHandler }
+export { intentMessageHandler, fulfillmentMessageHandler }

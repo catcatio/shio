@@ -1,9 +1,9 @@
 import { OutgoingMessage } from '@shio-bot/foundation/entities'
-import { SubscribeOutgoingMessageListener } from '@shio-bot/foundation'
-import { MessagingClient, LineMessageClientSendMessageInput, LineMessageClientSendMessageOutput } from '@shio-bot/chatengine/types'
+import { MessagingClient, LineMessageClientSendMessageInput } from '@shio-bot/chatengine/types'
+import { FulfillmentListener } from '../types'
 
-export const outgoingMessageHandler = (messagingClient: MessagingClient): SubscribeOutgoingMessageListener => {
-  return async (message: OutgoingMessage, acknowledge: () => void): Promise<void> => {
+export const fulfillmentMessageHandler = (messagingClient: MessagingClient): FulfillmentListener => {
+  return async (message: OutgoingMessage): Promise<void> => {
     console.log(JSON.stringify(message))
 
     let input: LineMessageClientSendMessageInput = {
@@ -12,8 +12,8 @@ export const outgoingMessageHandler = (messagingClient: MessagingClient): Subscr
       to: message.source.userId,
       text: JSON.stringify(message)
     }
-    let output = await messagingClient.sendMessage(input).catch(err => console.error(err))
-    console.log(output)
-    acknowledge()
+
+    let result = await messagingClient.sendMessage(input).catch(err => console.error(err))
+    console.log(result)
   }
 }
