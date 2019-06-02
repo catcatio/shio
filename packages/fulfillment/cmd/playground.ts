@@ -74,6 +74,10 @@ async function Run() {
       userId: uuid().toString(),
       type: 'user'
     },
+    userProfile: {
+      userId: uuid().toString(),
+      displayName: `i am ${uuid().toString()}`
+    },
     timestamp: Date.now(),
     type: 'follow',
     original: {},

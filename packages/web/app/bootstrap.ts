@@ -4,7 +4,7 @@ import { chatEndpoint } from './endpoints/chat'
 import {
   createCloudPubSubInstance,
   WithClientConfig,
-  CloudPubsubMessageChannelTransport as CloudPubsubTransport,
+  CloudPubsubMessageChannelTransport,
   MessageChannelTransport,
   PublishIncommingMessageInput,
   SubscribeIncomingMessageListener,
@@ -73,7 +73,7 @@ const createPubsubTransportInstance = async (settings: PubSubSettings, serviceNa
 
   let pubsub = await createCloudPubSubInstance(WithClientConfig(settings.cloudPubSub || {}))
 
-  return new CloudPubsubTransport({ pubsub, serviceName })
+  return new CloudPubsubMessageChannelTransport({ pubsub, serviceName })
 }
 
 export async function bootstrap(config: Configurations) {
