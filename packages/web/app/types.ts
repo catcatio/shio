@@ -1,17 +1,19 @@
-import { LineSettings } from '@shio-bot/chatengine/types'
+import { Configuration as ChatEngineSettings } from '@shio-bot/chatengine/types'
 import { OutgoingMessage, IncomingMessage } from '@shio-bot/foundation/entities'
 import express = require('express')
+import { ClientConfig } from '@google-cloud/pubsub/build/src/pubsub'
 
 export type Configurations = {
   serviceName: string
   port: number
   chatEngine: ChatEngineSettings
-  pubsub: any
+  pubsub: PubSubSettings
+  intentProvider: string
 }
 
-export type ChatEngineSettings = {
-  line: LineSettings
-  dialogflow: any
+export interface PubSubSettings {
+  devPubSub?: boolean
+  cloudPubSub?: ClientConfig
 }
 
 export type FulfillmentListener = (message: OutgoingMessage) => Promise<void>

@@ -1,26 +1,26 @@
-import { LineRequestHandler } from '../requestHandler'
+import { requestHandler } from '../requestHandler'
 import { deepStrictEqual } from 'assert'
 
 describe('LineRequestHandler test', () => {
   it('should throw error if channelSecret is empty', () => {
     const channelSecret = ''
-    expect(() => new LineRequestHandler(channelSecret)).toThrow('no channel secret')
+    expect(() => requestHandler(channelSecret)).toThrow('no channel secret')
   })
 
   it('should throw error of header not found', () => {
     const channelSecret = 'test_channel_secret'
-    let handler = new LineRequestHandler(channelSecret)
+    let handler = requestHandler(channelSecret)
 
     let req: any = {
       headers: {}
     }
 
-    expect(() => handler.handle(req)).toThrow('no signature')
+    expect(() => handler(req)).toThrow('no signature')
   })
 
   it('should be able to return event object (body is string)', () => {
     const channelSecret = 'test_channel_secret'
-    let handler = new LineRequestHandler(channelSecret)
+    let handler = requestHandler(channelSecret)
     let event = {
       message: {
         id: 'test_event_message_id',
@@ -43,7 +43,7 @@ describe('LineRequestHandler test', () => {
       })
     }
 
-    let rawMsg = handler.handle(req)
+    let rawMsg = handler(req)
 
     expect(rawMsg).not.toBeNull()
     expect(rawMsg.events).not.toBeNull()
@@ -53,7 +53,7 @@ describe('LineRequestHandler test', () => {
 
   it('should be able to return event object (body is buffer)', () => {
     const channelSecret = 'test_channel_secret'
-    let handler = new LineRequestHandler(channelSecret)
+    let handler = requestHandler(channelSecret)
     let event = {
       message: {
         id: 'test_event_message_id',
@@ -79,7 +79,7 @@ describe('LineRequestHandler test', () => {
       )
     }
 
-    let rawMsg = handler.handle(req)
+    let rawMsg = handler(req)
 
     expect(rawMsg).not.toBeNull()
     expect(rawMsg.events).not.toBeNull()
@@ -89,7 +89,7 @@ describe('LineRequestHandler test', () => {
 
   it('should be able to return event object (body is json)', () => {
     const channelSecret = 'test_channel_secret'
-    let handler = new LineRequestHandler(channelSecret)
+    let handler = requestHandler(channelSecret)
     let event = {
       message: {
         id: 'test_event_message_id',
@@ -112,7 +112,7 @@ describe('LineRequestHandler test', () => {
       }
     }
 
-    let rawMsg = handler.handle(req)
+    let rawMsg = handler(req)
     expect(rawMsg).not.toBeNull()
     expect(rawMsg.events).not.toBeNull()
     expect(rawMsg.events && rawMsg.events.length).toEqual(1)
@@ -121,14 +121,14 @@ describe('LineRequestHandler test', () => {
 
   it('should ignore signature when having `x-shio-debug` in header', () => {
     const channelSecret = 'test_channel_secret'
-    let handler = new LineRequestHandler(channelSecret)
+    let handler = requestHandler(channelSecret)
 
     let req: any = {
       headers: { 'x-shio-debug': 'true' },
       body: '{"events":[]}'
     }
 
-    let rawMsg = handler.handle(req)
+    let rawMsg = handler(req)
 
     expect(rawMsg).not.toBeNull()
     expect(rawMsg.events).not.toBeNull()

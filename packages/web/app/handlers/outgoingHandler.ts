@@ -1,10 +1,10 @@
 import { OutgoingMessage } from '@shio-bot/foundation/entities'
-import { MessagingClient, LineMessageClientSendMessageInput } from '@shio-bot/chatengine/types'
+import { LineMessageClientSendMessageInput, MessagingClientProvider } from '@shio-bot/chatengine/types'
 import { FulfillmentListener } from '../types'
 
-export const fulfillmentMessageHandler = (messagingClient: MessagingClient): FulfillmentListener => {
+export const fulfillmentMessageHandler = (messagingClientProvider: MessagingClientProvider): FulfillmentListener => {
   return async (message: OutgoingMessage): Promise<void> => {
-    console.log(JSON.stringify(message))
+    console.log('OutgoingMessage', JSON.stringify(message))
 
     let input: LineMessageClientSendMessageInput = {
       provider: 'line',
@@ -13,6 +13,7 @@ export const fulfillmentMessageHandler = (messagingClient: MessagingClient): Ful
       text: JSON.stringify(message)
     }
 
+    let messagingClient = messagingClientProvider.get(message.provider)
     let result = await messagingClient.sendMessage(input).catch(err => console.error(err))
     console.log(result)
   }

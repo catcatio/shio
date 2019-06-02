@@ -1,5 +1,4 @@
 import { Entity } from 'dialogflow'
-import * as http from 'http'
 
 export type MessageType =
   | 'textMessage'
@@ -19,10 +18,6 @@ export type MessageType =
   | 'accountLink'
   | 'unknown'
 
-export type Request = http.IncomingMessage & { body: any }
-export type Response = http.ServerResponse
-export type NextCallback = (err?: Error) => void
-
 export type ParsedMessage = {
   message?: string | object
   type: MessageType
@@ -31,6 +26,12 @@ export type ParsedMessage = {
   source: Source
   provider: string
   original?: any
+}
+
+export type UserInfo = {
+  id: string
+  displayName: string
+  pictureUrl?: string
 }
 
 export type empty = null | undefined
@@ -54,10 +55,6 @@ export type Group = {
   type: 'group'
 }
 
-export interface ConfigurationManager {
-  GetConfig(key: string): any
-}
-
 export interface MessageParser {
   parse(rawMsg: any): ParsedMessage[]
 }
@@ -66,25 +63,28 @@ export interface MessagerResponder {
   send(to: string, ...messages: string[]): boolean
 }
 
-export interface RequestHandler {
-  handle(req: Request): any
-}
-
-export type Intent = {
+export interface Intent {
   name: string
   parameters: IntentParameters
 }
 
 export type IntentParameters = {
-  [name: string]: string
+  [name: string]: any
 }
 
 export interface IntentDetector {
+  name: string
   isSupport(msgType: MessageType): boolean
   detect(message: ParsedMessage): Promise<Intent | empty>
 }
 
-// export type MessagingClient = ILineMessagingClient
+export interface Provider<T> {
+  add(intent: T): void
+  get(name: string): T
+}
+
+export interface IntentDetectorProvider extends Provider<IntentDetector> {}
+export interface MessagingClientProvider extends Provider<MessagingClient> {}
 
 export type MessageClientSendImageInput = LineMessageClientSendImageInput
 export type MessageClientSendImageOutput = LineMessageClientSendImageOutput
@@ -132,32 +132,54 @@ export interface LineMessageClientSendCustomMessagesInput {
 
 export interface LineMessageClientSendCustomMessagesOutput {
   provider: 'line'
+  success: boolean
 }
 
 export interface LineMessageClientGetProfileInput {
   provider: 'line'
+  userId: string
 }
 
 export interface LineMessageClientGetProfileOutput {
   provider: 'line'
+  userId: string
+  displayName: string
+  pictureUrl?: string
 }
 
 export interface MessagingClient {
+  name: string
   sendImage(input: MessageClientSendImageInput): Promise<MessageClientSendImageOutput>
   sendMessage(input: MessageClientSendMessageInput): Promise<MessageClientSendMessageOutput>
   sendCustomMessages(input: MessageClientSendCustomMessagesInput): Promise<MessageClientSendCustomMessagesOutput>
   getProfile(input: MessageClientGetProfileInput): Promise<MessageClientGetProfileOutput>
 }
 
-export interface LineConfig {
+export interface Configuration {
+  line?: LineSettings
+  dialogflow?: DialogFlowSettings
+  linepay?: LinePaySettings
+  fluke?: FlukeSettings
+}
+
+export interface LineClientConfig {
   channelAccessToken: string
   channelSecret: string
   channelId: string
 }
 
 export type LineSettings = {
-  clientConfig: LineConfig
-  apiEndPoint?: string
+  clientConfig: LineClientConfig
+  sendToConsole?: boolean
+  routerPath?: string
+}
+
+export type DialogFlowSettings = {
+  credentials: {
+    client_email: string
+    private_key: string
+  }
+  projectId: string
 }
 
 export type LinePaySettings = {
@@ -170,14 +192,10 @@ export type LinePaySettings = {
   confirmUrl: string
 }
 
-export type ProvidersSettings = {
-  line?: LineSettings
-  linePay?: LinePaySettings
-}
+export type IntentFunc = (msg: string) => Intent
 
-export type Configurations = {
-  providers: ProvidersSettings
-  googleServiceAccountKey?: GoogleServiceAccountKey
+export type FlukeSettings = {
+  intentMap?: { [msg: string]: Intent | IntentFunc }
 }
 
 export type GoogleServiceAccountKey = {
@@ -185,7 +203,6 @@ export type GoogleServiceAccountKey = {
     client_email: string
     private_key: string
   }
-  apiKey: string
   projectId: string
 }
 
@@ -199,3 +216,7 @@ export interface EntityType {
 export interface ExportedAgent {
   agentContent: Buffer
 }
+
+export const OnMessageReceivedEventName = 'MessageReceived'
+
+export type OnMessageReceivedCallback = (message: ParsedMessage) => void

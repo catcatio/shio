@@ -1,5 +1,4 @@
-import { LineRequestHandler } from './requestHandler'
-import { LineMessageParser } from './messageParser'
+import { setup } from './setup'
 import { LineMessagingClient } from './messagingClient'
 
-export { LineMessageParser, LineRequestHandler, LineMessagingClient }
+export { setup, LineMessagingClient }

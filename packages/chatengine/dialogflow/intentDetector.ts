@@ -2,7 +2,9 @@ import { IntentDetector, ParsedMessage, Intent, empty, MessageType, IntentParame
 import { SessionsClient } from 'dialogflow'
 import structjson from '../utils/dialogflow/structjson'
 
-export class DialogFlowIntentDetector implements IntentDetector {
+export class DialogflowIntentDetector implements IntentDetector {
+  name = 'dialogflow'
+
   constructor(private clientOption: any) {}
 
   isSupport(msgType: MessageType): boolean {

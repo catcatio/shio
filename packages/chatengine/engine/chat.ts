@@ -1,32 +1,55 @@
-import { EventEmitter } from 'events'
+import { intentDetectorProvider, messagingClientProvider } from './providers'
+import { Configuration, IntentDetectorProvider, MessagingClientProvider } from '../types'
+import { DialogflowIntentDetector } from '../dialogflow/intentDetector'
+import { Router } from 'express'
+import { ParsedMessageNotifier } from './notifier'
+import { setup as lineSetup, LineMessagingClient } from '../line'
+import { FlukeIntentDetector } from '../fluke'
 
-import { Request, Response, NextCallback, ParsedMessage, RequestHandler, MessageParser } from '../types'
+export class ChatEngine extends ParsedMessageNotifier {
+  private _intents = intentDetectorProvider()
+  private _msgClients = messagingClientProvider()
 
-export type OnMessageReceiveCallback = (message: ParsedMessage) => void
-
-export class ChatEngine extends EventEmitter {
-  private _onMessageReceiveEventName = 'messagereceived'
-
-  onMessageReceived(cb: OnMessageReceiveCallback): void {
-    this.on(this._onMessageReceiveEventName, cb)
-  }
-
-  constructor(private reqHandler: RequestHandler, private parser: MessageParser) {
-    super()
-  }
-
-  middleware(req: Request, res: Response, next: NextCallback): any {
-    try {
-      // validate message
-      let rawMsg = this.reqHandler.handle(req)
-      // parse message
-      let msgs = this.parser.parse(rawMsg)
-      // notify listeners
-      msgs.forEach(m => this.emit(this._onMessageReceiveEventName, m))
-
-      next && next()
-    } catch (err) {
-      next && next(err)
+  private _initIntentProvider() {
+    if (this.config.fluke) {
+      this._intents.add(new FlukeIntentDetector(this.config.fluke))
     }
+
+    if (this.config.dialogflow) {
+      this._intents.add(new DialogflowIntentDetector(this.config.dialogflow))
+    }
+  }
+
+  private _initMessagingClientProvider() {
+    if (this.config.line) {
+      this._msgClients.add(new LineMessagingClient(this.config.line))
+    }
+  }
+
+  constructor(private config: Configuration) {
+    super()
+    this._initIntentProvider()
+    this._initMessagingClientProvider()
+  }
+
+  public buildRouter(): Router {
+    let router = Router()
+
+    if (this.config.line) {
+      lineSetup(router, this, this.config.line)
+    }
+
+    if (this.config.linepay) {
+    }
+
+    return router
+  }
+
+  public get intentDetectorProvider(): IntentDetectorProvider {
+    return this._intents
+  }
+
+  public get messagingClientProvider(): MessagingClientProvider {
+    return this._msgClients
   }
 }
