@@ -1,6 +1,6 @@
 {
   "name": "@shio-bot/chatengine",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "private": false,
@@ -9,10 +9,10 @@
     "build": "tsc",
     "clean": "find -E . -regex '.*\\.(info|js|map|d\\.ts)' -not -path \"**/node_modules/*\" -not -path  \"./.next/*\" -delete && rm -rf dist",
     "test": "tsc && jest --config jest.unit.json",
-    "postinstall": "tsc"
+    "prepublish": "yarn build"
   },
   "bin": {
-    "dialogflow-agent": "node /dist/cmd/dialogflow/agent.js"
+    "dialogflow-agent": "./cmd/dialogflow/agent.js"
   },
   "dependencies": {
     "@google-cloud/translate": "^4.0.1",
