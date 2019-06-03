@@ -16,7 +16,7 @@ export const server = (config: Configurations, ...endpoints: Endpoint[]) => {
       })
     })
 
-  this.app.get('/', (req, res) => {
+  app.get('/', (req, res) => {
     res.status(200).end(`ok - ${new Date()}`)
   })
   const addEndpoint = (endpoint: Endpoint) => {

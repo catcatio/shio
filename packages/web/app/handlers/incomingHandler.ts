@@ -14,10 +14,14 @@ export const intentMessageHandler = (fulfillment: Fulfillment, intentDetector: I
     }
 
     let msgClient = messagingClientProvider.get(msg.provider)
-    let userProfile = await msgClient.getProfile({
-      provider: 'line',
-      userId: msg.source.userId
-    })
+    let userProfile = await msgClient
+      .getProfile({
+        provider: 'line',
+        userId: msg.source.userId
+      })
+      .catch(err => {
+        return { userId: '', displayName: '', pictureUrl: '' }
+      })
 
     // pub message
     let requestId = uuid()
