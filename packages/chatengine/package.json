@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "private": false,
   "license": "MIT",
   "scripts": {
     "build": "tsc",
@@ -13,9 +14,6 @@
   "bin": {
     "dialogflow-agent": "node /dist/cmd/dialogflow/agent.js"
   },
-  "files": [
-    "dist/**/*"
-  ],
   "dependencies": {
     "@google-cloud/translate": "^4.0.1",
     "@line/bot-sdk": "^6.7.1",
