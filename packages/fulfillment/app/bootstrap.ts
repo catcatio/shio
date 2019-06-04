@@ -16,6 +16,7 @@ import {
 import { DefaultBoardingUsecase } from './usecases/boarding'
 import { registerPubsub } from './transports/pubsub'
 import { createFulfillmentEndpoint } from './endpoints'
+import * as express from 'express'
 
 export async function bootstrap(config: Config) {
   const log = newLogger()
@@ -52,14 +53,27 @@ export async function bootstrap(config: Config) {
   log.info('registry pubsub...')
 
   registerPubsub(pubsub, endpoints)
-  pubsub.start(atoi(config.port))
+
+  const app = express()
+  app.use(express.json())
+  app.use('/', pubsub.messageRouter)
+  app.get('/', (_, res) => res.status(200).send('ok'))
+  log.info(`Start server on port ${config.port}`)
+  const server = app.listen(atoi(config.port))
+
   return {
     pubsub,
     close: async () => {
       log.info('Gracefully shutting down service....')
       pubsub.UnsubscribeAllIncomingMessage()
       pubsub.UnsubscribeAllOutgoingMessage()
-      await pubsub.stop()
+      await new Promise(resolve => {
+        server.close(() => {
+          log.info('server is shutdown')
+          resolve()
+        })
+      })
+
       log.info('Service is shutdown!!')
     }
   }

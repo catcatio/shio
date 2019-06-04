@@ -5,6 +5,8 @@ import { IncomingMessage } from '../../entities'
 import { GetEnvString } from '../../env'
 import { platform } from 'os'
 import { atoi } from '../../type-utilities'
+import * as express from 'express'
+import { Server } from 'http'
 
 // Because docker network in Macos and Linux
 // using different config to reach localhost
@@ -17,6 +19,7 @@ if (platform() === 'darwin') {
 
 describe('CloudPubsub messageing transports integration testing', () => {
   let pubsub: CloudPubsubMessageChannelTransport
+  let server: Server
   beforeAll(async () => {
     if (GetEnvString('FOUNDATION_INTEGRATION_DEBUG') === '1') {
       jest.setTimeout(60 * 1000)
@@ -40,10 +43,17 @@ describe('CloudPubsub messageing transports integration testing', () => {
     // Transport messageing
     await pubsub.prepareTopic()
 
-    // start pubsub server
+    // start server
     // to receive push message
     const serverHost = new URL(host)
-    pubsub.start(atoi(serverHost.port))
+
+    const app = express()
+    app.use(express.json())
+    app.use('/', pubsub.messageRouter)
+    app.get('/', (req, res) => res.status(200).send('ok'))
+    server = app.listen(atoi(serverHost.port), () => {
+      console.log('test server started ', serverHost.port)
+    })
   })
 
   test('Incoming publish and subscribe', async () => {
@@ -102,6 +112,10 @@ describe('CloudPubsub messageing transports integration testing', () => {
   })
 
   afterAll(async () => {
-    await pubsub.stop()
+    await new Promise(resolve => {
+      server.close(() => {
+        resolve()
+      })
+    })
   })
 })

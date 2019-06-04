@@ -1,11 +1,9 @@
 import * as express from 'express'
 import { Configurations, Endpoint } from './types'
-import * as bodyParser from 'body-parser'
 
 export const server = (config: Configurations, ...endpoints: Endpoint[]) => {
   let app = express()
-  app.use(bodyParser.urlencoded({ extended: true }))
-  app.use(bodyParser.json())
+  app.use(express.json())
 
   endpoints.forEach(e => app.use(e.path, e))
   const start = async (): Promise<void> =>

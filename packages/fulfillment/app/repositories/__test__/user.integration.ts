@@ -1,6 +1,7 @@
 import { DatastoreUserRepository } from '../user'
 import { WithSystemOperation, WithWhere, WithOperationOwner } from '../common'
 import { createDatastoreInstance, WithDatastoreAPIEndpoint } from '@shio-bot/foundation'
+import { User } from '../../entities'
 
 describe('DatastoreUserRepository test', () => {
   let userRepo: DatastoreUserRepository
@@ -19,7 +20,7 @@ describe('DatastoreUserRepository test', () => {
     const user = await userRepo.findById(k.id, WithOperationOwner(k.id))
     expect(user!.displayName).toEqual('TEST_USER')
     await userRepo.remove(
-      WithWhere({
+      WithWhere<User>({
         displayName: {
           Equal: 'TEST_USER'
         }
