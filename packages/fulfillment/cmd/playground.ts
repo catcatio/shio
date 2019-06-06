@@ -9,6 +9,7 @@ import {
   WithDatastoreProjectId
 } from '@shio-bot/foundation'
 import * as uuid from 'uuid/v4'
+import * as express from 'express'
 
 // if you want to use local development datastore server
 // insert datastore endpoint to CrateDatastoreInstance
@@ -44,19 +45,28 @@ async function Run() {
   await cloudpubsub.prepareTopic()
   const [subs] = await cloudpubsub.incomingTopic.getSubscriptions()
 
-  await Promise.all(subs.map(async sub => {
-    console.log(sub.name)
-    const meta = await sub.getMetadata()
-    console.log(meta)
-  }))
-  cloudpubsub.app.listen(8080)
+  await Promise.all(
+    subs.map(async sub => {
+      console.log(sub.name)
+      const meta = await sub.getMetadata()
+      console.log(meta)
+    })
+  )
+
+  const app = express()
+  app.use(express.json())
+  app.use('/', cloudpubsub.messageRouter)
+  app.get('/', (req, res) => res.status(200).send('ok'))
+  let server = app.listen(8080, () => {
+    console.log('test server started ', 8080)
+  })
 
   cloudpubsub.SubscribeIncommingMessage(async (message, ack) => {
     console.log(message)
     ack()
   })
 
-  cloudpubsub.SubscribeOutgoingMessage(async (message, ack)=> {
+  cloudpubsub.SubscribeOutgoingMessage(async (message, ack) => {
     console.log(message)
     ack()
   })

@@ -27,6 +27,7 @@
         "--config",
         "${workspaceRoot}/packages/foundation/jest.integration.json",
         "--runInBand",
+        "--detectOpenHandles",
         "--coverage",
         "false",
         "${relativeFile}"

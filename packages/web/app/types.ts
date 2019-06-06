@@ -5,6 +5,7 @@ import { ClientConfig } from '@google-cloud/pubsub/build/src/pubsub'
 
 export type Configurations = {
   serviceName: string
+  host: string
   port: number
   chatEngine: ChatEngineSettings
   pubsub: PubSubSettings

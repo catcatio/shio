@@ -3,6 +3,8 @@ import { createCloudPubSubInstance, WithPubsubProjectId, WithPubsubEndpoint, Clo
 import { OutgoingMessage, IncomingMessage } from '@shio-bot/foundation/entities'
 import { MessageFulfillment } from '@shio-bot/foundation/entities/intent'
 import { NarrowUnion } from '../app/endpoints/default'
+import * as express from 'express'
+import { Server } from 'http'
 
 export function expectFulfillment<Intent extends MessageFulfillment['name']>(name: Intent, assertFunction: (fulfillment: NarrowUnion<MessageFulfillment, Intent>) => void) {
   return function(message: OutgoingMessage) {
@@ -21,10 +23,17 @@ export const createPubsubIntegrationClient = async () => {
   })
 
   let resolve: any
+  let server: Server
   return {
     pubsub,
     async start() {
-      pubsub.start(8091)
+      const app = express()
+      app.use(express.json())
+      app.use('/', pubsub.messageRouter)
+      app.get('/', (req, res) => res.status(200).send('ok'))
+      server = app.listen(8091, () => {
+        console.log('test server started ', 8091)
+      })
       await pubsub.createOutgoingSubscriptionConfig('http://host.docker.internal:8091')
     },
     sendIncomingMessage: (m: IncomingMessage): Promise<OutgoingMessage> => {
@@ -48,7 +57,12 @@ export const createPubsubIntegrationClient = async () => {
       })
     },
     clean: async () => {
-      await pubsub.stop()
+      await new Promise(resolve => {
+        server.close(() => {
+          log.info('server is shutdown')
+          resolve()
+        })
+      })
       pubsub.UnsubscribeAllIncomingMessage()
       pubsub.UnsubscribeAllOutgoingMessage()
     }

@@ -1,9 +1,7 @@
 import { IncomingMessage, OutgoingMessage } from '../entities'
 import { PubSub, Topic, Subscription, Message } from '@google-cloud/pubsub'
 import * as express from 'express'
-import { json } from 'body-parser'
 import { newLogger, ShioLogger } from '../logger'
-import { Server } from 'http'
 
 export const PUBSUB_INCOMING_MESSAGE_TOPIC = 'shio-incoming-message'
 export const PUBSUB_FULLFILLMENT_SUBSCRIPTION = 'shio-fullfillment-service'
@@ -32,6 +30,8 @@ export interface MessageChannelManager {
   createOutgoingSubscriptionConfig(host: string): Promise<void>
   prepareTopic(): Promise<void>
   purge(): Promise<void>
+
+  messageRouter: express.Router
 }
 
 export type CloudPubsubMessageChannelOptions = {
@@ -45,11 +45,8 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
   public outgoingSubscription: Subscription
 
   private pubsub: PubSub
-  app: express.Express
   private log: ShioLogger = newLogger()
   private serviceName: string
-  private port: number
-  private server: Server
 
   constructor({ pubsub, serviceName }: CloudPubsubMessageChannelOptions) {
     this.pubsub = pubsub
@@ -59,66 +56,6 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
     this.outgoingTopic = this.pubsub.topic(PUBSUB_OUTGOING_MESSAGE_TOPIC)
     this.incomingSubscription = this.incomingTopic.subscription(PUBSUB_FULLFILLMENT_SUBSCRIPTION)
     this.outgoingSubscription = this.outgoingTopic.subscription(PUBSUB_OUTGOING_SUBSCRIPTION)
-
-    this.app = express()
-    this.app.use(json({}))
-    this.app.get('/', (req, res) => {
-      res.status(200).end('ok')
-    })
-    this.log.info('Create http server for push message...')
-
-    this.app.post('/outgoing', (req, res) => {
-      if (!this.outgoingListenerFunction) {
-        res.status(403).end('Outgoing listener does not registered')
-        return
-      }
-      const message = Buffer.from(req.body.message.data, 'base64').toString('utf-8')
-      try {
-        const f = this.outgoingListenerFunction(JSON.parse(message), () => {
-          res.status(200).send()
-        })
-        if (f && typeof f.then === 'function') {
-          f.then()
-        }
-      } catch (e) {
-        // HANDLE INVALID PAYLOAD
-        this.log
-          .withFields({
-            body: JSON.stringify(req.body),
-            payloadMessage: message,
-            error: e
-          })
-          .error('outgoing message handle error')
-        res.status(200).end()
-      }
-    })
-
-    this.app.post('/incoming', (req, res) => {
-      if (!this.incomingListenerFunction) {
-        res.status(403).end('Incoming listener does not registered')
-        return
-      }
-
-      const message = Buffer.from(req.body.message.data, 'base64').toString('utf-8')
-      try {
-        const f = this.incomingListenerFunction(JSON.parse(message), () => {
-          res.status(200).send()
-        })
-        if (f && typeof f.then === 'function') {
-          f.then()
-        }
-      } catch (e) {
-        // HANDLE INVALID PAYLOAD
-        this.log
-          .withFields({
-            body: req.body,
-            payloadMessage: message,
-            error: e
-          })
-          .error('incomming message handle error')
-        res.status(200).end()
-      }
-    })
   }
 
   private incomingListenerFunction: SubscribeIncomingMessageListener
@@ -161,19 +98,71 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
   // Express instance management method
   // if you want to extends server
   // please define new function here
-  start(port: number = 8080) {
-    this.port = port
-    this.log.info(`Start pubsub server :${this.port}`)
-    this.server = this.app.listen(port)
-  }
-  stop() {
-    return new Promise((resolve, reject) => {
-      this.log.info(`shutdown pubsub server :${this.port}....`)
-      this.server.close(err => {
-        this.log.info('server is shutdown')
-        resolve()
-      })
+  get messageRouter(): express.Router {
+    let router = express.Router()
+
+    router.get('/outgoing', (req, res) => {
+      res.status(200).end('ok')
     })
+
+    router.post('/outgoing', (req, res) => {
+      if (!this.outgoingListenerFunction) {
+        res.status(403).end('Outgoing listener does not registered')
+        return
+      }
+      const message = Buffer.from(req.body.message.data, 'base64').toString('utf-8')
+      try {
+        const f = this.outgoingListenerFunction(JSON.parse(message), () => {
+          res.status(200).send()
+        })
+        if (f && typeof f.then === 'function') {
+          f.then()
+        }
+      } catch (e) {
+        // HANDLE INVALID PAYLOAD
+        this.log
+          .withFields({
+            body: JSON.stringify(req.body),
+            payloadMessage: message,
+            error: e
+          })
+          .error('outgoing message handle error')
+        res.status(200).end()
+      }
+    })
+
+    router.get('/incoming', (req, res) => {
+      res.status(200).end('ok')
+    })
+
+    router.post('/incoming', (req, res) => {
+      if (!this.incomingListenerFunction) {
+        res.status(403).end('Incoming listener does not registered')
+        return
+      }
+
+      const message = Buffer.from(req.body.message.data, 'base64').toString('utf-8')
+      try {
+        const f = this.incomingListenerFunction(JSON.parse(message), () => {
+          res.status(200).send()
+        })
+        if (f && typeof f.then === 'function') {
+          f.then()
+        }
+      } catch (e) {
+        // HANDLE INVALID PAYLOAD
+        this.log
+          .withFields({
+            body: req.body,
+            payloadMessage: message,
+            error: e
+          })
+          .error('incomming message handle error')
+        res.status(200).end()
+      }
+    })
+
+    return router
   }
 
   // Cloud pubsub topic management utility function

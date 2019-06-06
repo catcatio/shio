@@ -4,6 +4,7 @@ import { Configurations } from '../app/types'
 function loadConfig(): Configurations {
   let config: Configurations = {
     serviceName: 'shio-api-dev',
+    host: 'http://localhost',
     port: 3000,
     chatEngine: {
       line: {
