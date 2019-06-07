@@ -1,11 +1,18 @@
-import { DatastoreUserRepository } from '../user'
+import { DatastoreUserRepository, CreateUserChatSessionInput } from '../user'
 import { WithSystemOperation, WithWhere, WithOperationOwner } from '../common'
-import { createDatastoreInstance, WithDatastoreAPIEndpoint } from '@shio-bot/foundation'
+import { createDatastoreInstance, WithDatastoreAPIEndpoint, WithDatastoreNameSpace, WithDatastoreProjectId } from '@shio-bot/foundation'
+import { Datastore } from '@google-cloud/datastore'
+import * as uuid from 'uuid/v4'
 
 describe('DatastoreUserRepository test', () => {
   let userRepo: DatastoreUserRepository
+  let datastore: Datastore
   beforeAll(async () => {
-    const datastore = await createDatastoreInstance(WithDatastoreAPIEndpoint('http://localhost:5545'))
+    datastore = await createDatastoreInstance(
+      WithDatastoreNameSpace('catcat-local-dev'),
+      WithDatastoreProjectId('catcat-development'),
+    )
+    // WithDatastoreAPIEndpoint('http://localhost:5545')
     userRepo = new DatastoreUserRepository(datastore)
   })
 
@@ -18,6 +25,24 @@ describe('DatastoreUserRepository test', () => {
     )
     const user = await userRepo.findById(k.id, WithOperationOwner(k.id))
     expect(user!.displayName).toEqual('TEST_USER')
+
+    const chatSessionInput: CreateUserChatSessionInput = {
+      provider: 'line',
+      providerId: uuid().toString(),
+      userId: user!.id
+    }
+
+    const chatSession = await userRepo.createChatSession(chatSessionInput)
+
+    // ห้ามสร้าง chatsession ซ้ำด้วย provider, providerId เดิม
+    await expect(userRepo.createChatSession(chatSessionInput)).rejects.toBeTruthy()
+    const chatSessionKey = await userRepo.getUserChatSessionKey(chatSession)
+    const [chatSessionResult] = await datastore.get(chatSessionKey)
+    const [userResult] = await datastore.get(chatSessionKey.parent)
+
+    expect(chatSessionResult).toBeDefined()
+    expect(userResult).toBeDefined()
+
     await userRepo.remove(
       WithWhere({
         displayName: {

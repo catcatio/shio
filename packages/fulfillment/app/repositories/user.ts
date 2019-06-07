@@ -1,12 +1,12 @@
 import * as Joi from 'joi'
 import { User, UserChatSession } from '../entities/user'
 import { RepositoryOperationOption, JoiObjectSchema, composeRepositoryOptions, WithWhere, WithSystemOperation } from './common'
-import { Omit, PartialCommonAttributes, CommonAttributes} from '@shio-bot/foundation'
-import {  PaginationResult } from '@shio-bot/foundation/entities'
+import { Omit, PartialCommonAttributes, CommonAttributes } from '@shio-bot/foundation'
+import { PaginationResult } from '@shio-bot/foundation/entities'
 import { Datastore } from '@google-cloud/datastore'
 import { newGlobalError } from '../entities/error'
 import { newResourceTag } from '../entities'
-import { toJSON, applyFilter } from '../helpers/datastore';
+import { toJSON, applyFilter } from '../helpers/datastore'
 
 export type UserRepositoryOperationOption = RepositoryOperationOption<User>
 export type UserChatSessionOperationOption = RepositoryOperationOption<UserChatSession>
@@ -24,9 +24,7 @@ export interface UserRepository {
   findOneChatSession(...options: UserChatSessionOperationOption[]): Promise<UserChatSession | undefined>
 }
 
-
 export class DatastoreUserRepository implements UserRepository {
-
   async findOneChatSession(...options: RepositoryOperationOption<UserChatSession>[]): Promise<UserChatSession | undefined> {
     const option = composeRepositoryOptions(...options)
     let query = applyFilter(this.db.createQuery(this.UserChatSessionKind), option)
@@ -58,7 +56,17 @@ export class DatastoreUserRepository implements UserRepository {
   async createChatSession(input: CreateUserChatSessionInput, ...options: RepositoryOperationOption<User>[]): Promise<UserChatSession> {
     const option = composeRepositoryOptions(...options)
 
-    const k = this.getUserChatSessionKey(input.userId, `${input.provider}.${input.providerId}`)
+    const [existsChatSession] = await this.db.runQuery(
+      this.db
+        .createQuery(this.UserChatSessionKind)
+        .filter('provider', input.provider)
+        .filter('providerId', input.providerId)
+    )
+    if (existsChatSession.length > 0) {
+      throw new Error(`Cannot create chat session because ${input.provider}.${input.providerId} is exists`)
+    }
+
+    const k = this.getUserChatSessionKey(input)
     input.createdAt = new Date()
     input.createdBy = option.operationOwnerId
     await this.db.upsert({
@@ -93,18 +101,21 @@ export class DatastoreUserRepository implements UserRepository {
   async remove(...options: RepositoryOperationOption<User>[]): Promise<number> {
     const option = composeRepositoryOptions(...options)
     const users = await this.findMany(...options, WithSystemOperation())
-    await this.db.delete(users.records.map(user => this.getUserKey(user.id)))
+    const tx = this.db.transaction()
+    await Promise.all(
+      users.records.map(async user => {
+        await this.db.delete(users.records.map(user => tx.getUserKey(user.id)))
+      })
+    )
+
     return users.records.length
   }
 
-  private getUserChatSessionKey(userId: string, chatSessionId: string) {
-    if (Number.isInteger(parseInt(chatSessionId))) {
-      return this.db.key([this.UserKind, userId, this.UserChatSessionKind, parseInt(chatSessionId)])
-    } else {
-      return this.db.key([this.UserKind, userId,this.UserChatSessionKind, chatSessionId])
-    }
+  public getUserChatSessionKey(chatsession: CreateUserChatSessionInput) {
+    const userKey = this.getUserKey(chatsession.userId)
+    return this.db.key([this.UserKind, userKey.id, this.UserChatSessionKind, chatsession.provider + ':' + chatsession.providerId])
   }
-  private getUserKey(userId: string) {
+  public getUserKey(userId: string) {
     if (Number.isInteger(parseInt(userId))) {
       return this.db.key([this.UserKind, parseInt(userId)])
     } else {
@@ -150,7 +161,7 @@ export class DatastoreUserRepository implements UserRepository {
       this.db.upsert({
         key: key,
         data: data
-      }),
+      })
     ])
     const [entities] = await this.db.get(key)
     return toJSON(entities)

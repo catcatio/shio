@@ -132,6 +132,7 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
     this.outgoingListenerFunction = listener
   }
   async PublishIncommingMessage(input: PublishIncommingMessageInput): Promise<void> {
+    this.log.info(`send message to outgoing topic to ${input.provider}:${input.source.userId} (${input.intent.name})`)
     await this.incomingTopic.publishJSON({
       ...input,
       origin: this.serviceName
@@ -139,7 +140,7 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
   }
 
   async PublishOutgoingMessage(input: PublishOutgoingMessageInput): Promise<void> {
-    this.log.info(`Publish message to outgoing topic: ${input.provider}(${input.source.userId})`)
+    this.log.info(`send message to outgoing topic to ${input.provider}:${input.source.userId} (${input.fulfillment.map(f => f.name).join(',')})`)
     await this.outgoingTopic.publishJSON({
       ...input,
       origin: this.serviceName
@@ -232,3 +233,6 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
     }
   }
 }
+
+
+
