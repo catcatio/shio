@@ -27,6 +27,7 @@
         "--config",
         "${workspaceRoot}/packages/foundation/jest.integration.json",
         "--runInBand",
+        "--detectOpenHandles",
         "--coverage",
         "false",
         "${relativeFile}"
@@ -75,6 +76,26 @@
       "cwd": "${workspaceRoot}/packages/fulfillment",
       "protocol": "inspector",
       "outputCapture": "std",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      "name": "[web] Run dev",
+      "type": "node",
+      "request": "launch",
+      "args": ["${workspaceRoot}/packages/web/cmd/dev.ts"],
+      "cwd": "${workspaceRoot}/packages/web",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "protocol": "inspector",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      "name": "[web] Run local",
+      "type": "node",
+      "request": "launch",
+      "args": ["${workspaceRoot}/packages/web/cmd/local.ts"],
+      "cwd": "${workspaceRoot}/packages/web",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "protocol": "inspector",
       "internalConsoleOptions": "openOnSessionStart"
     },
     {

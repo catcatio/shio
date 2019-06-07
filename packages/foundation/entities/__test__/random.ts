@@ -31,6 +31,10 @@ export function randomIncomingMessage(intent: MessageIntent = randomFollowMessag
       userId: uuid().toString(),
       type: 'user'
     },
+    userProfile: {
+      userId: uuid().toString(),
+      displayName: `i am ${uuid().toString()}`
+    },
     timestamp: Date.now(),
     type: 'follow',
     original: {},

@@ -1,8 +1,8 @@
-import { LineMessageParser } from '../messageParser'
+import { messageParser } from '../messageParser'
 
 describe('LineMessageParser test', () => {
   it('should be able to parse system validation event', () => {
-    let parser = new LineMessageParser()
+    let parser = messageParser()
     let rawMsgs = {
       events: [
         {
@@ -21,7 +21,7 @@ describe('LineMessageParser test', () => {
   })
 
   it('should be able to parse follow event', () => {
-    let parser = new LineMessageParser()
+    let parser = messageParser()
     let rawMsgs = {
       events: [
         {
@@ -50,7 +50,7 @@ describe('LineMessageParser test', () => {
   })
 
   it('should be able to parse unfollow event', () => {
-    let parser = new LineMessageParser()
+    let parser = messageParser()
     let rawMsgs = {
       events: [
         {
@@ -78,7 +78,7 @@ describe('LineMessageParser test', () => {
   })
 
   it('should be able to parse beacon event', () => {
-    let parser = new LineMessageParser()
+    let parser = messageParser()
     let rawMsgs = {
       events: [
         {
@@ -112,7 +112,7 @@ describe('LineMessageParser test', () => {
   })
 
   it('should be able to parse postback event', () => {
-    let parser = new LineMessageParser()
+    let parser = messageParser()
     let rawMsgs = {
       events: [
         {
@@ -148,7 +148,7 @@ describe('LineMessageParser test', () => {
   })
 
   it('should be able to parse unknown event', () => {
-    let parser = new LineMessageParser()
+    let parser = messageParser()
     let rawMsgs = {
       events: [
         {
@@ -177,7 +177,7 @@ describe('LineMessageParser test', () => {
   })
 
   it('should be able to parse text message event', () => {
-    let parser = new LineMessageParser()
+    let parser = messageParser()
     let rawMsgs = {
       events: [
         {
@@ -211,7 +211,7 @@ describe('LineMessageParser test', () => {
   })
 
   it('should be able to parse other message event', () => {
-    let parser = new LineMessageParser()
+    let parser = messageParser()
     let rawMsgs = {
       events: [
         {
@@ -248,7 +248,7 @@ describe('LineMessageParser test', () => {
   })
 
   it('should be able to parse multiple events', () => {
-    let parser = new LineMessageParser()
+    let parser = messageParser()
     let rawMsgs = {
       events: [
         {

@@ -1,0 +1,1 @@
+export { FlukeIntentDetector } from './intentDetector'

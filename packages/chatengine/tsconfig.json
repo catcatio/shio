@@ -2,7 +2,7 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "allowJs": false,
-    "declaration": true,
+    "declaration": true
   },
   "exclude": ["dist", "node_modules", "./**/__mocks__"]
 }

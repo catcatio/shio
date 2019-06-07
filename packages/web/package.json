@@ -1,21 +1,44 @@
 {
   "name": "@shio-bot/web",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "app/index.ts",
   "license": "MIT",
+  "nodemonConfig": {
+    "delay": "1500",
+    "verbose": false,
+    "debug": false,
+    "exec": "node --inspect=9239 -r ts-node/register ./cmd/dev.ts",
+    "ignore": [
+      "node_modules"
+    ],
+    "watch": [
+      "*.ts"
+    ],
+    "ext": "ts, tsx",
+    "inspect": true
+  },
   "scripts": {
+    "start": "node cmd/entry.js",
+    "predev": "yarn build",
+    "dev": "nodemon",
+    "prelocal": "yarn build",
+    "local": "node --inspect=9239 -r ts-node/register ./cmd/local.ts ",
     "build": "tsc",
     "clean": "find -E . -regex '.*\\.(info|js|map|d\\.ts)' -not -path \"**/node_modules/*\" -not -path  \"./.next/*\" -delete && rm -rf dist",
     "test": "tsc && jest --config jest.unit.json",
-    "postinstall": "tsc"
+    "pregcp-deploy": "yarn build",
+    "gcp-deploy": "gcloud app deploy service.yaml --format=yaml",
+    "gcp-logs": "gcloud app logs tail -s web"
   },
   "dependencies": {
     "@shio-bot/chatengine": "^1.0.0",
-    "@shio-bot/foundation": "^1.0.4",
-    "body-parser": "^1.19.0",
+    "@shio-bot/foundation": "^1.0.8",
     "express": "^4.17.1"
   },
   "devDependencies": {
-    "@types/express": "^4.16.1"
+    "@types/express": "^4.16.1",
+    "@types/jest": "^24.0.13",
+    "jest": "^24.8.0",
+    "typescript": "^3.5.1"
   }
 }

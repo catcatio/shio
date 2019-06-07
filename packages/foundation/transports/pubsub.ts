@@ -1,9 +1,7 @@
 import { IncomingMessage, OutgoingMessage } from '../entities'
 import { PubSub, Topic, Subscription, Message } from '@google-cloud/pubsub'
 import * as express from 'express'
-import { json } from 'body-parser'
 import { newLogger, ShioLogger } from '../logger'
-import { Server } from 'http'
 
 export const PUBSUB_INCOMING_MESSAGE_TOPIC = 'shio-incoming-message'
 export const PUBSUB_FULLFILLMENT_SUBSCRIPTION = 'shio-fullfillment-service'
@@ -32,6 +30,8 @@ export interface MessageChannelManager {
   createOutgoingSubscriptionConfig(host: string): Promise<void>
   prepareTopic(): Promise<void>
   purge(): Promise<void>
+
+  messageRouter: express.Router
 }
 
 export type CloudPubsubMessageChannelOptions = {
@@ -45,11 +45,8 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
   public outgoingSubscription: Subscription
 
   private pubsub: PubSub
-  app: express.Express
   private log: ShioLogger = newLogger()
   private serviceName: string
-  private port: number
-  private server: Server
 
   constructor({ pubsub, serviceName }: CloudPubsubMessageChannelOptions) {
     this.pubsub = pubsub
@@ -59,15 +56,56 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
     this.outgoingTopic = this.pubsub.topic(PUBSUB_OUTGOING_MESSAGE_TOPIC)
     this.incomingSubscription = this.incomingTopic.subscription(PUBSUB_FULLFILLMENT_SUBSCRIPTION)
     this.outgoingSubscription = this.outgoingTopic.subscription(PUBSUB_OUTGOING_SUBSCRIPTION)
+  }
 
-    this.app = express()
-    this.app.use(json({}))
-    this.app.get('/', (req, res) => {
+  private incomingListenerFunction: SubscribeIncomingMessageListener
+  private outgoingListenerFunction: SubscribeOutgoingMessageListener
+  SubscribeIncommingMessage(listener: SubscribeIncomingMessageListener): void {
+    this.log.info('Handle incoming message register at POST /incoming')
+    this.incomingListenerFunction = listener
+  }
+  SubscribeOutgoingMessage(listener: SubscribeOutgoingMessageListener): void {
+    this.log.info('Handle outgoing message register at POST /outgoing')
+    this.outgoingListenerFunction = listener
+  }
+  async PublishIncommingMessage(input: PublishIncommingMessageInput): Promise<void> {
+    await this.incomingTopic.publishJSON({
+      ...input,
+      origin: this.serviceName
+    })
+  }
+
+  async PublishOutgoingMessage(input: PublishOutgoingMessageInput): Promise<void> {
+    this.log.info(`Publish message to outgoing topic: ${input.provider}(${input.source.userId})`)
+    await this.outgoingTopic.publishJSON({
+      ...input,
+      origin: this.serviceName
+    })
+  }
+
+  // @deprecated: no longer need to remove listeners, only use on delivery type pull only
+  // currently we use push type to subscript message from pubsub
+  UnsubscribeAllIncomingMessage(): void {
+    this.incomingSubscription.removeAllListeners('message')
+  }
+
+  // @deprecated: no longer need to remove listeners, only use on delivery type pull only
+  // currently we use push type to subscript message from pubsub
+  UnsubscribeAllOutgoingMessage(): void {
+    this.outgoingSubscription.removeAllListeners('message')
+  }
+
+  // Express instance management method
+  // if you want to extends server
+  // please define new function here
+  get messageRouter(): express.Router {
+    let router = express.Router()
+
+    router.get('/outgoing', (req, res) => {
       res.status(200).end('ok')
     })
-    this.log.info('Create http server for push message...')
 
-    this.app.post('/outgoing', (req, res) => {
+    router.post('/outgoing', (req, res) => {
       if (!this.outgoingListenerFunction) {
         res.status(403).end('Outgoing listener does not registered')
         return
@@ -93,7 +131,11 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
       }
     })
 
-    this.app.post('/incoming', (req, res) => {
+    router.get('/incoming', (req, res) => {
+      res.status(200).end('ok')
+    })
+
+    router.post('/incoming', (req, res) => {
       if (!this.incomingListenerFunction) {
         res.status(403).end('Incoming listener does not registered')
         return
@@ -119,62 +161,8 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
         res.status(200).end()
       }
     })
-  }
 
-  private incomingListenerFunction: SubscribeIncomingMessageListener
-  private outgoingListenerFunction: SubscribeOutgoingMessageListener
-  SubscribeIncommingMessage(listener: SubscribeIncomingMessageListener): void {
-    this.log.info('Handle incoming message register at POST /incoming')
-    this.incomingListenerFunction = listener
-  }
-  SubscribeOutgoingMessage(listener: SubscribeOutgoingMessageListener): void {
-    this.log.info('Handle outgoing message register at POST /outgoing')
-    this.outgoingListenerFunction = listener
-  }
-  async PublishIncommingMessage(input: PublishIncommingMessageInput): Promise<void> {
-    this.log.info(`send message to outgoing topic to ${input.provider}:${input.source.userId} (${input.intent.name})`)
-    await this.incomingTopic.publishJSON({
-      ...input,
-      origin: this.serviceName
-    })
-  }
-
-  async PublishOutgoingMessage(input: PublishOutgoingMessageInput): Promise<void> {
-    this.log.info(`send message to outgoing topic to ${input.provider}:${input.source.userId} (${input.fulfillment.map(f => f.name).join(',')})`)
-    await this.outgoingTopic.publishJSON({
-      ...input,
-      origin: this.serviceName
-    })
-  }
-
-  // @deprecated: no longer need to remove listeners, only use on delivery type pull only
-  // currently we use push type to subscript message from pubsub
-  UnsubscribeAllIncomingMessage(): void {
-    this.incomingSubscription.removeAllListeners('message')
-  }
-
-  // @deprecated: no longer need to remove listeners, only use on delivery type pull only
-  // currently we use push type to subscript message from pubsub
-  UnsubscribeAllOutgoingMessage(): void {
-    this.outgoingSubscription.removeAllListeners('message')
-  }
-
-  // Express instance management method
-  // if you want to extends server
-  // please define new function here
-  start(port: number = 8080) {
-    this.port = port
-    this.log.info(`Start pubsub server :${this.port}`)
-    this.server = this.app.listen(port)
-  }
-  stop() {
-    return new Promise((resolve, reject) => {
-      this.log.info(`shutdown pubsub server :${this.port}....`)
-      this.server.close(err => {
-        this.log.info('server is shutdown')
-        resolve()
-      })
-    })
+    return router
   }
 
   // Cloud pubsub topic management utility function

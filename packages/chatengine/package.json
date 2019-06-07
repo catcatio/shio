@@ -1,21 +1,19 @@
 {
   "name": "@shio-bot/chatengine",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "private": false,
   "license": "MIT",
   "scripts": {
     "build": "tsc",
     "clean": "find -E . -regex '.*\\.(info|js|map|d\\.ts)' -not -path \"**/node_modules/*\" -not -path  \"./.next/*\" -delete && rm -rf dist",
     "test": "tsc && jest --config jest.unit.json",
-    "postinstall": "tsc"
+    "prepublish": "yarn build"
   },
   "bin": {
-    "dialogflow-agent": "node /dist/cmd/dialogflow/agent.js"
+    "dialogflow-agent": "./cmd/dialogflow/agent.js"
   },
-  "files": [
-    "dist/**/*"
-  ],
   "dependencies": {
     "@google-cloud/translate": "^4.0.1",
     "@line/bot-sdk": "^6.7.1",
@@ -23,11 +21,13 @@
     "dialogflow": "^0.9.1",
     "fs-extra": "^8.0.1",
     "node-fetch": "^2.6.0",
+    "nodemon": "^1.19.1",
     "yargs": "^13.2.4"
   },
   "devDependencies": {
     "@types/adm-zip": "^0.4.32",
     "@types/dialogflow": "^0.9.0",
+    "@types/express": "^4.16.1",
     "@types/fs-extra": "^7.0.0",
     "@types/jest": "^24.0.13",
     "@types/yargs": "^13.0.0",
@@ -36,5 +36,8 @@
     "ts-node": "^8.1.0",
     "tslint": "^5.16.0",
     "typescript": "^3.4.5"
+  },
+  "peerDependencies": {
+    "express": "^4.17.1"
   }
 }

@@ -46,10 +46,17 @@ export interface IncomingMessage {
 
   type: IncommingMessageType
   source: IncommingMessageSource
+  userProfile: UserProfile
   timestamp: number
   original: any
 
   requestId: string
+}
+
+export interface UserProfile {
+  userId: string
+  displayName: string
+  pictureUrl?: string
 }
 
 export interface OutgoingMessage {
@@ -63,13 +70,11 @@ export interface OutgoingMessage {
 }
 
 export function createOutgoingFromIncomingMessage(incoming: IncomingMessage, fulfillment: MessageFulfillment | MessageFulfillment[]): OutgoingMessage {
-
-  if(!Array.isArray(fulfillment)) {
+  if (!Array.isArray(fulfillment)) {
     fulfillment = [fulfillment]
   }
   return {
     fulfillment,
-    ...incoming,
+    ...incoming
   }
-
 }

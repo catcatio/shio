@@ -1,6 +1,6 @@
 {
   "name": "@shio-bot/foundation",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "private": false,
   "license": "MIT",
   "main": "index.js",
@@ -11,7 +11,6 @@
     "prepublish": "yarn build"
   },
   "devDependencies": {
-    "@types/body-parser": "^1.17.0",
     "@types/express": "^4.16.1",
     "@types/jest": "^24.0.13",
     "@types/node-fetch": "^2.3.4",
@@ -22,8 +21,11 @@
     "@google-cloud/datastore": "^3.1.2",
     "@google-cloud/logging-winston": "^0.11.1",
     "@google-cloud/pubsub": "^0.28.1",
-    "body-parser": "^1.19.0",
-    "express": "^4.17.1",
-    "ulid": "^2.3.0"
+    "@google-cloud/storage": "^2.5.0",
+    "ulid": "^2.3.0",
+    "winston": "^3.2.1"
+  },
+  "peerDependencies": {
+    "express": "^4.17.1"
   }
 }

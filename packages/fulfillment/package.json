@@ -23,7 +23,7 @@
     "inspect": true
   },
   "scripts": {
-    "start":"node cmd/entry.js",
+    "start": "node cmd/entry.js",
     "dev": "sh ../../scripts/clean.bash && nodemon",
     "build": "yarn tsc",
     "integration": "yarn jest --config jest.integration.json",
@@ -36,17 +36,15 @@
   },
   "dependencies": {
     "@google-cloud/datastore": "^3.1.2",
-    "@google-cloud/logging-winston": "^0.11.1",
     "@google-cloud/pubsub": "^0.28.1",
     "@shio-bot/foundation": "^1.0.7",
     "dataloader": "^1.4.0",
+    "express": "^4.17.1",
     "joi": "^14.3.1",
     "node-fetch": "^2.6.0",
-    "ulid": "^2.3.0",
-    "winston": "^3.2.1"
+    "ulid": "^2.3.0"
   },
   "devDependencies": {
-    "typescript": "^3.4.5",
     "@types/jest": "^24.0.12",
     "@types/joi": "^14.3.3",
     "@types/node-fetch": "^2.3.4",
@@ -57,6 +55,7 @@
     "ora": "^3.4.0",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.1.0",
+    "typescript": "^3.4.5",
     "uuid": "^3.3.2"
   }
 }
