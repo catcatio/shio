@@ -1,6 +1,6 @@
 import * as Joi from 'joi'
 import { User, UserChatSession } from '../entities/user'
-import { RepositoryOperationOption, JoiObjectSchema, composeRepositoryOptions, WithWhere, WithSystemOperation } from './common'
+import { RepositoryOperationOption, JoiObjectSchema, composeRepositoryOptions, WithWhere, WithSystemOperation, DatastoreBaseRepository } from './common'
 import { Omit, PartialCommonAttributes, CommonAttributes } from '@shio-bot/foundation'
 import { PaginationResult } from '@shio-bot/foundation/entities'
 import { Datastore } from '@google-cloud/datastore'
@@ -24,7 +24,8 @@ export interface UserRepository {
   findOneChatSession(...options: UserChatSessionOperationOption[]): Promise<UserChatSession | undefined>
 }
 
-export class DatastoreUserRepository implements UserRepository {
+export class DatastoreUserRepository extends DatastoreBaseRepository implements UserRepository {
+
   async findOneChatSession(...options: RepositoryOperationOption<UserChatSession>[]): Promise<UserChatSession | undefined> {
     const option = composeRepositoryOptions(...options)
     let query = applyFilter(this.db.createQuery(this.UserChatSessionKind), option)
@@ -44,12 +45,12 @@ export class DatastoreUserRepository implements UserRepository {
     const [entities] = await this.db.get(this.getUserKey(id))
     return toJSON(entities)
   }
-  private db: Datastore
   private UserKind = 'user'
   private UserChatSessionKind = 'user-chat-session'
   private aclTag = newResourceTag(this.UserKind)
 
   constructor(db: Datastore) {
+    super(db)
     this.db = db
   }
 
@@ -99,12 +100,11 @@ export class DatastoreUserRepository implements UserRepository {
   }
 
   async remove(...options: RepositoryOperationOption<User>[]): Promise<number> {
-    const option = composeRepositoryOptions(...options)
     const users = await this.findMany(...options, WithSystemOperation())
-    const tx = this.db.transaction()
     await Promise.all(
       users.records.map(async user => {
-        await this.db.delete(users.records.map(user => tx.getUserKey(user.id)))
+        await this.db.delete(this.getUserKey(user.id))
+        // await this.db.delete(users.records.map(user => this.getUserKey(user.id)))
       })
     )
 
@@ -116,11 +116,7 @@ export class DatastoreUserRepository implements UserRepository {
     return this.db.key([this.UserKind, userKey.id, this.UserChatSessionKind, chatsession.provider + ':' + chatsession.providerId])
   }
   public getUserKey(userId: string) {
-    if (Number.isInteger(parseInt(userId))) {
-      return this.db.key([this.UserKind, parseInt(userId)])
-    } else {
-      return this.db.key([this.UserKind, userId])
-    }
+    return this.db.key([this.UserKind, this.parseIdToDatastoreId(userId)])
   }
 
   async findOne(...options: RepositoryOperationOption<User>[]): Promise<User | undefined> {

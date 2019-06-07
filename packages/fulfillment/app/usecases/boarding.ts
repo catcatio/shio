@@ -1,14 +1,14 @@
 import { MessageProvider } from '@shio-bot/foundation/entities'
 import { User, UserChatSession } from '../entities'
-import { UserRepository, WithSystemOperation, ACLRepository, WithWhere } from '../repositories'
+import { ACLRepository, UserRepository, WithSystemOperation, WithWhere } from '../repositories'
 import { createUserError } from './errors';
 
-type BoardingUserFollowInput = {
+interface BoardingUserFollowInput {
   displayName: string
   providerId: string
   provider: MessageProvider
 }
-type BoardingUserFollowOutput = {
+interface BoardingUserFollowOutput {
   user: User
   userChatSession: UserChatSession
 }
@@ -24,7 +24,7 @@ export class DefaultBoardingUsecase implements BoardingUsecase {
     this.ACL = acl
   }
 
-  async userFollow(input: BoardingUserFollowInput): Promise<BoardingUserFollowOutput> {
+  public async userFollow(input: BoardingUserFollowInput): Promise<BoardingUserFollowOutput> {
 
     const isUserExists = await this.User.findOneChatSession(
       WithWhere<UserChatSession>({
@@ -35,9 +35,9 @@ export class DefaultBoardingUsecase implements BoardingUsecase {
           Equal: input.providerId,
         },
       })
-    ) 
+    )
     if (isUserExists) {
-      throw createUserError(input.provider,input.providerId)
+      throw createUserError(input.provider, input.providerId)
     }
 
     const user = await this.User.create(

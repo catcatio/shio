@@ -7,6 +7,7 @@
   "scripts": {
     "build": "yarn tsc",
     "clean": "find -E . -regex '.*\\.(js|map|d\\.ts)' -not -path \"**/node_modules/*\" -not -path  \"./.next/*\" -delete",
+    "test": "yarn integration",
     "integration": "yarn jest --config jest.integration.json",
     "prepublish": "yarn build"
   },

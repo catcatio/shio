@@ -1,12 +1,44 @@
+import { AssetMetadata } from "./asset";
 
 
+export const ListItemEventMessageIntentKind = 'list-item'
+export enum ListItemEventMessageIntentParameterFilter {
+  RECENT,
+  MOST_VIEWED,
+}
+export interface ListItemEventMessageIntent {
+  name: typeof ListItemEventMessageIntentKind
+  parameters: {
+    merchantId: string
+    limit: number // default = 5
+    offset: number // default = 0
+    filter: ListItemEventMessageIntentParameterFilter
+  }
+}
 
+export const ListItemEventMessageFulfillmentKind = 'list-item'
+export interface ListItemEventMessageFulfillment {
+  name: typeof ListItemEventMessageFulfillmentKind
+  parameters: {
+    merchantTitle: string
+    limit: number
+    offset: number
+    hasNext: boolean
+    hasPrev: boolean
+    filter: ListItemEventMessageIntentParameterFilter
+    assets: {
+      id: string
+      meta: AssetMetadata
+      price: number
+    }[]
+  }
+}
 
 
 export const FollowEventMessageIntentKind = 'follow'
 export interface FollowEventMessageIntent {
   name: typeof FollowEventMessageIntentKind
-  parameters: { 
+  parameters: {
     displayName: string
   }
 }
@@ -37,5 +69,12 @@ export interface ErrorEventMessageFulfillment {
   }
 }
 
-export type MessageIntent = FollowEventMessageIntent | UnfollowEventMessageIntent
-export type MessageFulfillment = FollowEventMessageFulfillment | ErrorEventMessageFulfillment
+export type MessageIntent =
+  | FollowEventMessageIntent
+  | UnfollowEventMessageIntent
+  | ListItemEventMessageIntent
+
+export type MessageFulfillment =
+  | FollowEventMessageFulfillment
+  | ErrorEventMessageFulfillment
+  | ListItemEventMessageFulfillment

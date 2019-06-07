@@ -3,7 +3,8 @@ import { ValidationError } from 'joi'
 export enum ErrorType {
   Auth,
   NotFound,
-  Input
+  Input,
+  Internal
 }
 
 export class GlobalError extends Error {

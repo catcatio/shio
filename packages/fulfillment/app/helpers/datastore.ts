@@ -3,6 +3,8 @@ import { Datastore, Query } from "@google-cloud/datastore";
 import { entity } from "@google-cloud/datastore/build/src/entity";
 import { RepositoryOptions } from "../repositories";
 
+export const LocalDatastoreEndpoint = 'http://localhost:5545'
+
 export function toJSON(entity: any) {
   if (typeof entity === 'undefined' || !entity) {
     return undefined

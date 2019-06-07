@@ -1,0 +1,12 @@
+{
+  "extends": [
+    "../tslint.base.json",
+    "tslint:latest",
+    "tslint-sonarts",
+    "tslint-config-prettier"
+  ],
+  "rules": {
+    "interface-name": false,
+    "no-submodule-imports": false
+  }
+}

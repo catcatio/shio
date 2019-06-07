@@ -1,7 +1,19 @@
-import { FollowEventMessageIntent, FollowEventMessageFulfillment, MessageIntent, MessageFulfillment } from '../intent'
+import { FollowEventMessageIntent, FollowEventMessageFulfillment, MessageIntent, MessageFulfillment, ListItemEventMessageIntent, ListItemEventMessageIntentKind, ListItemEventMessageIntentParameterFilter } from '../intent'
 import { IncomingMessage, OutgoingMessage } from '../message'
 import { ulid } from 'ulid'
 import * as uuid from 'uuid/v4'
+
+export function randomListItemEventMessageIntent(): ListItemEventMessageIntent {
+  return {
+    name:ListItemEventMessageIntentKind,
+    parameters: {
+      filter: ListItemEventMessageIntentParameterFilter.MOST_VIEWED,
+      limit: 10,
+      offset: 0,
+      merchantId: "random-marchant-id",
+    }
+  }
+}
 
 export function randomFollowMessageIntent(): FollowEventMessageIntent {
   return {

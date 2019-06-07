@@ -1,27 +1,16 @@
+export * from '@shio-bot/foundation/entities'
+import { AssetMetadata } from "@shio-bot/foundation/entities";
+import { CommonAttributes } from '@shio-bot/foundation';
 
 
-export interface AssetMetadataBook {
-    kind: 'AssetMetadataBook'
-    coverImageURL: string
-    title: string
-    description: string
-    teaser: string
-}
 
-export interface AssetMetadataEvent {
-    kind: 'AssetMetadataEvent'
-    eventURL: string
-}
-
-export type AssetMetadata = AssetMetadataBook | AssetMetadataEvent
-
-export interface Asset {
+export interface Asset extends CommonAttributes {
   id: string
   aclTag: string
+  merchantId?: string
 
   // gs://[bucket_name]/book1
   // https://staging.reeeeed.com/book/1
   describeURL: string
   meta: AssetMetadata
-  price: number
 }
