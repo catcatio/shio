@@ -12,7 +12,7 @@ export function makeFollowEndpoint(boarding: BoardingUsecase): EndpointFuntion {
         providerId: message.source.userId
       })
 
-      const outgoing = createOutgoingFromIncomingMessage(message, [
+      return createOutgoingFromIncomingMessage(message, [
         {
           name: 'follow',
           parameters: {
@@ -22,7 +22,6 @@ export function makeFollowEndpoint(boarding: BoardingUsecase): EndpointFuntion {
           }
         }
       ])
-      return outgoing
     } catch (e) {
       if (e instanceof GlobalError) {
         return createOutgoingFromIncomingMessage(message, [

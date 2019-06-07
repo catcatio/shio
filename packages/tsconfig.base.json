@@ -17,6 +17,7 @@
   "exclude": [ ],
   "references": [
     { "path": "foundation" },
-    { "path": "chatengine" }
+    { "path": "chatengine" },
+    { "path": "fulfillment" }
   ]
 }

@@ -1,22 +1,24 @@
-import { Config } from './config'
-import { DatastoreACLRepository, DatastoreUserRepository } from './repositories'
 import {
-  createDatastoreInstance,
-  WithDatastoreProjectId,
-  WithDatastoreNameSpace,
-  WithDatastoreAPIEndpoint,
-  WithPubsubEndpoint,
-  PubsubOption,
+  atoi,
   CloudPubsubMessageChannelTransport,
-  newLogger,
   createCloudPubSubInstance,
-  WithPubsubProjectId,
-  atoi
+  createDatastoreInstance,
+  newLogger,
+  PubsubOption,
+  WithDatastoreAPIEndpoint,
+  WithDatastoreNameSpace,
+  WithDatastoreProjectId,
+  WithPubsubEndpoint,
+  WithPubsubProjectId
 } from '@shio-bot/foundation'
-import { DefaultBoardingUsecase } from './usecases/boarding'
-import { registerPubsub } from './transports/pubsub'
-import { createFulfillmentEndpoint } from './endpoints'
 import * as express from 'express'
+import { Config } from './config'
+import { createFulfillmentEndpoint } from './endpoints'
+import { DatastoreACLRepository, DatastoreUserRepository } from './repositories'
+import { registerPubsub } from './transports/pubsub'
+import { DefaultBoardingUsecase } from './usecases/boarding'
+import { DefaultMerchandiseUseCase } from './usecases/merchandise';
+import { DatastoreAssetRepository } from './repositories/asset';
 
 export async function bootstrap(config: Config) {
   const log = newLogger()
@@ -46,25 +48,27 @@ export async function bootstrap(config: Config) {
   await acl.prepare()
   log.info('starting up service component...')
 
+  const assetRepository = new DatastoreAssetRepository(datastore)
   const userRepository = new DatastoreUserRepository(datastore)
   const boardingUsecase = new DefaultBoardingUsecase(userRepository, acl)
+  const merchandiseUseCase = new DefaultMerchandiseUseCase(acl,userRepository,assetRepository)
+  const endpoints = createFulfillmentEndpoint(boardingUsecase, merchandiseUseCase)
+  log.info("🎉 endpoint intial!")
 
-  const endpoints = createFulfillmentEndpoint(boardingUsecase)
   log.info('registry pubsub...')
-
   registerPubsub(pubsub, endpoints)
+  log.info("🎉 pubsub transport registered!")
 
   const app = express()
   app.use(express.json())
   app.use('/', pubsub.messageRouter)
   app.get('/', (_, res) => res.status(200).send('ok'))
-  log.info(`Start server on port ${config.port}`)
+  log.info(`start server on port ${config.port}`)
   const server = app.listen(atoi(config.port))
 
   return {
-    pubsub,
     close: async () => {
-      log.info('Gracefully shutting down service....')
+      log.info('gracefully shutting down service....')
       pubsub.UnsubscribeAllIncomingMessage()
       pubsub.UnsubscribeAllOutgoingMessage()
       await new Promise(resolve => {
@@ -75,6 +79,7 @@ export async function bootstrap(config: Config) {
       })
 
       log.info('Service is shutdown!!')
-    }
+    },
+    pubsub,
   }
 }

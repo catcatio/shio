@@ -1,0 +1,25 @@
+{
+  "name": "@shio/management",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^24.0.12",
+    "@types/joi": "^14.3.3",
+    "@types/node-fetch": "^2.3.4",
+    "@types/uuid": "^3.4.4",
+    "@types/winston": "^2.4.4",
+    "grpc_tools_node_protoc_ts": "^2.5.3",
+    "jest": "^24.8.0",
+    "nodemon": "^1.19.1",
+    "ora": "^3.4.0",
+    "prettier": "1.18.0",
+    "ts-jest": "^24.0.2",
+    "ts-node": "^8.1.0",
+    "tslint": "^5.17.0",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-sonarts": "^1.9.0",
+    "typescript": "^3.4.5",
+    "uuid": "^3.3.2"
+  }
+}

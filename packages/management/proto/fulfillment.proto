@@ -1,0 +1,17 @@
+syntax = "proto3";
+package management;
+
+
+service FulfillmentManager {
+  rpc CreateBookAsset(CreateBookAssetInput) returns (CreateBookAssetOutput);
+}
+
+message CreateBookAssetInput {
+  bytes source = 2;
+  string title = 1;
+  string description = 3;
+  string teaser = 4;
+}
+message CreateBookAssetOutput {
+  string id = 1;
+}

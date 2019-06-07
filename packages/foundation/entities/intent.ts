@@ -1,11 +1,12 @@
 import { AssetMetadata } from "./asset";
 
 
-export const ListItemEventMessageIntentKind = 'list-item'
 export enum ListItemEventMessageIntentParameterFilter {
   RECENT,
   MOST_VIEWED,
 }
+
+export const ListItemEventMessageIntentKind = 'list-item'
 export interface ListItemEventMessageIntent {
   name: typeof ListItemEventMessageIntentKind
   parameters: {
@@ -25,11 +26,11 @@ export interface ListItemEventMessageFulfillment {
     offset: number
     hasNext: boolean
     hasPrev: boolean
-    filter: ListItemEventMessageIntentParameterFilter
+    filter?: ListItemEventMessageIntentParameterFilter
     assets: {
       id: string
       meta: AssetMetadata
-      price: number
+      price?: number
     }[]
   }
 }

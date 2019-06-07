@@ -8,7 +8,7 @@ export function createEndpointFunction<IntentName extends MessageIntent['name']>
   intentName: IntentName,
   handler: (message: IncomingMessage & { intent: NarrowUnion<MessageIntent, IntentName> }) => Promise<OutgoingMessage | void >
 ) {
-  return async function(message: IncomingMessage): Promise<OutgoingMessage | void> {
+  return async (message: IncomingMessage): Promise<OutgoingMessage | void> => {
     if (message.intent.name === intentName) {
       return handler(message as any)
     } else {

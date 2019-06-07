@@ -1,4 +1,3 @@
-
 export const AssetMetadataBookKind  = 'AssetMetadataBook'
 export interface AssetMetadataBook {
     kind: typeof AssetMetadataBookKind
