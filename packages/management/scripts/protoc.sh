@@ -1,14 +1,8 @@
 # generate js codes via grpc-tools
-grpc_tools_node_protoc \
+yarn protoc-gen-grpc \
 --js_out=import_style=commonjs,binary:./__generated__ \
 --grpc_out=./__generated__ \
---plugin=protoc-gen-grpc=`which grpc_tools_node_protoc_plugin` \
--I ./proto \
-./proto/*.proto
+--proto_path ./proto ./proto/*.proto
 
 # generate d.ts codes
-protoc \
---plugin=protoc-gen-ts=./node_modules/.bin/protoc-gen-ts \
---ts_out=./__generated__ \
--I ./proto \
-./proto/*.proto
+yarn protoc-gen-grpc-ts --ts_out=service=true:__generated__ --proto_path ./proto ./proto/*.proto

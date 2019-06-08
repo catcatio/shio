@@ -27,15 +27,15 @@ export class GCPFileStorage implements FileStorage {
   PutObject(key: string, data: Buffer): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       let fileStream = this.bucket.file(key).createWriteStream()
-
       fileStream
         .once('error', err => {
+          console.error(err)
           reject(err)
         })
-        .once('end', () => {
+        .on('finish', () => {
           resolve()
         })
-        .end(data)
+        .end(data, () => { })
     })
   }
 

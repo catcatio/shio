@@ -4,6 +4,16 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
+    {
+      "name": "[Manager] Asset add",
+      "type": "node",
+      "request": "launch",
+      "args": ["${workspaceRoot}/packages/management/cmd/index.ts", "asset", "add", "-f", "/Users/rungsikornrungsikavarnich/Desktop/MGA_CH_1.zip"],
+      "cwd": "${workspaceRoot}/packages/management",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "protocol": "inspector",
+      "internalConsoleOptions": "openOnSessionStart"
+    }, 
 
     {
       "name": "Run current file",

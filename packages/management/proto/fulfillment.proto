@@ -3,15 +3,33 @@ package management;
 
 
 service FulfillmentManager {
-  rpc CreateBookAsset(CreateBookAssetInput) returns (CreateBookAssetOutput);
+
+  rpc CreateBookAsset(CreateBookAssetInput) returns (stream CreateBookAssetOutput);
+  rpc ListBookAsset(ListBookAssetInput) returns (ListBookAssetOutput);
+}
+
+message ListBookAssetInput {
+  int64 limit = 1;
+  int64 offset = 2;
+}
+message ListBookAssetOutput {
+  message BookAssetItem {
+    string id = 1;
+    string slug = 2;
+    string describeUrl = 3;
+    string title = 4;
+  }
+  repeated BookAssetItem records = 1;
 }
 
 message CreateBookAssetInput {
-  bytes source = 2;
+  string source = 2;
   string title = 1;
   string description = 3;
   string teaser = 4;
+  string slug = 5;
 }
 message CreateBookAssetOutput {
   string id = 1;
+  string message = 2;
 }

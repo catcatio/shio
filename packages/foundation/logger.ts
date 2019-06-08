@@ -47,6 +47,12 @@ export class ShioLogger {
   }
 }
 
+export function createStreamTransport(writableStream: NodeJS.WritableStream) {
+  const stream = new transports.Stream({
+    stream: writableStream,
+  })
+  return stream
+}
 export const logger = newLogger()
 
 /**
@@ -60,21 +66,23 @@ export const logger = newLogger()
  * @value 1 use stackdriver logging transport
  *
  */
-export function newLogger(): ShioLogger {
-  const loggerTransports: transports.ConsoleTransportInstance[] = []
+export function newLogger(logOutput?: any[]): ShioLogger {
+  const defaultLogOutput: any[] = []
 
   if (process.env['SHIO_LOG_DISABLE_CONSOLE'] !== '1') {
-    loggerTransports.push(new transports.Console())
+    defaultLogOutput.push(new transports.Console())
   }
 
   if (process.env['SHIO_LOG_TRANSPORT_STACKDRIVER'] === '1') {
     const stackdriverTransport = new LoggingWinston({})
-    loggerTransports.push(stackdriverTransport)
+    defaultLogOutput.push(stackdriverTransport)
   }
+
   const logger = createLogger({
-    transports: loggerTransports,
+    transports: logOutput || defaultLogOutput,
     format: format.printf(info => {
-      let requestId = '<no-request-id>'
+
+      let requestId = ''
       if (typeof info.requestId === 'string') {
         requestId = `${info.requestId}`
       }
@@ -93,7 +101,7 @@ export function newLogger(): ShioLogger {
 
       return info.message
         .split('\n')
-        .map((m) => [new Date().toISOString(), requestId, info.provider || '<none>', info.userId, info.level.toUpperCase(), fieldStr, m].filter(item => item).join(' | '))
+        .map((m) => [new Date().toISOString(), requestId, info.provider, info.userId, info.level.toUpperCase(), fieldStr, m].filter(item => item).join(' | '))
         .join('\n')
     })
   })

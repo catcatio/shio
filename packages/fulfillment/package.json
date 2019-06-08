@@ -1,8 +1,7 @@
 {
   "name": "@shio-bot/fulfillment",
   "version": "1.0.0",
-  "main": "index.js",
-  "private": true,
+  "main": "app/index.js",
   "repository": "git@github.com:catcatio/shio.git",
   "author": "Rungsikorn Rungsikavarnich <rungsikorn@me.com>",
   "license": "MIT",

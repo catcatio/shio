@@ -1,25 +1,42 @@
 {
-  "name": "@shio/management",
+  "name": "@shio-bot/management",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
+    "@types/cli-table": "^0.3.0",
     "@types/jest": "^24.0.12",
     "@types/joi": "^14.3.3",
     "@types/node-fetch": "^2.3.4",
     "@types/uuid": "^3.4.4",
     "@types/winston": "^2.4.4",
+    "commander": "^2.20.0",
+    "grpc-tools": "^1.7.3",
     "grpc_tools_node_protoc_ts": "^2.5.3",
     "jest": "^24.8.0",
     "nodemon": "^1.19.1",
     "ora": "^3.4.0",
     "prettier": "1.18.0",
+    "protoc-gen-grpc": "^1.2.8",
     "ts-jest": "^24.0.2",
-    "ts-node": "^8.1.0",
+    "ts-node": "^8.2.0",
     "tslint": "^5.17.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-sonarts": "^1.9.0",
-    "typescript": "^3.4.5",
+    "typescript": "^3.5.1",
     "uuid": "^3.3.2"
+  },
+  "dependencies": {
+    "@shio-bot/fulfillment": "^1.0.0",
+    "adm-zip": "^0.4.13",
+    "cli-table": "^0.3.1",
+    "extract-zip": "^1.6.7",
+    "nanoid": "^2.0.3",
+    "unzipper": "^0.10.0",
+    "winston": "^3.2.1"
+  },
+  "scripts": {
+    "dev": "yarn ts-node ./app/index.ts",
+    "shio": "yarn ts-node ./cmd/index.ts"
   }
 }

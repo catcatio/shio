@@ -6,7 +6,7 @@ import { DatastoreBaseRepository, RepositoryOperationOption, composeRepositoryOp
 import { toJSON, applyFilter } from '../helpers/datastore'
 
 export type AssetRepositoryOperationOption = RepositoryOperationOption<Asset>
-export type CreateAssetInput = Omit<PartialCommonAttributes<Asset>, 'id' | 'aclTag'>
+export type CreateAssetInput = Omit<PartialCommonAttributes<Asset>, 'id' | 'aclTag'> & { id?: string }
 
 export interface AssetRepository {
   create(input: CreateAssetInput): Promise<Asset>
@@ -23,7 +23,12 @@ export class DatastoreAssetRepository extends DatastoreBaseRepository implements
   }
 
   async create(input: CreateAssetInput): Promise<Asset> {
-    const assetKey = await this.allocateKey(this.AssetKind)
+    let assetKey: any
+    if (input.id) {
+      assetKey = this.db.key([this.AssetKind, input.id])
+    } else {
+      assetKey = await this.allocateKey(this.AssetKind)
+    }
     await this.db.upsert({
       key: assetKey,
       data: input
@@ -33,7 +38,7 @@ export class DatastoreAssetRepository extends DatastoreBaseRepository implements
   }
   async remove(...options: AssetRepositoryOperationOption[]): Promise<number> {
     const assets = await this.findMany(...options, WithSystemOperation())
-    await Promise.all(assets.records.map(async asset=> {
+    await Promise.all(assets.records.map(async asset => {
       return this.db.delete(this.db.key([this.AssetKind, this.parseIdToDatastoreId(asset.id)]))
     }))
     return assets.records.length

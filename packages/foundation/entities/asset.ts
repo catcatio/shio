@@ -3,8 +3,9 @@ export interface AssetMetadataBook {
     kind: typeof AssetMetadataBookKind
     coverImageURL: string
     title: string
-    description: string
-    teaser: string
+    description?: string
+    teaser?: string
+    slug?: string
 }
 
 export const AssetMetadataEventKind = 'AssetMetadataEvent'

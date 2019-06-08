@@ -23,7 +23,6 @@ export async function createDatastoreInstance(...options: ShioDatastoreOption[])
 
   const option: DatastoreOptions = composeFunctionOptions({
     namespace: "catcat",
-    projectId: "catcat-local" 
   }, ...options)
 
   console.info(`try to connect datastore... ${option.apiEndpoint ? option.apiEndpoint : ""}`)
