@@ -2,6 +2,8 @@ import { SYSTEM_USER } from '../entities'
 import { SchemaLike } from 'joi'
 import { Datastore, Query } from '@google-cloud/datastore'
 import { ErrorType, newGlobalError } from '../entities/error'
+import { logger, ShioLogger, newLogger } from '@shio-bot/foundation';
+import { MessageProvider, IncomingMessage } from '../entities/asset';
 
 export class DatastoreBaseRepository {
   db: Datastore
@@ -52,61 +54,81 @@ export type WhereOperator<T> = Partial<{
 }>
 export type WhereConditions<T> = { [P in keyof T]?: WhereOperator<T[P]> }
 
-export type RepositoryOptions<T = any> = {
+export class OperationOptions<T = any> {
   key?: string
-  operationOwnerId: string
+  operationOwnerId: string = '<none>'
+  provider?: MessageProvider
   requestId?: string
-  where: WhereConditions<Partial<T>>[]
-  limit: number
-  offset: number
+  where: Array<WhereConditions<Partial<T>>> = []
+  limit: number = 10
+  offset: number = 0
+  // logger: ShioLogger
+  get logger(): ShioLogger {
+    let log = newLogger()
+    if (this.requestId) {
+      log = log.withRequestId(this.requestId)
+    }
+    if (this.operationOwnerId) {
+      log = log.withUserId(this.operationOwnerId)
+    }
+    if (this.provider) {
+      log = log.withProviderName(this.provider)
+    }
+    return log
+  }
 }
 
-export type RepositoryOperationOption<T> = (option: RepositoryOptions<T>) => RepositoryOptions<T>
+export type OperationOption<T = any> = (option: OperationOptions<T>) => OperationOptions<T>
 
-export function composeRepositoryOptions<T>(...opt: RepositoryOperationOption<T>[]) {
-  return opt.reduce<RepositoryOptions<T>>(
+export function composeOperationOptions<T>(...opt: OperationOption<T>[]) {
+  const option = new OperationOptions()
+  return opt.reduce<OperationOptions<T>>(
     (options, opt) => {
       return opt(options)
     },
-    {
-      limit: 10,
-      offset: 0,
-      operationOwnerId: '<NONE>',
-      where: []
-    }
+    option
   )
 }
 
-export function WithWhere<T>(condition: WhereConditions<Partial<T>>): RepositoryOperationOption<T> {
-  return function(opts) {
+export function WithWhere<T>(condition: WhereConditions<Partial<T>>): OperationOption<T> {
+  return function (opts) {
     opts.where.push(condition)
     return opts
   }
 }
 
-export function WithSystemOperation<T>(): RepositoryOperationOption<T> {
-  return function(opts) {
+export function WithSystemOperation<T>(): OperationOption<T> {
+  return function (opts) {
     opts.operationOwnerId = SYSTEM_USER
     return opts
   }
 }
 
-export function WithKey(id: string): RepositoryOperationOption<any> {
-  return function(opts) {
+export function WithKey(id: string): OperationOption<any> {
+  return function (opts) {
     opts.key = id
     return opts
   }
 }
 
-export function WithPagination<T = any>(limit: number = 5, offset: number = 10): RepositoryOperationOption<T> {
-  return function(opts) {
+// config operation attribute with incoming message object
+export function WithIncomingMessage(msg: IncomingMessage): OperationOption<any> {
+  return function (opts) {
+    opts.provider = msg.provider
+    opts.requestId = msg.requestId
+    return opts
+  }
+}
+
+export function WithPagination<T = any>(limit: number = 5, offset: number = 10): OperationOption<T> {
+  return function (opts) {
     opts.limit = limit
     opts.offset = offset
     return opts
   }
 }
-export function WithOperationOwner<T>(userId: string): RepositoryOperationOption<T> {
-  return function(opts) {
+export function WithOperationOwner<T>(userId: string): OperationOption<T> {
+  return function (opts) {
     opts.operationOwnerId = userId
     return opts
   }

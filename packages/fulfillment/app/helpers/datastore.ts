@@ -1,7 +1,7 @@
 
 import { Datastore, Query } from "@google-cloud/datastore";
 import { entity } from "@google-cloud/datastore/build/src/entity";
-import { RepositoryOptions } from "../repositories";
+import { OperationOptions } from "../repositories";
 
 export const LocalDatastoreEndpoint = 'http://localhost:5545'
 
@@ -36,7 +36,7 @@ function addFilter(Query: Query, key: string, value: any, op: string) {
   return Query
 }
 
-export function applyFilter(Query: Query, option: RepositoryOptions): Query {
+export function applyFilter(Query: Query, option: OperationOptions): Query {
   option.where.forEach(condition => {
     Object.keys(condition).forEach(k => {
       const attr = condition[k]

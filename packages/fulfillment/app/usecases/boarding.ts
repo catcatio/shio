@@ -1,6 +1,6 @@
 import { MessageProvider } from '@shio-bot/foundation/entities'
 import { User, UserChatSession } from '../entities'
-import { ACLRepository, UserRepository, WithSystemOperation, WithWhere } from '../repositories'
+import { ACLRepository, UserRepository, WithSystemOperation, WithWhere, OperationOption, composeOperationOptions } from '../repositories'
 import { createUserError } from './errors';
 
 interface BoardingUserFollowInput {
@@ -13,7 +13,8 @@ interface BoardingUserFollowOutput {
   userChatSession: UserChatSession
 }
 export interface BoardingUsecase {
-  userFollow(input: BoardingUserFollowInput): Promise<BoardingUserFollowOutput>
+  userFollow(input: BoardingUserFollowInput, ...options: OperationOption[]): Promise<BoardingUserFollowOutput>
+  getUserChatSession(provider: MessageProvider, userId: string): Promise<UserChatSession | undefined>
 }
 
 export class DefaultBoardingUsecase implements BoardingUsecase {
@@ -24,8 +25,25 @@ export class DefaultBoardingUsecase implements BoardingUsecase {
     this.ACL = acl
   }
 
-  public async userFollow(input: BoardingUserFollowInput): Promise<BoardingUserFollowOutput> {
+  public async getUserChatSession(provider: MessageProvider, providerId: string): Promise<UserChatSession | undefined> {
+    return this.User.findOneChatSession(
+      WithWhere<UserChatSession>({
+        provider: {
+          Equal: provider,
+        },
+        providerId: {
+          Equal: providerId,
+        }
+      }),
+      WithSystemOperation(),
+    )
+  }
 
+  public async userFollow(input: BoardingUserFollowInput, ...options: OperationOption[]): Promise<BoardingUserFollowOutput> {
+
+    const option = composeOperationOptions(...options)
+
+    option.logger.withFields({ userId: input.providerId, provider: input.provider }).info("checking if user exists")
     const isUserExists = await this.User.findOneChatSession(
       WithWhere<UserChatSession>({
         provider: {

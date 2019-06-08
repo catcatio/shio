@@ -1,15 +1,15 @@
 import * as Joi from 'joi'
 import { User, UserChatSession } from '../entities/user'
-import { RepositoryOperationOption, JoiObjectSchema, composeRepositoryOptions, WithWhere, WithSystemOperation, DatastoreBaseRepository } from './common'
-import { Omit, PartialCommonAttributes, CommonAttributes } from '@shio-bot/foundation'
+import { OperationOption, JoiObjectSchema, composeOperationOptions, WithWhere, WithSystemOperation, DatastoreBaseRepository } from './common'
+import { Omit, PartialCommonAttributes, CommonAttributes, newLogger } from '@shio-bot/foundation'
 import { PaginationResult } from '@shio-bot/foundation/entities'
 import { Datastore } from '@google-cloud/datastore'
-import { newGlobalError } from '../entities/error'
+import { newValidateError } from '../entities/error'
 import { newResourceTag } from '../entities'
 import { toJSON, applyFilter } from '../helpers/datastore'
 
-export type UserRepositoryOperationOption = RepositoryOperationOption<User>
-export type UserChatSessionOperationOption = RepositoryOperationOption<UserChatSession>
+export type UserRepositoryOperationOption = OperationOption<User>
+export type UserChatSessionOperationOption = OperationOption<UserChatSession>
 
 export type CreateUserInput = Omit<PartialCommonAttributes<User>, 'id' | 'aclTag'>
 export type CreateUserChatSessionInput = Omit<PartialCommonAttributes<UserChatSession>, 'id'>
@@ -20,14 +20,14 @@ export interface UserRepository {
   findMany(...options: UserRepositoryOperationOption[]): Promise<PaginationResult<User>>
   remove(...options: UserRepositoryOperationOption[]): Promise<number>
 
-  createChatSession(input: CreateUserChatSessionInput, ...options: RepositoryOperationOption<UserChatSession>[]): Promise<UserChatSession>
+  createChatSession(input: CreateUserChatSessionInput, ...options: OperationOption<UserChatSession>[]): Promise<UserChatSession>
   findOneChatSession(...options: UserChatSessionOperationOption[]): Promise<UserChatSession | undefined>
 }
 
 export class DatastoreUserRepository extends DatastoreBaseRepository implements UserRepository {
-
-  async findOneChatSession(...options: RepositoryOperationOption<UserChatSession>[]): Promise<UserChatSession | undefined> {
-    const option = composeRepositoryOptions(...options)
+  log = newLogger()
+  async findOneChatSession(...options: OperationOption<UserChatSession>[]): Promise<UserChatSession | undefined> {
+    const option = composeOperationOptions(...options)
     let query = applyFilter(this.db.createQuery(this.UserChatSessionKind), option)
       .limit(option.limit)
       .offset(option.offset)
@@ -41,7 +41,7 @@ export class DatastoreUserRepository extends DatastoreBaseRepository implements 
   }
 
   async findById(id: string, ...options: UserRepositoryOperationOption[]): Promise<User | undefined> {
-    const option = composeRepositoryOptions(...options)
+    const option = composeOperationOptions(...options)
     const [entities] = await this.db.get(this.getUserKey(id))
     return toJSON(entities)
   }
@@ -54,8 +54,8 @@ export class DatastoreUserRepository extends DatastoreBaseRepository implements 
     this.db = db
   }
 
-  async createChatSession(input: CreateUserChatSessionInput, ...options: RepositoryOperationOption<User>[]): Promise<UserChatSession> {
-    const option = composeRepositoryOptions(...options)
+  async createChatSession(input: CreateUserChatSessionInput, ...options: OperationOption<User>[]): Promise<UserChatSession> {
+    const option = composeOperationOptions(...options)
 
     const [existsChatSession] = await this.db.runQuery(
       this.db
@@ -76,7 +76,7 @@ export class DatastoreUserRepository extends DatastoreBaseRepository implements 
         ...input
       }
     })
-    const query = await this.db
+    const query = this.db
       .createQuery(this.UserChatSessionKind)
       .filter('__key__', k)
       .limit(1)
@@ -84,8 +84,8 @@ export class DatastoreUserRepository extends DatastoreBaseRepository implements 
     return toJSON(entities[0])
   }
 
-  async findMany(...options: RepositoryOperationOption<User>[]): Promise<PaginationResult<User>> {
-    const option = composeRepositoryOptions(...options)
+  async findMany(...options: OperationOption<User>[]): Promise<PaginationResult<User>> {
+    const option = composeOperationOptions(...options)
 
     let query = applyFilter(this.db.createQuery(this.UserKind), option)
       .limit(option.limit)
@@ -99,12 +99,11 @@ export class DatastoreUserRepository extends DatastoreBaseRepository implements 
     }
   }
 
-  async remove(...options: RepositoryOperationOption<User>[]): Promise<number> {
+  async remove(...options: OperationOption<User>[]): Promise<number> {
     const users = await this.findMany(...options, WithSystemOperation())
     await Promise.all(
       users.records.map(async user => {
         await this.db.delete(this.getUserKey(user.id))
-        // await this.db.delete(users.records.map(user => this.getUserKey(user.id)))
       })
     )
 
@@ -119,8 +118,8 @@ export class DatastoreUserRepository extends DatastoreBaseRepository implements 
     return this.db.key([this.UserKind, this.parseIdToDatastoreId(userId)])
   }
 
-  async findOne(...options: RepositoryOperationOption<User>[]): Promise<User | undefined> {
-    const option = composeRepositoryOptions(...options)
+  async findOne(...options: OperationOption<User>[]): Promise<User | undefined> {
+    const option = composeOperationOptions(...options)
     let query = applyFilter(this.db.createQuery(this.UserKind), option).limit(1)
     const [entities] = await this.db.runQuery(query, {})
 
@@ -137,12 +136,12 @@ export class DatastoreUserRepository extends DatastoreBaseRepository implements 
     stellarPublicKey: Joi.string()
   }
   async create(input: CreateUserInput, ...option: UserRepositoryOperationOption[]): Promise<User> {
-    const options = composeRepositoryOptions(...option)
+    const options = composeOperationOptions(...option)
 
     const JoiCreateUserInput = Joi.object().keys(this.CreateUserInputSchema)
     const { error, value } = JoiCreateUserInput.validate(input)
     if (error) {
-      throw newGlobalError(error)
+      throw newValidateError(error)
     }
 
     const ids = await this.db.allocateIds(this.db.key([this.UserKind]), 1)

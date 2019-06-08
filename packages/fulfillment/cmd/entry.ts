@@ -1,11 +1,14 @@
 import { Config } from '../app/config'
 import { GetEnvStringOrThrow, GetEnvString } from '@shio-bot/foundation'
-import { bootstrap } from '../app'
+import { bootstrap, getFulfillmentDevelopmentConstant } from '../app'
 
 export function LoadConfig(): Config {
+
+  const defaultConstant = getFulfillmentDevelopmentConstant()
+
   const option: Config = {
-    projectId: GetEnvStringOrThrow('SHIO_FULFILLMENT_PROJECT_ID'),
-    datastoreNamespace: GetEnvStringOrThrow('SHIO_FULFILLMENT_DATASTORE_NAMESPACE'),
+    projectId: GetEnvString('SHIO_FULFILLMENT_PROJECT_ID',defaultConstant.projectId),
+    datastoreNamespace: GetEnvString('SHIO_FULFILLMENT_DATASTORE_NAMESPACE', defaultConstant.datastoreNamespace),
     host: GetEnvStringOrThrow('SHIO_FULFILLMENT_HOST'),
     port: GetEnvStringOrThrow('PORT'),
   }

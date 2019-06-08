@@ -1,16 +1,15 @@
 import { Asset, PaginationResult } from "../entities/asset";
-import { ACLRepository, UserRepository, WithOperationOwner, WithPagination, WithSystemOperation } from "../repositories";
+import { ACLRepository, UserRepository, WithOperationOwner, WithPagination, WithSystemOperation, OperationOption, composeOperationOptions } from "../repositories";
 import { AssetRepository } from "../repositories/asset";
 
 
 interface MerchandiseListItemInput {
-  userId: string
   merchandiseId?: string
   limit?: number
   offset?: number
 }
 export interface MerchandiseUseCase {
-  listItem(input: MerchandiseListItemInput): Promise<PaginationResult<Asset>>
+  listItem(input: MerchandiseListItemInput, ...options: OperationOption[]): Promise<PaginationResult<Asset>>
 }
 
 export class DefaultMerchandiseUseCase implements MerchandiseUseCase {
@@ -24,10 +23,12 @@ export class DefaultMerchandiseUseCase implements MerchandiseUseCase {
     this.User = userRepository
     this.Asset = assetRepository
   }
-  public async listItem({ limit, merchandiseId, offset, userId }: MerchandiseListItemInput): Promise<PaginationResult<Asset>> {
+
+  public async listItem({ limit, merchandiseId, offset }: MerchandiseListItemInput, ...options: OperationOption[]): Promise<PaginationResult<Asset>> {
+    const option = composeOperationOptions(...options)
     return this.Asset.findMany(
       WithPagination(limit, offset),
-      WithOperationOwner(userId)
+      WithOperationOwner(option.operationOwnerId)
     )
   }
 }

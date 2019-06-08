@@ -2,10 +2,10 @@ import { MessageProvider } from "@shio-bot/foundation/entities";
 import { GlobalError, ErrorType } from "../entities/error";
 
 
-const UsecaseErrorMessages = {
-  CREATE_USER_ERROR: 'Create user error, user already exists'
+export const UsecaseErrorMessages = {
+  USER_ALREADY_EXISTED: 'create user error, user already exists'
 }
 
 export const createUserError = (provider: MessageProvider, providerId: string) => {
-  return new GlobalError(ErrorType.Input, UsecaseErrorMessages.CREATE_USER_ERROR).withDetail(`${provider}: ${providerId}`)
+  return new GlobalError(ErrorType.Input, UsecaseErrorMessages.USER_ALREADY_EXISTED).withDetail(`${provider}: ${providerId}`)
 }

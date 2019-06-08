@@ -17,8 +17,8 @@ let host = 'http://localhost'
 const log = newLogger()
 export default {
   datastoreEndpoint: 'http://localhost:5545',
-  datastoreNamespace: 'catcat',
-  projectId: 'catcat-local',
+  datastoreNamespace: 'fulfillment-integration',
+  projectId: 'catcat-integration',
   pubsubEndpoint: 'http://localhost:8085',
   host: getHostForIntegrationTest() + ":8080",
   port: '8080'

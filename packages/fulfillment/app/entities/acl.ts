@@ -7,6 +7,7 @@ export enum Permission {
 }
 
 export const SYSTEM_USER = 'system'
+export const INTEGRATION_USER = 'integration'
 
 export interface ACL extends CommonAttributes {
   // shio::book::list::*

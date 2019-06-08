@@ -2,10 +2,10 @@ import { Asset } from '../entities/asset'
 import { PaginationResult } from '@shio-bot/foundation/entities'
 import { PartialCommonAttributes, Omit } from '../entities'
 import { Datastore } from '@google-cloud/datastore'
-import { DatastoreBaseRepository, RepositoryOperationOption, composeRepositoryOptions, WithSystemOperation } from './common'
+import { DatastoreBaseRepository, OperationOption, composeOperationOptions, WithSystemOperation } from './common'
 import { toJSON, applyFilter } from '../helpers/datastore'
 
-export type AssetRepositoryOperationOption = RepositoryOperationOption<Asset>
+export type AssetRepositoryOperationOption = OperationOption<Asset>
 export type CreateAssetInput = Omit<PartialCommonAttributes<Asset>, 'id' | 'aclTag'> & { id?: string }
 
 export interface AssetRepository {
@@ -37,6 +37,8 @@ export class DatastoreAssetRepository extends DatastoreBaseRepository implements
     return toJSON(entities)
   }
   async remove(...options: AssetRepositoryOperationOption[]): Promise<number> {
+    const option = composeOperationOptions(...options)
+    option.logger.info('remove asset...')
     const assets = await this.findMany(...options, WithSystemOperation())
     await Promise.all(assets.records.map(async asset => {
       return this.db.delete(this.db.key([this.AssetKind, this.parseIdToDatastoreId(asset.id)]))
@@ -44,7 +46,7 @@ export class DatastoreAssetRepository extends DatastoreBaseRepository implements
     return assets.records.length
   }
   async findOne(...options: AssetRepositoryOperationOption[]): Promise<Asset | undefined> {
-    const option = composeRepositoryOptions(...options)
+    const option = composeOperationOptions(...options)
     const query = applyFilter(this.db.createQuery(this.AssetKind), option)
     const results = await this.runQuery(query)
     if (results.length < 1) {
@@ -53,7 +55,7 @@ export class DatastoreAssetRepository extends DatastoreBaseRepository implements
     return toJSON(results[0])
   }
   async findMany(...options: AssetRepositoryOperationOption[]): Promise<PaginationResult<Asset>> {
-    const option = composeRepositoryOptions(...options)
+    const option = composeOperationOptions(...options)
     const query = applyFilter(this.db.createQuery(this.AssetKind), option)
     const results = await this.runQuery(query)
     return {

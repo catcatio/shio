@@ -5,7 +5,7 @@ import * as uuid from 'uuid/v4'
 
 export function randomListItemEventMessageIntent(): ListItemEventMessageIntent {
   return {
-    name:ListItemEventMessageIntentKind,
+    name: ListItemEventMessageIntentKind,
     parameters: {
       filter: ListItemEventMessageIntentParameterFilter.MOST_VIEWED,
       limit: 10,
@@ -27,6 +27,7 @@ export function randomFollowMessageFulfillment(): FollowEventMessageFulfillment 
   return {
     name: 'follow',
     parameters: {
+      isExists: false,
       isCompleted: true,
       chatSessionId: 'random-chat-session-id',
       userId: 'random-user-id'

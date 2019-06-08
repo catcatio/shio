@@ -1,13 +1,25 @@
 import config from './config'
-import { createCloudPubSubInstance, WithPubsubProjectId, WithPubsubEndpoint, CloudPubsubMessageChannelTransport, GetEnvString, newLogger } from '@shio-bot/foundation'
+import { createCloudPubSubInstance, WithPubsubProjectId, WithPubsubEndpoint, CloudPubsubMessageChannelTransport, GetEnvString, newLogger, MessageChannelTransport, UnPromise } from '@shio-bot/foundation'
 import { OutgoingMessage, IncomingMessage } from '@shio-bot/foundation/entities'
 import { MessageFulfillment } from '@shio-bot/foundation/entities/intent'
 import { NarrowUnion } from '../app/endpoints/default'
 import * as express from 'express'
 import { Server } from 'http'
+import { FixtureStep, FixtureContext } from './fixture';
 
-export function expectFulfillment<Intent extends MessageFulfillment['name']>(name: Intent, assertFunction: (fulfillment: NarrowUnion<MessageFulfillment, Intent>) => void) {
-  return function(message: OutgoingMessage) {
+export function runFixtureSteps(ctx: FixtureContext, pubsub: UnPromise<ReturnType<typeof createPubsubIntegrationClient>>) {
+  return async (...steps: FixtureStep[]) => {
+    for (const step of steps) {
+      const { expect, incomingMessage } = step(ctx)
+      const outgoingMessage = await pubsub.sendIncomingMessage(incomingMessage)
+      expect(outgoingMessage, ctx)
+    }
+  }
+}
+
+
+export function expectFulfillment(message: OutgoingMessage) {
+  return <Intent extends MessageFulfillment['name']>(name: Intent, assertFunction: (fulfillment: NarrowUnion<MessageFulfillment, Intent>) => void) => {
     expect(message.fulfillment[0].name).toEqual(name)
     assertFunction(message.fulfillment[0] as any)
   }

@@ -6,6 +6,7 @@ import { newGlobalError, ErrorType } from '../entities/error';
 export function registerPubsub(pubsub: MessageChannelTransport, endpoints: FulfillmentEndpoint) {
   const log = newLogger()
 
+
   pubsub.SubscribeIncommingMessage(async (message, ack) => {
     log
       .withRequestId(message.requestId)
@@ -19,11 +20,15 @@ export function registerPubsub(pubsub: MessageChannelTransport, endpoints: Fulfi
     let outgoingMessage: OutgoingMessage | void
     try {
 
-      const endpoint = endpoints[message.intent.name](message)
+      const endpoint = endpoints[message.intent.name]
       if (!endpoint) {
         throw newGlobalError(ErrorType.NotFound, "intent fultillment not found")
       }
+
+      // do task and resolve
+      // outoging message
       outgoingMessage = await endpoint(message)
+
       ack()
 
       // Send outgoing message
@@ -36,7 +41,7 @@ export function registerPubsub(pubsub: MessageChannelTransport, endpoints: Fulfi
         createOutgoingFromIncomingMessage(message, {
           name: 'error',
           parameters: {
-            reason: JSON.stringify(e)
+            reason: e.toString() + "\n" + e.stack
           }
         })
       )

@@ -1,22 +1,22 @@
 import { ValidationError } from 'joi'
 
 export enum ErrorType {
-  Auth,
-  NotFound,
-  Input,
-  Internal
+  Auth = 'unauthorize',
+  NotFound = 'notfound',
+  Input = 'badinput',
+  Internal = 'internal'
 }
 
 export class GlobalError extends Error {
   errorType: ErrorType
-  detail: string =""
+  detail: any[] = []
   constructor(errorType: ErrorType, message: string) {
     super(message)
     this.errorType = errorType
   }
 
   withDetail(detail: string) {
-    this.detail = detail
+    this.detail.push(detail)
     return this
   }
 
@@ -25,13 +25,13 @@ export class GlobalError extends Error {
   }
 }
 
-function newGlobalError(errorType: ErrorType, message: string): GlobalError 
-function newGlobalError(errorType: ValidationError): GlobalError 
-function newGlobalError(errorType, message: string = ''): GlobalError {
-  if (typeof errorType === 'number') {
-    return new GlobalError(errorType, message)
-  } else {
-    return new GlobalError(ErrorType.Input, errorType.message)
-  }
+function newGlobalError(errorType: ErrorType, message: string): GlobalError {
+  return new GlobalError(errorType, message)
 }
+
+export function newValidateError(error: ValidationError) {
+  const err =  newGlobalError(ErrorType.Input, error.name)
+  err.detail = error.details
+}
+
 export { newGlobalError }

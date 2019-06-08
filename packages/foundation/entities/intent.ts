@@ -10,9 +10,9 @@ export const ListItemEventMessageIntentKind = 'list-item'
 export interface ListItemEventMessageIntent {
   name: typeof ListItemEventMessageIntentKind
   parameters: {
-    merchantId: string
-    limit: number // default = 5
-    offset: number // default = 0
+    merchantId?: string
+    limit?: number // default = 5
+    offset?: number // default = 0
     filter: ListItemEventMessageIntentParameterFilter
   }
 }
@@ -57,6 +57,7 @@ export interface FollowEventMessageFulfillment {
   name: typeof FollowEventMessageFulfillmentKind
   parameters: {
     isCompleted: boolean
+    isExists: boolean
     userId?: string
     chatSessionId?: string
     description?: string

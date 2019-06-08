@@ -2,9 +2,9 @@ import { Datastore } from '@google-cloud/datastore'
 import { newGlobalError, ErrorType } from '../entities/error'
 import { Omit } from '../entities/common'
 import { Permission, ACL, newResourceTag, SYSTEM_USER, ResourceTag } from '../entities/acl'
-import { RepositoryOperationOption, composeRepositoryOptions, WithSystemOperation } from './common'
+import { OperationOption, composeOperationOptions, WithSystemOperation } from './common'
 
-export type ACLRepositoryOperationOption = RepositoryOperationOption<ACL>
+export type ACLRepositoryOperationOption = OperationOption<ACL>
 export interface ACLRepository {
   IsGranted(userId: string, resourceTag: ResourceTag, permission: Permission): Promise<boolean>
   IsGrantedOrThrow(userId: string, resourceTag: ResourceTag, permission: Permission): Promise<boolean>
@@ -17,8 +17,8 @@ export interface ACLRepository {
 }
 
 export class DatastoreACLRepository implements ACLRepository {
-  async RevokeAllPermissionFromResource(userId: string, resourceTag: ResourceTag, ...opts: RepositoryOperationOption<ACL>[]): Promise<void> {
-    const options = composeRepositoryOptions(...opts)
+  async RevokeAllPermissionFromResource(userId: string, resourceTag: ResourceTag, ...opts: OperationOption<ACL>[]): Promise<void> {
+    const options = composeOperationOptions(...opts)
     await this.IsGranted(options.operationOwnerId, newResourceTag('acl'), Permission.OWNER)
     const key = this.getACLKey(userId, resourceTag)
     await this.db.delete(key)
@@ -64,7 +64,7 @@ export class DatastoreACLRepository implements ACLRepository {
   }
 
   async CreatePermission(userId: string, tag: ResourceTag, permission: Permission, ...opts: ACLRepositoryOperationOption[]): Promise<void> {
-    const options = composeRepositoryOptions(...opts)
+    const options = composeOperationOptions(...opts)
     await this.IsGrantedOrThrow(options.operationOwnerId, newResourceTag('acl'), Permission.WRITER)
     const key = this.getACLKey(userId, tag)
     const [existACL]: [ACL | undefined] = await this.db.get(key)
@@ -100,7 +100,7 @@ export class DatastoreACLRepository implements ACLRepository {
   }
 
   async GetPermission(userId: string, resourceTag: ResourceTag, permission: Permission, ...opts: ACLRepositoryOperationOption[]): Promise<ACL | undefined> {
-    const options = composeRepositoryOptions(...opts)
+    const options = composeOperationOptions(...opts)
     await this.IsGranted(options.operationOwnerId, newResourceTag('acl'), Permission.VIEWER)
     const query = this.db.createQuery(this.ACLKind).filter('__key__', this.getACLKey(userId, resourceTag))
     const [entities] = await this.db.runQuery(query)
