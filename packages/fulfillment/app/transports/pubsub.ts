@@ -1,6 +1,6 @@
 import { MessageChannelTransport, newLogger } from '@shio-bot/foundation'
 import { FulfillmentEndpoint } from '../endpoints'
-import { createOutgoingFromIncomingMessage, OutgoingMessage, ListItemEventMessageIntentKind } from '@shio-bot/foundation/entities'
+import { createOutgoingFromIncomingMessage, OutgoingMessage } from '@shio-bot/foundation/entities'
 import { newGlobalError, ErrorType } from '../entities/error';
 
 export function registerPubsub(pubsub: MessageChannelTransport, endpoints: FulfillmentEndpoint) {

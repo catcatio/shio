@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`constant test getFulfillmentDevelopmentConstant 1`] = `
+Object {
+  "datastoreNamespace": "fulfillment-development",
+  "projectId": "catcat-development",
+  "storageName": "catcat-development",
+}
+`;

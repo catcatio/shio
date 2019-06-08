@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "bin": {
+    "shio": "./cmd/index.js"
+  },
   "devDependencies": {
     "@types/cli-table": "^0.3.0",
     "@types/jest": "^24.0.12",
@@ -10,7 +13,6 @@
     "@types/node-fetch": "^2.3.4",
     "@types/uuid": "^3.4.4",
     "@types/winston": "^2.4.4",
-    "commander": "^2.20.0",
     "grpc-tools": "^1.7.3",
     "grpc_tools_node_protoc_ts": "^2.5.3",
     "jest": "^24.8.0",
@@ -23,10 +25,11 @@
     "tslint": "^5.17.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-sonarts": "^1.9.0",
-    "typescript": "^3.5.1",
-    "uuid": "^3.3.2"
+    "typescript": "^3.5.1"
   },
   "dependencies": {
+    "commander": "^2.20.0",
+    "uuid": "^3.3.2",
     "@shio-bot/fulfillment": "^1.0.0",
     "adm-zip": "^0.4.13",
     "cli-table": "^0.3.1",

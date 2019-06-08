@@ -16,7 +16,7 @@ message ListBookAssetOutput {
   message BookAssetItem {
     string id = 1;
     string slug = 2;
-    string describeUrl = 3;
+    string description = 3;
     string title = 4;
   }
   repeated BookAssetItem records = 1;

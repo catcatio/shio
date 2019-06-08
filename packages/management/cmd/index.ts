@@ -32,7 +32,6 @@ program
   .option("--offset <value>", "offset of page", 0)
   .action((type, action, options) => {
     const conn = new FulfillmentManagerClient(options.endpoint, credentials.createInsecure())
-    console.log(type, action)
     if (type === 'book' && action === 'add') {
 
       const p = isFileOrExit(options.file)
@@ -57,11 +56,11 @@ program
           process.exit(2)
         }
         var table = new Table({
-          head: ['ID', 'Title'], colWidths: [38, 18]
+          head: ['ID', 'Title', 'Description'], colWidths: [10, 18, 24]
         });
 
         resp.getRecordsList().forEach(record => {
-          table.push([record.getId(), record.getTitle()])
+          table.push([record.getId(), record.getTitle(), record.getDescription()])
         })
         console.log(table.toString())
       })

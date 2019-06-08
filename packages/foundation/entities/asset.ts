@@ -13,6 +13,7 @@ export interface AssetMetadataEvent {
     kind: typeof AssetMetadataEventKind
     eventURL: string
     title: string
+    description?: string
 }
 
 export type AssetMetadata = AssetMetadataBook | AssetMetadataEvent

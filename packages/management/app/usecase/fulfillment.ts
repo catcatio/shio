@@ -48,7 +48,7 @@ export class FulfillmentManagerUseCase {
     const output = new ListBookAssetOutput()
     output.setRecordsList(assets.records.map(a => {
       const v = new ListBookAssetOutput.BookAssetItem()
-      v.setDescribeurl(a.describeURL)
+      v.setDescription(a.meta.description || "")
       v.setId(a.id)
       v.setTitle(a.meta.title)
       return v
