@@ -37,7 +37,7 @@
   "dependencies": {
     "@google-cloud/datastore": "^3.1.2",
     "@google-cloud/pubsub": "^0.28.1",
-    "@shio-bot/foundation": "^1.0.7",
+    "@shio-bot/foundation": "^1.0.9",
     "dataloader": "^1.4.0",
     "express": "^4.17.1",
     "joi": "^14.3.1",

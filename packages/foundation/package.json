@@ -1,6 +1,6 @@
 {
   "name": "@shio-bot/foundation",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "private": false,
   "license": "MIT",
   "main": "index.js",
@@ -8,12 +8,14 @@
     "build": "yarn tsc",
     "clean": "find -E . -regex '.*\\.(js|map|d\\.ts)' -not -path \"**/node_modules/*\" -not -path  \"./.next/*\" -delete",
     "test": "yarn integration",
+    "unit": "yarn jest --config jest.unit.json",
     "integration": "yarn jest --config jest.integration.json",
     "prepublish": "yarn build"
   },
   "devDependencies": {
     "@types/express": "^4.16.1",
     "@types/jest": "^24.0.13",
+    "@types/joi": "^14.3.3",
     "@types/node-fetch": "^2.3.4",
     "jest": "^24.8.0",
     "typescript": "^3.4.5"
@@ -23,6 +25,7 @@
     "@google-cloud/logging-winston": "^0.11.1",
     "@google-cloud/pubsub": "^0.28.1",
     "@google-cloud/storage": "^2.5.0",
+    "joi": "^14.3.1",
     "nanoid": "^2.0.3",
     "ulid": "^2.3.0",
     "winston": "^3.2.1"

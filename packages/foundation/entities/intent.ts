@@ -1,12 +1,23 @@
 import { AssetMetadata } from "./asset";
+import * as Joi from 'joi'
 
 
 export enum ListItemEventMessageIntentParameterFilter {
-  RECENT,
-  MOST_VIEWED,
+  RECENT = 'recent',
+  MOST_VIEWED = 'mostviewed',
 }
 
 export const ListItemEventMessageIntentKind = 'list-item'
+export const ListItemEventMessageIntentSchema = Joi.object()
+  .keys({
+    name: Joi.string().allow(ListItemEventMessageIntentKind),
+    parameters: Joi.object().keys({
+      merchantId: Joi.string(),
+      limit: Joi.number(),
+      offset: Joi.number(),
+      filter: Joi.required().allow(Object.keys(ListItemEventMessageIntentParameterFilter).map(e => ListItemEventMessageIntentParameterFilter[e]))
+    })
+  })
 export interface ListItemEventMessageIntent {
   name: typeof ListItemEventMessageIntentKind
   parameters: {
@@ -37,6 +48,12 @@ export interface ListItemEventMessageFulfillment {
 
 
 export const FollowEventMessageIntentKind = 'follow'
+export const FollowEventMessageIntentSchema = Joi.object().keys({
+  name: FollowEventMessageIntentKind,
+  parameters: Joi.object().keys({
+    displayName: Joi.string().required(),
+  })
+})
 export interface FollowEventMessageIntent {
   name: typeof FollowEventMessageIntentKind
   parameters: {
@@ -80,3 +97,13 @@ export type MessageFulfillment =
   | FollowEventMessageFulfillment
   | ErrorEventMessageFulfillment
   | ListItemEventMessageFulfillment
+
+
+export function validateMessageIntent(message: any): { value: MessageIntent, error: Joi.ValidationError } {
+
+  return Joi.validate(message, Joi.alternatives().try(
+    ListItemEventMessageIntentSchema,
+    FollowEventMessageIntentSchema,
+  ))
+
+}
