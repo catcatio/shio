@@ -1,9 +1,8 @@
 import { Config } from '../app/config'
-import { GetEnvStringOrThrow, GetEnvString } from '@shio-bot/foundation'
+import { GetEnvStringOrThrow, GetEnvString, newLogger } from '@shio-bot/foundation'
 import { bootstrap, getFulfillmentDevelopmentConstant } from '../app'
 
 export function LoadConfig(): Config {
-
   const defaultConstant = getFulfillmentDevelopmentConstant()
 
   const option: Config = {
@@ -25,10 +24,13 @@ export function LoadConfig(): Config {
 
 async function run() {
   const config = LoadConfig()
+  const log = newLogger()
+  log.info("init shio fulfillment service....")
   const service = await bootstrap({
     ...config,
     dev: false,
   })
+  log.info('service is ready!!')
 
   process.on('beforeExit', () => {
     service.close().then()

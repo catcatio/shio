@@ -6,6 +6,16 @@ import { credentials } from 'grpc';
 import { FulfillmentManagerClient } from '../__generated__/fulfillment_grpc_pb';
 import Table from 'cli-table'
 
+const tableStyle = {
+  chars: {
+    'top': '', 'top-mid': '', 'top-left': '', 'top-right': ''
+    , 'bottom': '', 'bottom-mid': '', 'bottom-left': '', 'bottom-right': ''
+    , 'left': '', 'left-mid': '', 'mid': '', 'mid-mid': ''
+    , 'right': '', 'right-mid': '', 'middle': ' '
+  },
+  style: { 'padding-left': 0, 'padding-right': 0 }
+}
+
 function isFileOrExit(value: string): string {
   if (!isAbsolute(value)) {
     value = join(process.cwd(), value)
@@ -21,7 +31,6 @@ function isFileOrExit(value: string): string {
 
 console.log('...')
 program
-  .version('1.0.0')
   .command('asset <type> <action>')
   .option('-e --endpoint <value>', 'endpoint of service', 'localhost:9199')
   .option('-t, --title <type>', 'asset title')
@@ -56,7 +65,8 @@ program
           process.exit(2)
         }
         var table = new Table({
-          head: ['ID', 'Title', 'Description'], colWidths: [10, 18, 24]
+          ...tableStyle,
+          head: ['ID', 'Title', 'Description'], colWidths: [10, 18, 48]
         });
 
         resp.getRecordsList().forEach(record => {
@@ -67,4 +77,12 @@ program
     }
   })
 
+
+program
+  .command('pubsub')
+  .arguments('<cmd>').action((arg) => {
+
+
+
+  })
 program.parse(process.argv)

@@ -3,7 +3,6 @@ package management;
 
 
 service FulfillmentManager {
-
   rpc CreateBookAsset(CreateBookAssetInput) returns (stream CreateBookAssetOutput);
   rpc ListBookAsset(ListBookAssetInput) returns (ListBookAssetOutput);
 }

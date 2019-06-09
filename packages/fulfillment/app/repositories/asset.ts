@@ -29,6 +29,7 @@ export class DatastoreAssetRepository extends DatastoreBaseRepository implements
     } else {
       assetKey = await this.allocateKey(this.AssetKind)
     }
+    input.createdAt = new Date()
     await this.db.upsert({
       key: assetKey,
       data: input

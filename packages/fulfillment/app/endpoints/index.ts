@@ -89,9 +89,15 @@ export class DefaultFulfillmentEndpoint {
     return this.boarding.getUserChatSession(incomingMessage.provider, incomingMessage.source.userId)
   }
   private async getSessionFromIncomingMessageOrThrow(incomingMessage: IncomingMessage): Promise<UserChatSession> {
-    const session = await this.getSessionFromIncomingMessage(incomingMessage)
+    let session = await this.getSessionFromIncomingMessage(incomingMessage)
     if (!session) {
-      throw newGlobalError(ErrorType.Auth, "session not found")
+      // try to create new one
+      const result = await this.boarding.userFollow({
+        displayName: incomingMessage.userProfile.displayName,
+        provider: incomingMessage.provider,
+        providerId: incomingMessage.source.userId,
+      }) 
+      session = result.userChatSession 
     }
     return session
   }

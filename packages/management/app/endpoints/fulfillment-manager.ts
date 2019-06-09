@@ -2,7 +2,6 @@ import { IFulfillmentManagerServer } from "../../__generated__/fulfillment_grpc_
 import { CreateBookAssetOutput, CreateBookAssetInput, ListBookAssetOutput } from "../../__generated__/fulfillment_pb";
 import { FulfillmentManagerUseCase } from "../usecase/fulfillment";
 import { newLogger, createStreamTransport } from "@shio-bot/foundation";
-import { createWriteStream } from "fs";
 import { Writable } from "stream";
 
 

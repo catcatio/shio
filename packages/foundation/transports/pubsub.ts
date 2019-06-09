@@ -2,6 +2,7 @@ import { IncomingMessage, OutgoingMessage } from '../entities'
 import { PubSub, Topic, Subscription, Message } from '@google-cloud/pubsub'
 import * as express from 'express'
 import { newLogger, ShioLogger } from '../logger'
+const nanoid = require('nanoid')
 
 export const PUBSUB_INCOMING_MESSAGE_TOPIC = 'shio-incoming-message'
 export const PUBSUB_FULLFILLMENT_SUBSCRIPTION = 'shio-fullfillment-service'
@@ -31,6 +32,8 @@ export interface MessageChannelManager {
   prepareTopic(): Promise<void>
   purge(): Promise<void>
 
+  // DebugIncomingMessage(listener: (message: any) => void)
+
   messageRouter: express.Router
 }
 
@@ -56,6 +59,17 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
     this.outgoingTopic = this.pubsub.topic(PUBSUB_OUTGOING_MESSAGE_TOPIC)
     this.incomingSubscription = this.incomingTopic.subscription(PUBSUB_FULLFILLMENT_SUBSCRIPTION)
     this.outgoingSubscription = this.outgoingTopic.subscription(PUBSUB_OUTGOING_SUBSCRIPTION)
+  }
+  
+  async DebugIncomingMessage(listener: (message: any) => void) {
+    // subscribe to topic
+    const subscriptionName = 'debug-incoming-' + nanoid(5)
+    await this.pubsub.createSubscription(this.incomingTopic.name, subscriptionName, { })
+    const debugSubscription = this.incomingTopic.subscription(subscriptionName)
+    debugSubscription.addListener('message', (message, ack) => {
+      listener(message)
+      ack()
+    })
   }
 
   private incomingListenerFunction: SubscribeIncomingMessageListener

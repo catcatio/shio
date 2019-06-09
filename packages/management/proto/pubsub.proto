@@ -1,0 +1,13 @@
+syntax = "proto3";
+package management;
+
+service PubsubManager {
+  rpc DebugTopic(DebugTopicInput) returns(stream DebugTopicOutput);
+}
+
+message DebugTopicInput {
+  string TopicName = 1;
+}
+message DebugTopicOutput {
+  string Message = 1;
+}

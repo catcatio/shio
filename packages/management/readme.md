@@ -1,5 +1,10 @@
 # Shio management CLI
 
+## Local usage
+start local server for CLI command
+```
+$ yarn dev
+```
 
 ## Asset management
 ### Book
