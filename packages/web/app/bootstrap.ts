@@ -5,7 +5,6 @@ import { createCloudPubSubInstance, WithClientConfig, CloudPubsubMessageChannelT
 import { ChatEngine } from '@shio-bot/chatengine'
 import { fulfillment } from './fulfillment'
 import { intentMessageHandler, fulfillmentMessageHandler } from './handlers'
-import { Router } from 'express'
 import { EchoPubSubTransport, MessageChannelTransportExt } from './internal'
 
 const msgPubsubPath = '/msgpubsub'

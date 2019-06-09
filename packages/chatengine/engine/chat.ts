@@ -39,9 +39,6 @@ export class ChatEngine extends ParsedMessageNotifier {
       lineSetup(router, this, this.config.line)
     }
 
-    if (this.config.linepay) {
-    }
-
     return router
   }
 
