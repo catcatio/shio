@@ -99,9 +99,9 @@ export type MessageFulfillment =
   | ListItemEventMessageFulfillment
 
 
-export function validateMessageIntent(message: any): { value: MessageIntent, error: Joi.ValidationError } {
+export function validateMessageIntent(intent: any): { value: MessageIntent, error: Joi.ValidationError } {
 
-  return Joi.validate(message, Joi.alternatives().try(
+  return Joi.validate(intent, Joi.alternatives().try(
     ListItemEventMessageIntentSchema,
     FollowEventMessageIntentSchema,
   ))

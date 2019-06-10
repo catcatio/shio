@@ -5,9 +5,14 @@
     "**/.hg": true,
     "**/CVS": true,
     "**/.DS_Store": true,
-    "**/*.js.map": true,
     "**/*.d.ts.map": true,
-    "**/node_modules": true
+    "**/node_modules": true,
+    "**/*.js": {
+      "when": "$(basename).ts"
+    },
+    "**/*.js.map": {
+      "when": "$(basename)"
+    }
   },
   "files.autoSave": "off"
 }
