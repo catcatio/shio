@@ -1,9 +1,8 @@
 import { ParsedMessage, Intent, IntentDetector, MessagingClientProvider } from '@shio-bot/chatengine/types'
-import { PublishIncommingMessageInput, newLogger } from '@shio-bot/foundation'
+import { PublishIncomingMessageInput, newLogger } from '@shio-bot/foundation'
 import { v4 as uuid } from 'uuid'
 import { Fulfillment } from '../types'
-import { validateMessageIntent, MessageIntent } from '@shio-bot/foundation/entities';
-
+import { validateMessageIntent, MessageIntent } from '@shio-bot/foundation/entities'
 
 export function tryBypassMessage(value: any) {
   if (typeof value !== 'string') {
@@ -23,8 +22,6 @@ export function tryBypassMessage(value: any) {
 export const intentMessageHandler = (fulfillment: Fulfillment, intentDetector: IntentDetector, messagingClientProvider: MessagingClientProvider) => {
   const log = newLogger()
   const handle = async (msg: ParsedMessage) => {
-
-
     // get intent
     let intent: MessageIntent
 
@@ -33,12 +30,12 @@ export const intentMessageHandler = (fulfillment: Fulfillment, intentDetector: I
     // example:
     // shio bypass list-item "{\"offset\": 5}"
     // shio bypass follow
-    log.info("incoming message: " + msg.message)
+    log.info('incoming message: ' + msg.message)
     const byPassMessage = tryBypassMessage(msg.message)
     if (byPassMessage) {
-      log.info("bypass intent parser with special command: " + msg.message)
+      log.info('bypass intent parser with special command: ' + msg.message)
       const { value, error } = validateMessageIntent(byPassMessage)
-      if (error){
+      if (error) {
         log.error(JSON.stringify(error.details))
         return
       }
@@ -46,7 +43,7 @@ export const intentMessageHandler = (fulfillment: Fulfillment, intentDetector: I
     } else {
       // basic conversation text
       // perform intent detactor
-      intent = intentDetector.isSupport(msg.type) ? await intentDetector.detect(msg) : await Promise.resolve({ name: `${msg.type}`, parameters: {} } as Intent) as any
+      intent = intentDetector.isSupport(msg.type) ? await intentDetector.detect(msg) : ((await Promise.resolve({ name: `${msg.type}`, parameters: {} } as Intent)) as any)
     }
 
     if (!intent) {
@@ -67,8 +64,8 @@ export const intentMessageHandler = (fulfillment: Fulfillment, intentDetector: I
     // pub message
     let requestId = uuid()
 
-    let input: PublishIncommingMessageInput = {
-      intent: intent,
+    let input: PublishIncomingMessageInput = {
+      intent: intent as any,
       provider: msg.provider as any,
       replyToken: msg.replyToken,
       languageCode: 'en',
@@ -84,7 +81,7 @@ export const intentMessageHandler = (fulfillment: Fulfillment, intentDetector: I
       requestId: requestId
     }
 
-    console.log('PublishIncommingMessageInput', JSON.stringify(input))
+    console.log('PublishIncomingMessageInput', JSON.stringify(input))
     fulfillment
       .publishIntent(input)
       .then(_ => console.log('incoming message published:', requestId))

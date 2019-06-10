@@ -20,6 +20,7 @@
     "adm-zip": "^0.4.13",
     "dialogflow": "^0.9.1",
     "fs-extra": "^8.0.1",
+    "line-pay": "^1.0.15",
     "node-fetch": "^2.6.0",
     "nodemon": "^1.19.1",
     "yargs": "^13.2.4"

@@ -1,4 +1,4 @@
-import { MessageChannelTransport, newLogger } from '@shio-bot/foundation'
+import { newLogger, MessageChannelTransport } from '@shio-bot/foundation'
 import { FulfillmentEndpoint } from '../endpoints'
 import { createOutgoingFromIncomingMessage, OutgoingMessage } from '@shio-bot/foundation/entities'
 import { newGlobalError, ErrorType } from '../entities/error';
@@ -6,8 +6,7 @@ import { newGlobalError, ErrorType } from '../entities/error';
 export function registerPubsub(pubsub: MessageChannelTransport, endpoints: FulfillmentEndpoint) {
   const log = newLogger()
 
-
-  pubsub.SubscribeIncommingMessage(async (message, ack) => {
+  pubsub.SubscribeIncoming(async (message, ack) => {
     log
       .withRequestId(message.requestId)
       .withProviderName(message.provider)
@@ -33,11 +32,10 @@ export function registerPubsub(pubsub: MessageChannelTransport, endpoints: Fulfi
 
       // Send outgoing message
       if (outgoingMessage) {
-        await pubsub.PublishOutgoingMessage(outgoingMessage)
+        await pubsub.PublishOutgoing(outgoingMessage)
       }
-
     } catch (e) {
-      await pubsub.PublishOutgoingMessage(
+      await pubsub.PublishOutgoing(
         createOutgoingFromIncomingMessage(message, {
           name: 'error',
           parameters: {

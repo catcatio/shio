@@ -60,11 +60,11 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
     this.incomingSubscription = this.incomingTopic.subscription(PUBSUB_FULLFILLMENT_SUBSCRIPTION)
     this.outgoingSubscription = this.outgoingTopic.subscription(PUBSUB_OUTGOING_SUBSCRIPTION)
   }
-  
+
   async DebugIncomingMessage(listener: (message: any) => void) {
     // subscribe to topic
     const subscriptionName = 'debug-incoming-' + nanoid(5)
-    await this.pubsub.createSubscription(this.incomingTopic.name, subscriptionName, { })
+    await this.pubsub.createSubscription(this.incomingTopic.name, subscriptionName, {})
     const debugSubscription = this.incomingTopic.subscription(subscriptionName)
     debugSubscription.addListener('message', (message, ack) => {
       listener(message)
@@ -213,8 +213,15 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
     this.log.info('Prepare subscription channel message...')
     const [topics] = await this.pubsub.getTopics()
     this.log.info('Topic list')
-    this.log.info(topics.map(t => t.name).join('\n'))
-    await Promise.all([this.incomingTopic.get({ autoCreate: true }), this.outgoingTopic.get({ autoCreate: true })])
+    if (topics.length === 0) {
+      this.log.info("there are no topics.....")
+    } else {
+      this.log.info(topics.map(t => t.name).join('\n'))
+    }
+    const topicCreateResults = await Promise.all([this.incomingTopic.get({ autoCreate: true }), this.outgoingTopic.get({ autoCreate: true })])
+    topicCreateResults.forEach(( [ topic ] ) => {
+      this.log.info("topic: " + topic.name + " is ready")
+    })
   }
 
   // purge method will remove subscription channel of

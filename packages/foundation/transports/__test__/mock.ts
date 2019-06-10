@@ -1,31 +1,56 @@
-import { CloudPubsubMessageChannelTransport, MessageChannelTransport, SubscribeIncomingMessageListener, SubscribeOutgoingMessageListener } from '../pubsub'
+import { PublishIncomingMessageInput, PublishOutgoingMessageInput, MessageChannelTransport, SubscribeListener, PaymentChannelTransport } from '../pubsub'
+import { ReservePayment, ConfirmPayment } from '../../entities'
 
-export class __mock__CloudPubsubTransports implements MessageChannelTransport {
-  incomingSubs: SubscribeIncomingMessageListener[] = []
-  outgoingSubs: SubscribeOutgoingMessageListener[] = []
+export class __mock__CloudPubsubMessageTransports implements MessageChannelTransport {
+  incomingSubs: SubscribeListener<PublishIncomingMessageInput>[] = []
+  outgoingSubs: SubscribeListener<PublishOutgoingMessageInput>[] = []
 
   ack = jest.fn()
 
-  async PublishIncommingMessage(input: import('../pubsub').PublishIncommingMessageInput): Promise<void> {
+  async PublishIncoming(input: PublishIncomingMessageInput): Promise<void> {
     await Promise.all(
       this.incomingSubs.map(async i => {
         await i(input, this.ack)
       })
     )
   }
-  SubscribeIncommingMessage(listener: import('../pubsub').SubscribeIncomingMessageListener): void {
+  SubscribeIncoming(listener: SubscribeListener<PublishIncomingMessageInput>): void {
     this.incomingSubs.push(listener)
   }
-  UnsubscribeAllIncomingMessage(): void {
+  PublishOutgoing(input: PublishOutgoingMessageInput): Promise<void> {
     throw new Error('Method not implemented.')
   }
-  PublishOutgoingMessage(input: import('../pubsub').PublishOutgoingMessageInput): Promise<void> {
+  SubscribeOutgoing(listener: SubscribeListener<PublishOutgoingMessageInput>): void {
     throw new Error('Method not implemented.')
   }
-  SubscribeOutgoingMessage(listener: import('../pubsub').SubscribeOutgoingMessageListener): void {
+  UnsubscribeAll(): void {
     throw new Error('Method not implemented.')
   }
-  UnsubscribeAllOutgoingMessage(): void {
+}
+
+export class __mock__CloudPubsubPaymentTransports implements PaymentChannelTransport {
+  incomingSubs: SubscribeListener<ReservePayment>[] = []
+  outgoingSubs: SubscribeListener<ConfirmPayment>[] = []
+
+  ack = jest.fn()
+
+  async PublishIncoming(input: ReservePayment): Promise<void> {
+    await Promise.all(
+      this.incomingSubs.map(async i => {
+        await i(input, this.ack)
+      })
+    )
+  }
+  SubscribeIncoming(listener: SubscribeListener<ReservePayment>): void {
+    this.incomingSubs.push(listener)
+  }
+  PublishOutgoing(input: ConfirmPayment): Promise<void> {
+    throw new Error('Method not implemented.')
+  }
+  SubscribeOutgoing(listener: SubscribeListener<ConfirmPayment>): void {
+    throw new Error('Method not implemented.')
+  }
+  UnsubscribeAll(): void {
     throw new Error('Method not implemented.')
   }
 }

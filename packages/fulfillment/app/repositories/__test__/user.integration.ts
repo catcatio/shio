@@ -3,7 +3,7 @@ import { WithSystemOperation, WithWhere, WithOperationOwner } from '../common'
 import { createDatastoreInstance, WithDatastoreAPIEndpoint, WithDatastoreNameSpace, WithDatastoreProjectId } from '@shio-bot/foundation'
 import { Datastore } from '@google-cloud/datastore'
 import * as uuid from 'uuid/v4'
-import { User } from '../../entities';
+import { User } from '../../entities'
 
 describe('DatastoreUserRepository test', () => {
   let userRepo: DatastoreUserRepository
@@ -12,8 +12,9 @@ describe('DatastoreUserRepository test', () => {
     datastore = await createDatastoreInstance(
       WithDatastoreNameSpace('catcat-local-dev'),
       WithDatastoreProjectId('catcat-development'),
+      WithDatastoreAPIEndpoint('http://localhost:5545')
     )
-    // WithDatastoreAPIEndpoint('http://localhost:5545')
+
     userRepo = new DatastoreUserRepository(datastore)
   })
 

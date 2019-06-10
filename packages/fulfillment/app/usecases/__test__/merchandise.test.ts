@@ -1,8 +1,3 @@
-
-describe("Merchandise usecase", () => {
-
-
-
-
-
+describe('Merchandise usecase', () => {
+  //
 })

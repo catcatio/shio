@@ -1,5 +1,5 @@
 {
-  "displayName": "unit tests",
+  "displayName": "integration",
   "testURL": "http://localhost/",
   "verbose": true,
   "globals": {
@@ -12,7 +12,7 @@
   },
   "reporters": ["default"],
   "testEnvironment": "node",
-  "testMatch": ["<rootDir>/**/__test__/**/*.(spec|test).ts"],
+  "testMatch": ["<rootDir>/**/__test__/**/*.test.ts"],
   "testPathIgnorePatterns": ["/node_modules/"],
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "node", "json"]
 }

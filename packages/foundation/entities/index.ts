@@ -1,4 +1,5 @@
 export * from './message'
+export * from './payment'
 export * from './intent'
 export * from './asset'
 

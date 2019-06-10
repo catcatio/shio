@@ -1,10 +1,9 @@
 import { Router, Request, Response } from 'express'
-import { LineSettings } from '../types'
+import { LineSettings, IParsedMessageNotifier } from '../types'
 import { requestHandler } from './requestHandler'
 import { messageParser } from './messageParser'
-import { ParsedMessageNotifier } from '../engine/notifier'
 
-export const setup = (router: Router, notifier: ParsedMessageNotifier, lineSettings: LineSettings) => {
+export const setup = (router: Router, notifier: IParsedMessageNotifier, lineSettings: LineSettings) => {
   const handler = requestHandler(lineSettings.clientConfig.channelSecret)
   const parser = messageParser()
 
