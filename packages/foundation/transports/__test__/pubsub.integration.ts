@@ -1,4 +1,4 @@
-import { CloudPubsubMessageChannelTransport } from '../pubsub'
+import { CloudPubsubMessageChannelTransport } from '../pubsub/message'
 import { createCloudPubSubInstance, WithPubsubEndpoint, WithPubsubProjectId } from '../../pubsub'
 import { randomIncomingMessage, randomFollowMessageIntent, randomOutgoingMessage, randomFollowMessageFulfillment } from '../../entities/__test__/random'
 import { IncomingMessage } from '../../entities'
@@ -37,11 +37,11 @@ describe('CloudPubsub messageing transports integration testing', () => {
 
     // Clear the subscription channel
     // for testing (message in queue should be empty)
-    await pubsub.purge()
+    await pubsub.Purge()
 
     // Create topic that need for
     // Transport messageing
-    await pubsub.prepareTopic()
+    await pubsub.PrepareTopic()
 
     // start server
     // to receive push message
@@ -49,7 +49,7 @@ describe('CloudPubsub messageing transports integration testing', () => {
 
     const app = express()
     app.use(express.json())
-    app.use('/', pubsub.messageRouter)
+    app.use('/', pubsub.NotificationRouter)
     app.get('/', (req, res) => res.status(200).send('ok'))
     server = app.listen(atoi(serverHost.port), () => {
       console.log('test server started ', serverHost.port)
@@ -64,15 +64,15 @@ describe('CloudPubsub messageing transports integration testing', () => {
     // Set both subscription push endpoint to this instance
     // THIS MUST DO IN MIGRATION SCRIPT OR CONFIG IT BY HAND
     // DO NOT CALL THIS FUNCTION ON SERVICE
-    await pubsub.createIncomingSubscriptionConfig(host)
+    await pubsub.CreateIncomingSubscriptionConfig(host)
 
     // Send new incoming message to IncomingMesageTopic
-    await pubsub.PublishIncommingMessage(incomingMessage)
+    await pubsub.PublishIncoming(incomingMessage)
 
     // register incoming message handler
     // to pubsub transport (http://localhost:8080/incoming)
     await new Promise((resolve, reject) => {
-      pubsub.SubscribeIncommingMessage((message: IncomingMessage, ack: () => void) => {
+      pubsub.SubscribeIncoming((message: IncomingMessage, ack: () => void) => {
         ack()
         subscriptionChannel(message)
         resolve()
@@ -89,15 +89,15 @@ describe('CloudPubsub messageing transports integration testing', () => {
   test('Outgoing publish and subscription', async () => {
     // THIS MUST DO IN MIGRATION SCRIPT OR CONFIG IT BY HAND
     // DO NOT CALL THIS FUNCTION ON SERVICE
-    await pubsub.createOutgoingSubscriptionConfig(host)
+    await pubsub.CreateOutgoingSubscriptionConfig(host)
 
     // begin publish message
     const outgoingMessage = randomOutgoingMessage(randomFollowMessageFulfillment())
     const subscriptionChannel = jest.fn()
 
-    await pubsub.PublishOutgoingMessage(outgoingMessage)
+    await pubsub.PublishOutgoing(outgoingMessage)
     await new Promise((resolve, reject) => {
-      pubsub.SubscribeOutgoingMessage((message, ack) => {
+      pubsub.SubscribeOutgoing((message, ack) => {
         subscriptionChannel(message)
         resolve(message)
         ack()

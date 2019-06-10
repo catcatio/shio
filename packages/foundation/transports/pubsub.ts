@@ -10,10 +10,10 @@ export const PUBSUB_FULLFILLMENT_SUBSCRIPTION = 'shio-fullfillment-service'
 export const PUBSUB_OUTGOING_MESSAGE_TOPIC = 'shio-outgoing-message'
 export const PUBSUB_OUTGOING_SUBSCRIPTION = 'shio-outgoing-subscription'
 
-export interface PublishIncommingMessageInput extends IncomingMessage { }
+export interface PublishIncommingMessageInput extends IncomingMessage {}
 export type SubscribeIncomingMessageListener = (message: IncomingMessage, acknowledge: () => void) => Promise<void> | void
 
-export interface PublishOutgoingMessageInput extends OutgoingMessage { }
+export interface PublishOutgoingMessageInput extends OutgoingMessage {}
 export type SubscribeOutgoingMessageListener = (message: OutgoingMessage, acknowledge: () => void) => Promise<void> | void
 
 export interface MessageChannelTransport {
@@ -60,11 +60,11 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
     this.incomingSubscription = this.incomingTopic.subscription(PUBSUB_FULLFILLMENT_SUBSCRIPTION)
     this.outgoingSubscription = this.outgoingTopic.subscription(PUBSUB_OUTGOING_SUBSCRIPTION)
   }
-  
+
   async DebugIncomingMessage(listener: (message: any) => void) {
     // subscribe to topic
     const subscriptionName = 'debug-incoming-' + nanoid(5)
-    await this.pubsub.createSubscription(this.incomingTopic.name, subscriptionName, { })
+    await this.pubsub.createSubscription(this.incomingTopic.name, subscriptionName, {})
     const debugSubscription = this.incomingTopic.subscription(subscriptionName)
     debugSubscription.addListener('message', (message, ack) => {
       listener(message)
@@ -90,7 +90,10 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
   }
 
   async PublishOutgoingMessage(input: PublishOutgoingMessageInput): Promise<void> {
-    this.log.withRequestId(input.requestId).withFields({ fullfillment: input.fulfillment.map(f => f.name).join(',') }).info(`Publish message to outgoing topic: ${input.provider}(${input.source.userId})`)
+    this.log
+      .withRequestId(input.requestId)
+      .withFields({ fullfillment: input.fulfillment.map(f => f.name).join(',') })
+      .info(`Publish message to outgoing topic: ${input.provider}(${input.source.userId})`)
     await this.outgoingTopic.publishJSON({
       ...input,
       origin: this.serviceName
@@ -235,6 +238,3 @@ export class CloudPubsubMessageChannelTransport implements MessageChannelTranspo
     }
   }
 }
-
-
-
