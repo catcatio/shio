@@ -17,13 +17,11 @@ if (platform() === 'darwin') {
   host = 'http://localhost:8890'
 }
 
+jest.setTimeout(60 * 1000)
 describe('CloudPubsub messageing transports integration testing', () => {
   let pubsub: CloudPubsubMessageChannelTransport
   let server: Server
   beforeAll(async () => {
-    if (GetEnvString('FOUNDATION_INTEGRATION_DEBUG') === '1') {
-      jest.setTimeout(60 * 1000)
-    }
 
     // Create pubsub connect to local pubsub server
     // ATTEND: this endpoint must be in local development or development project

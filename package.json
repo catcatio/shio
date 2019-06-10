@@ -9,5 +9,9 @@
   ],
   "devDependencies": {
     "lerna": "^2.9.0"
+  },
+  "scripts": {
+    "gcp-build": "gcloud builds submit --config ./cloudbuild.yaml",
+    "clean": "sh ./scripts/clean.bash"
   }
 }
