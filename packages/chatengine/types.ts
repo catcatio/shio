@@ -190,6 +190,7 @@ export type LinePaySettings = {
   }
   apiEndpoint: string
   confirmUrl: string
+  routerPath?: string
 }
 
 export type IntentFunc = (msg: string) => Intent
@@ -218,5 +219,62 @@ export interface ExportedAgent {
 }
 
 export const OnMessageReceivedEventName = 'MessageReceived'
+export const OnPaymentConfirmationReceivedEventName = 'PaymentConfirmationReceived'
 
 export type OnMessageReceivedCallback = (message: ParsedMessage) => void
+
+export type ConfirmTransaction = (confirmRequest: PaymentConfirmRequest) => Promise<PaymentConfirmResponse>
+
+export type OnPaymentConfirmationReceivedCallback = (payload: PaymentConfirmationPayload, confirmTransaction: ConfirmTransaction) => Promise<any>
+
+export interface IParsedMessageNotifier {
+  onMessageReceived(cb: OnMessageReceivedCallback): void
+  notify(msg: ParsedMessage): void
+}
+
+export interface IPaymentNotifier {
+  onPaymentConfirmationReceived(cb: OnPaymentConfirmationReceivedCallback): void
+  notify(payload: PaymentConfirmationPayload, cb: ConfirmTransaction): void
+}
+
+export type PaymentConfirmationPayload = LinePaymentConfirmationPayload
+
+export type PaymentConfirmRequest = LineMessageConfirmRequest
+
+export type PaymentConfirmResponse = {}
+
+export interface LineMessageConfirmRequest {
+  transactionId: string
+  amount: number
+  currency: string
+}
+
+export interface LinePaymentConfirmationPayload {
+  transactionId: string
+}
+
+export type ReservePaymentRequest = LineReservePaymentRequest
+export type ReservePaymentResponse = LineReservePaymentRequest
+
+export interface LineReservePaymentRequest {
+  productName: string
+  productImageUrl?: string
+  amount: number
+  currency: string
+  mid?: string // line member id
+  oneTimeKey?: string
+  confirmUrl: string
+  confirmUrlType?: 'SERVER' | 'CLIENT'
+  checkConfirmUrlBrowswer?: boolean
+  cancelUrl?: string
+  packageName?: string
+  orderId: string
+  deliveryPlacePhone?: string
+  payType?: 'NORMAL' | 'PREAPPROVED'
+  langCd?: string
+  capture?: boolean
+}
+
+export interface PaymentClient {
+  reserve(request: ReservePaymentRequest): Promise<ReservePaymentResponse>
+}

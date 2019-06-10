@@ -1,11 +1,20 @@
 import config from './config'
-import { createCloudPubSubInstance, WithPubsubProjectId, WithPubsubEndpoint, CloudPubsubMessageChannelTransport, GetEnvString, newLogger, MessageChannelTransport, UnPromise } from '@shio-bot/foundation'
+import {
+  createCloudPubSubInstance,
+  WithPubsubProjectId,
+  WithPubsubEndpoint,
+  CloudPubsubMessageChannelTransport,
+  GetEnvString,
+  newLogger,
+  MessageChannelTransport,
+  UnPromise
+} from '@shio-bot/foundation'
 import { OutgoingMessage, IncomingMessage } from '@shio-bot/foundation/entities'
 import { MessageFulfillment } from '@shio-bot/foundation/entities/intent'
 import { NarrowUnion } from '../app/endpoints/default'
 import * as express from 'express'
 import { Server } from 'http'
-import { FixtureStep, FixtureContext } from './fixture';
+import { FixtureStep, FixtureContext } from './fixture'
 
 export function runFixtureSteps(ctx: FixtureContext, pubsub: UnPromise<ReturnType<typeof createPubsubIntegrationClient>>) {
   return async (...steps: FixtureStep[]) => {
@@ -16,7 +25,6 @@ export function runFixtureSteps(ctx: FixtureContext, pubsub: UnPromise<ReturnTyp
     }
   }
 }
-
 
 export function expectFulfillment(message: OutgoingMessage) {
   return <Intent extends MessageFulfillment['name']>(name: Intent, assertFunction: (fulfillment: NarrowUnion<MessageFulfillment, Intent>) => void) => {
@@ -41,12 +49,12 @@ export const createPubsubIntegrationClient = async () => {
     async start() {
       const app = express()
       app.use(express.json())
-      app.use('/', pubsub.messageRouter)
+      app.use('/', pubsub.NotificationRouter)
       app.get('/', (req, res) => res.status(200).send('ok'))
       server = app.listen(8091, () => {
-        console.log('test server started ', 8091)
+        log.info('test server started 8091')
       })
-      await pubsub.createOutgoingSubscriptionConfig('http://host.docker.internal:8091')
+      await pubsub.CreateOutgoingSubscriptionConfig('http://host.docker.internal:8091')
     },
     sendIncomingMessage: (m: IncomingMessage): Promise<OutgoingMessage> => {
       if (GetEnvString('FULFILLMENT_INTEGRATION_DEBUG') === '1') {
@@ -54,7 +62,7 @@ export const createPubsubIntegrationClient = async () => {
       }
       return new Promise<OutgoingMessage>(async (res, reject) => {
         resolve = res
-        pubsub.SubscribeOutgoingMessage((message, ack) => {
+        pubsub.SubscribeOutgoing((message, ack) => {
           if (message.requestId !== m.requestId) {
             log.info(`IGNORE MESSAGE WITH REQUEST ID ${message.requestId}`)
             reject('INVALID MESSAGE ID')
@@ -65,14 +73,14 @@ export const createPubsubIntegrationClient = async () => {
           ack()
         })
 
-        pubsub.PublishIncommingMessage(m)
+        pubsub.PublishIncoming(m)
       })
     },
     clean: async () => {
-      await new Promise(resolve => {
+      await new Promise(r => {
         server.close(() => {
           log.info('server is shutdown')
-          resolve()
+          r()
         })
       })
       pubsub.UnsubscribeAllIncomingMessage()

@@ -1,11 +1,10 @@
 import { server } from './server'
 import { Configurations, PubSubSettings, Endpoint } from './types'
 import { chatEndpoint } from './endpoints/chat'
-import { createCloudPubSubInstance, WithClientConfig, CloudPubsubMessageChannelTransport, SubscribeOutgoingMessageListener } from '@shio-bot/foundation'
+import { createCloudPubSubInstance, WithClientConfig, CloudPubsubMessageChannelTransport } from '@shio-bot/foundation'
 import { ChatEngine } from '@shio-bot/chatengine'
 import { fulfillment } from './fulfillment'
 import { intentMessageHandler, fulfillmentMessageHandler } from './handlers'
-import { Router } from 'express'
 import { EchoPubSubTransport, MessageChannelTransportExt } from './internal'
 
 const msgPubsubPath = '/msgpubsub'
@@ -20,7 +19,7 @@ const createPubsubTransportInstance = async (settings: PubSubSettings, serviceNa
 }
 
 function makePubsubEndpoint(pubsub: MessageChannelTransportExt): Endpoint {
-  let ep: Endpoint = pubsub.messageRouter as any
+  let ep: Endpoint = pubsub.NotificationRouter as any
   ep.path = msgPubsubPath
   return ep
 }
@@ -34,7 +33,7 @@ export async function bootstrap(config: Configurations) {
   let inMsgHandler = intentMessageHandler(ff, intentDetector, chatEngine.messagingClientProvider)
   let outMsgHandler = fulfillmentMessageHandler(chatEngine.messagingClientProvider)
 
-  pubsub.createOutgoingSubscriptionConfig(`${config.host}${msgPubsubPath}`)
+  pubsub.CreateOutgoingSubscriptionConfig(`${config.host}${msgPubsubPath}`)
   ff.onFulfillment(outMsgHandler)
 
   chatEngine.onMessageReceived(inMsgHandler.handle)

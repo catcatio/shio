@@ -1,29 +1,24 @@
-import {
-  MessageChannelTransport,
-  MessageChannelManager,
-  SubscribeIncomingMessageListener,
-  SubscribeOutgoingMessageListener,
-  PublishIncommingMessageInput,
-  PublishOutgoingMessageInput
-} from '@shio-bot/foundation'
+import { MessageChannelTransport, MessageChannelManager, PublishIncomingMessageInput, PublishOutgoingMessageInput } from '@shio-bot/foundation'
 
 import { Router } from 'express'
+import { SubscribeListener } from '@shio-bot/foundation/transports/pubsub'
+import { IncomingMessage, OutgoingMessage } from 'http'
 
 export interface MessageChannelTransportExt extends MessageChannelTransport, MessageChannelManager {}
 
 export class EchoPubSubTransport implements MessageChannelTransportExt {
-  private incomingMessageListener: SubscribeIncomingMessageListener[] = []
-  private outcomingMessageListener: SubscribeOutgoingMessageListener[] = []
+  private incomingMessageListener: SubscribeListener<PublishIncomingMessageInput>[] = []
+  private outcomingMessageListener: SubscribeListener<PublishOutgoingMessageInput>[] = []
 
   constructor() {
-    this.SubscribeIncommingMessage(
-      ((input: PublishIncommingMessageInput, ack: () => void) => {
+    this.SubscribeIncoming(
+      ((input: PublishIncomingMessageInput, ack: () => void) => {
         this.onIncomingMessage(input, ack)
       }).bind(this)
     )
   }
 
-  private onIncomingMessage(input: PublishIncommingMessageInput, ack: () => void) {
+  private onIncomingMessage(input: PublishIncomingMessageInput, ack: () => void) {
     let fulfillment: any = {
       name: input.intent.name,
       parameters: {
@@ -31,7 +26,7 @@ export class EchoPubSubTransport implements MessageChannelTransportExt {
       }
     }
 
-    this.PublishOutgoingMessage({
+    this.PublishOutgoing({
       fulfillment: [fulfillment],
       provider: input.provider,
       replyToken: input.replyToken,
@@ -42,39 +37,40 @@ export class EchoPubSubTransport implements MessageChannelTransportExt {
     ack()
   }
 
-  async PublishIncommingMessage(input: PublishIncommingMessageInput): Promise<void> {
+  async PublishIncoming(input: PublishIncomingMessageInput): Promise<void> {
     this.incomingMessageListener.forEach(listener => listener.bind(this)(input, () => {}))
   }
-  SubscribeIncommingMessage(listener: SubscribeIncomingMessageListener): void {
+  SubscribeIncoming(listener: SubscribeListener<PublishIncomingMessageInput>): void {
     this.incomingMessageListener.push(listener)
   }
   UnsubscribeAllIncomingMessage(): void {
     this.incomingMessageListener = []
   }
-  async PublishOutgoingMessage(input: PublishOutgoingMessageInput): Promise<void> {
+  async PublishOutgoing(input: PublishOutgoingMessageInput): Promise<void> {
     this.outcomingMessageListener.forEach(listener => listener(input, () => {}))
   }
-  SubscribeOutgoingMessage(listener: SubscribeOutgoingMessageListener): void {
+  SubscribeOutgoing(listener: SubscribeListener<PublishOutgoingMessageInput>): void {
     this.outcomingMessageListener.push(listener)
   }
-  UnsubscribeAllOutgoingMessage(): void {
+  UnsubscribeAll(): void {
     this.outcomingMessageListener = []
+    this.incomingMessageListener = []
   }
 
-  get messageRouter(): Router {
+  get NotificationRouter(): Router {
     return Router()
   }
 
-  async createIncomingSubscriptionConfig(host: string): Promise<void> {
+  async CreateIncomingSubscriptionConfig(host: string): Promise<void> {
     // do nothing
   }
-  async createOutgoingSubscriptionConfig(host: string): Promise<void> {
+  async CreateOutgoingSubscriptionConfig(host: string): Promise<void> {
     // do nothing
   }
-  async prepareTopic(): Promise<void> {
+  async PrepareTopic(): Promise<void> {
     // do nothing
   }
-  async purge(): Promise<void> {
+  async Purge(): Promise<void> {
     // do nothing
   }
 }

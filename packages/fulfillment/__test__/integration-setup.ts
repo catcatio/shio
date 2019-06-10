@@ -7,9 +7,9 @@ export default async () => {
   console.log('setup fulfillment integration test')
   await setup()
   const { pubsub } = await createPubsubIntegrationClient()
-  await pubsub.purge()
-  await pubsub.prepareTopic()
-  await pubsub.createIncomingSubscriptionConfig(config.host)
+  await pubsub.Purge()
+  await pubsub.PrepareTopic()
+  await pubsub.CreateIncomingSubscriptionConfig(config.host)
 
   const app = await bootstrap({
     ...config
