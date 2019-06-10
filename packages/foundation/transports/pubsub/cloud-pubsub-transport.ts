@@ -150,8 +150,16 @@ export class CloudPubsubTransport<T> implements ChannelTransport<T>, ChannelMana
     this.log.info('Prepare subscription channel message...')
     const [topics] = await this.pubsub.getTopics()
     this.log.info('Topic list')
-    this.log.info(topics.map(t => t.name).join('\n'))
-    await Promise.all([this.topic.get({ autoCreate: true })])
+
+    if (topics.length === 0) {
+      this.log.info('there are no topics.....')
+    } else {
+      this.log.info(topics.map(t => t.name).join('\n'))
+    }
+    const topicCreateResults = await Promise.all([this.topic.get({ autoCreate: true })])
+    topicCreateResults.forEach(([topic]) => {
+      this.log.info('topic: ' + topic.name + ' is ready')
+    })
   }
 
   // purge method will remove subscription channel of
