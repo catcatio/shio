@@ -61,7 +61,7 @@ export async function bootstrap(config: Config) {
 
   const app = express()
   app.use(express.json())
-  app.use('/', pubsub.messageRouter)
+  app.use('/', pubsub.NotificationRouter)
   app.get('/', (_, res) => res.status(200).send('ok'))
   log.info(`start server on port ${config.port}`)
   const server = app.listen(atoi(config.port))

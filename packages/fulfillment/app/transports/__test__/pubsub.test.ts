@@ -9,17 +9,16 @@ describe('Pubsub transport test', () => {
     follow: jest.fn(),
     [ListItemEventMessageIntentKind]: jest.fn(),
   }
-  let pubsub: __mock__CloudPubsubTransports
+  let pubsub: __mock__CloudPubsubMessageTransports
 
   beforeAll(async () => {
-    pubsub = new __mock__CloudPubsubTransports()
+    pubsub = new __mock__CloudPubsubMessageTransports()
   })
   test('Incoming message follow', async () => {
     registerPubsub(pubsub, mockEndpoints)
     const message = randomIncomingMessage(randomFollowMessageIntent())
-    await pubsub.PublishIncommingMessage(message)
+    await pubsub.PublishIncoming(message)
     expect(pubsub.ack).toBeCalledTimes(1)
     expect(mockEndpoints.follow).toBeCalledTimes(1)
-
   })
 })

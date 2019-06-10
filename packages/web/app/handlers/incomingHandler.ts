@@ -67,8 +67,8 @@ export const intentMessageHandler = (fulfillment: Fulfillment, intentDetector: I
     // pub message
     let requestId = uuid()
 
-    let input: PublishIncommingMessageInput = {
-      intent: intent,
+    let input: PublishIncomingMessageInput = {
+      intent: intent as any,
       provider: msg.provider as any,
       replyToken: msg.replyToken,
       languageCode: 'en',

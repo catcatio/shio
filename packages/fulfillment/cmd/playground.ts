@@ -42,8 +42,8 @@ async function Run() {
     pubsub,
     serviceName: 'playground'
   })
-  await cloudpubsub.prepareTopic()
-  const [subs] = await cloudpubsub.incomingTopic.getSubscriptions()
+  await cloudpubsub.PrepareTopic()
+  const [subs] = await cloudpubsub.incomingChannel.topic.getSubscriptions()
 
   await Promise.all(
     subs.map(async sub => {
@@ -55,23 +55,23 @@ async function Run() {
 
   const app = express()
   app.use(express.json())
-  app.use('/', cloudpubsub.messageRouter)
+  app.use('/', cloudpubsub.NotificationRouter)
   app.get('/', (req, res) => res.status(200).send('ok'))
   let server = app.listen(8080, () => {
     console.log('test server started ', 8080)
   })
 
-  cloudpubsub.SubscribeIncommingMessage(async (message, ack) => {
+  cloudpubsub.SubscribeIncoming(async (message, ack) => {
     console.log(message)
     ack()
   })
 
-  cloudpubsub.SubscribeOutgoingMessage(async (message, ack) => {
+  cloudpubsub.SubscribeOutgoing(async (message, ack) => {
     console.log(message)
     ack()
   })
 
-  await cloudpubsub.PublishIncommingMessage({
+  await cloudpubsub.PublishIncoming({
     intent: {
       name: 'follow',
       parameters: {
