@@ -1,13 +1,13 @@
 import { FulfillmentEndpoint } from '../../endpoints'
 import { registerPubsub } from '../pubsub'
-import { __mock__CloudPubsubTransports } from '@shio-bot/foundation/transports/__test__/mock'
-import { randomIncomingMessage, randomFollowMessageIntent } from '@shio-bot/foundation/entities/__test__/random';
-import { ListItemEventMessageIntentKind } from '../../entities/asset';
+import { __mock__CloudPubsubMessageTransports } from '@shio-bot/foundation/transports/__test__/mock'
+import { randomIncomingMessage, randomFollowMessageIntent } from '@shio-bot/foundation/entities/__test__/random'
+import { ListItemEventMessageIntentKind } from '../../entities/asset'
 
 describe('Pubsub transport test', () => {
   const mockEndpoints: FulfillmentEndpoint = {
     follow: jest.fn(),
-    [ListItemEventMessageIntentKind]: jest.fn(),
+    [ListItemEventMessageIntentKind]: jest.fn()
   }
   let pubsub: __mock__CloudPubsubMessageTransports
 

@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { PubSub, Topic, Subscription } from '@google-cloud/pubsub'
 import { newLogger, ShioLogger } from '../../logger'
+const nanoid = require('nanoid')
 
 export type SubscribeListener<T> = (message: T, acknowledge: () => void) => Promise<void> | void
 
@@ -15,6 +16,8 @@ export interface ChannelManager<T> {
   CreateSubscriptionConfig(host: string): Promise<void>
   PrepareTopic(): Promise<void>
   Purge(): Promise<void>
+
+  // DebugIncomingMessage(listener: (message: any) => void)
 
   NotificationRouter: Router
 }
@@ -55,6 +58,17 @@ export class CloudPubsubTransport<T> implements ChannelTransport<T>, ChannelMana
     await this.topic.publishJSON({
       ...input,
       origin: this.serviceName
+    })
+  }
+
+  async DebugIncomingMessage(listener: (message: any) => void) {
+    // subscribe to topic
+    const subscriptionName = 'debug-incoming-' + nanoid(5)
+    await this.pubsub.createSubscription(this.topic.name, subscriptionName, {})
+    const debugSubscription = this.topic.subscription(subscriptionName)
+    debugSubscription.addListener('message', (message, ack) => {
+      listener(message)
+      ack()
     })
   }
 

@@ -5,7 +5,9 @@
     "**/.hg": true,
     "**/CVS": true,
     "**/.DS_Store": true,
+    "**/*.js": true,
     "**/*.js.map": true,
+    "**/*.d.ts": true,
     "**/*.d.ts.map": true,
     "**/node_modules": true
   },
