@@ -1,13 +1,22 @@
-import { ReservePaymentListener } from '../types'
-import { ReservePaymentMessage } from '@shio-bot/foundation/entities'
-import { PaymentClientProvider, LineReservePaymentRequest } from '@shio-bot/chatengine'
+import { ReservePaymentListener, Payment } from '../types'
+import { ReservePaymentMessage, ReservePaymentResultMessage } from '@shio-bot/foundation/entities'
+import { PaymentClientProvider, LineReservePaymentRequest, PaymentClient } from '@shio-bot/chatengine'
+import { PaymentRepository } from '../repositories'
+import { newLogger } from '@shio-bot/foundation'
 
-export const reservePaymentHandler = (provider: PaymentClientProvider): ReservePaymentListener => {
+export const reservePaymentHandler = (confirmUrl: string, p: Payment, provider: PaymentClientProvider, paymentRepository: PaymentRepository): ReservePaymentListener => {
+  let log = newLogger()
   return async (payload: ReservePaymentMessage): Promise<void> => {
-    let client = provider.get(payload.provider)
-    if (!client) {
-      console.log('payment client not found')
-      //NC:TODO: handle failure case, reply to confirm payment channel
+    let client: PaymentClient
+    try {
+      client = provider.get(payload.provider)
+      if (!client) {
+        console.log('payment client not found')
+        //NC:TODO: handle failure case, reply to confirm payment channel
+        return
+      }
+    } catch (err) {
+      log.error(`payment client: ${err}`)
       return
     }
 
@@ -17,16 +26,41 @@ export const reservePaymentHandler = (provider: PaymentClientProvider): ReserveP
       amount: payload.amount,
       currency: payload.currency,
       orderId: payload.orderId,
-      confirmUrl: '',
+      confirmUrl: confirmUrl,
       langCd: 'th' // payment screen language
     }
 
     // store to memcache
+    await client.reserve(request).then(async response => {
+      let result: ReservePaymentResultMessage = {
+        type: 'ReservePaymentResult',
+        provider: 'linepay',
+        isCompleted: false
+      }
+      console.log(response)
+      if (response.returnCode != '0000') {
+        console.error('failed to reserve payment: ', response)
+        await p.confirmPayment(result)
+        return
+      }
 
-    client.reserve(request).then()
+      if (!response.info) {
+        console.error('failed to reserve payment: ', response)
+        await p.confirmPayment(result)
+        return
+      }
+      result.transactionId = response.info.transactionId
+      result.paymentUrl = response.info['paymentUrl']
+        ? {
+            web: response.info['paymentUrl'].web,
+            app: response.info['paymentUrl'].app
+          }
+        : undefined
+
+      await p.confirmPayment(result)
+      return paymentRepository.push(response.info.transactionId, payload)
+    })
 
     //NC:TODO: handle failure case, reply to confirm payment channel
-
-    console.log(payload)
   }
 }

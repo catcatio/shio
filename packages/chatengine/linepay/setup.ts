@@ -7,7 +7,7 @@ export const setup = (router: Router, notifier: IPaymentNotifier, linepaySetting
   const linepay = new LinePay(linepaySettings.clientConfig)
 
   router.get(path, (req: Request, res: Response) => {
-    if (!req.query || !req.query.transactionId || !req.query.orderId) {
+    if (!req.query || !req.query.transactionId) {
       console.log('not found: incomplete parameters')
       return res.status(404).send('not found')
     }

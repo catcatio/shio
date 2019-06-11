@@ -1,7 +1,7 @@
 import { PaymentConfirmationPayload, ConfirmTransaction } from '@shio-bot/chatengine'
 import { Payment } from '../types'
 import { newLogger } from '@shio-bot/foundation'
-import { ConfirmPaymentMessage } from '@shio-bot/foundation/entities'
+import { ConfirmPaymentResultMessage } from '@shio-bot/foundation/entities'
 import { PaymentRepository } from '../repositories'
 
 export const confirmPaymentHandler = (p: Payment, paymentRepository: PaymentRepository) => {
@@ -16,31 +16,33 @@ export const confirmPaymentHandler = (p: Payment, paymentRepository: PaymentRepo
       return await confirmTransaction(null as any, new Error('transaction not found'))
     }
     // verify amount and currency
-    if (reservePayment.orderId != payload.orderId) {
-      log.info(`orderId [${payload.orderId}] mismatch: (actual: ${reservePayment.orderId})`)
-      return await confirmTransaction(null as any, new Error('mismatch information'))
-    }
-    let c: ConfirmPaymentMessage = {
+    // if (reservePayment.orderId != payload.orderId) {
+    //   log.info(`orderId [${payload.orderId}] mismatch: (actual: ${reservePayment.orderId})`)
+    //   return await confirmTransaction(null as any, new Error('mismatch information'))
+    // }
+    let c: ConfirmPaymentResultMessage = {
+      type: 'ConfirmPaymentResult',
       provider: payload.provider,
       transactionId: payload.transactionId,
       orderId: payload.orderId,
       amount: reservePayment.amount,
       currency: reservePayment.currency,
-      isCompleted: true
+      isCompleted: false
     }
 
     // call confirm payment to server
     await confirmTransaction(
       {
         transactionId: payload.transactionId,
-        amount: 1000.0,
-        currency: 'THB'
+        amount: reservePayment.amount,
+        currency: reservePayment.currency
       },
       null as any
     )
       .then(response => {
         console.log(response)
         // send success reply to fulfillment
+        c.isCompleted = true
         return p.confirmPayment(c)
       })
       .catch(err => {

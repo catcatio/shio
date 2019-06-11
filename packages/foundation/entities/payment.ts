@@ -16,7 +16,20 @@ export interface ReservePaymentMessage {
   currency: Currency
 }
 
-export interface ConfirmPaymentMessage {
+export type ConfirmPaymentMessage = ConfirmPaymentResultMessage | ReservePaymentResultMessage
+
+export interface ReservePaymentResultMessage {
+  type: 'ReservePaymentResult'
+  provider: PaymentProvider
+  transactionId?: string
+  paymentUrl?: {
+    web: string
+    app: string
+  }
+  isCompleted: boolean
+}
+export interface ConfirmPaymentResultMessage {
+  type: 'ConfirmPaymentResult'
   provider: PaymentProvider
   orderId: string
   transactionId: string

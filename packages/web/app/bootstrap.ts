@@ -1,7 +1,7 @@
 import { server } from './server'
 import { Configurations, PubSubSettings, Endpoint } from './types'
 import { chatEndpoint } from './endpoints/chat'
-import { createCloudPubSubInstance, WithClientConfig, CloudPubsubMessageChannelTransport } from '@shio-bot/foundation'
+import { createCloudPubSubInstance, WithClientConfig, CloudPubsubMessageChannelTransport, newLogger } from '@shio-bot/foundation'
 import { ChatEngine, PaymentEngine } from '@shio-bot/chatengine'
 import { fulfillment } from './fulfillment'
 import { intentMessageHandler, fulfillmentMessageHandler } from './handlers'
@@ -42,11 +42,12 @@ function makePaymentPubsubEndpoint(pubsub: PaymentChannelTransportExt): Endpoint
 }
 
 export async function bootstrap(config: Configurations) {
+  let log = newLogger()
+  log.info('bootstrapping')
   let chatEngine = new ChatEngine(config.chatEngine)
   let paymentEngine = new PaymentEngine(config.chatEngine)
   let msgPubsub = await createPubsubMessageTransportInstance(config.pubsub, config.serviceName)
   let paymentPubsub = await createPubsubPaymentTransportInstance(config.pubsub, config.serviceName)
-  await paymentPubsub.PrepareTopic()
   let ff = fulfillment(msgPubsub)
   let pm = payment(paymentPubsub)
   let intentDetector = chatEngine.intentDetectorProvider.get(config.intentProvider)
@@ -56,10 +57,12 @@ export async function bootstrap(config: Configurations) {
   msgPubsub.CreateOutgoingSubscriptionConfig(`${config.host}${pubsubPath}`)
   ff.onFulfillment(outMsgHandler)
 
+  let confirmUrl = config.chatEngine.linepay ? config.chatEngine.linepay.confirmUrl : ''
+
   let paymentRepo = paymentRepository()
-  let rpHandler = reservePaymentHandler(paymentEngine.paymentClientProvider)
+  let rpHandler = reservePaymentHandler(confirmUrl, pm, paymentEngine.paymentClientProvider, paymentRepo)
   let cpHandler = confirmPaymentHandler(pm, paymentRepo)
-  paymentPubsub.CreateIncomingSubscriptionConfig(`${config.host}${pubsubPath}`)
+  paymentPubsub.CreateOutgoingSubscriptionConfig(`${config.host}${pubsubPath}`)
   pm.onReservePayment(rpHandler)
 
   chatEngine.onMessageReceived(inMsgHandler.handle)

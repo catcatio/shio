@@ -61,8 +61,12 @@ export function registerPubsub(pubsub: MessageChannelTransport, paymentPubsub: P
   })
 
   paymentPubsub.SubscribeConfirmPayment(async (message, ack) => {
-    log.withRequestId(message.orderId).info(`confirm payment message begin process...`)
+    log.info(`confirm payment message begin process...`)
 
+    /* TODO: handle
+        - ReservePaymentResultMessage
+        - ConfirmPaymentResultMessage
+    */
     log.info(JSON.stringify(message))
 
     ack()

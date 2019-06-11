@@ -13,8 +13,12 @@ export const fulfillmentMessageHandler = (messagingClientProvider: MessagingClie
       text: JSON.stringify(message)
     }
 
-    let messagingClient = messagingClientProvider.get(message.provider)
-    let result = await messagingClient.sendMessage(input).catch(err => console.error(err))
-    console.log(result)
+    try {
+      let messagingClient = messagingClientProvider.get(message.provider)
+      let result = await messagingClient.sendMessage(input).catch(err => console.error(err))
+      console.log(result)
+    } catch (err) {
+      console.error(err)
+    }
   }
 }

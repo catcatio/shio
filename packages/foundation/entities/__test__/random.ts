@@ -99,6 +99,7 @@ export function randomReservePaymentMessage(): ReservePaymentMessage {
 
 export function randomConfirmPaymentMessage(): ConfirmPaymentMessage {
   return {
+    type: 'ConfirmPaymentResult',
     provider: 'linepay',
     orderId: uuid().toString(),
     transactionId: uuid().toString(),
