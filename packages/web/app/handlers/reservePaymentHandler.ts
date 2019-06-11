@@ -71,7 +71,7 @@ export const reservePaymentHandler = (
           to: payload.source.userId,
           text: response.info['paymentUrl'].web
         })
-
+      result.isCompleted = true
       await p.confirmPayment(result)
       return paymentRepository.push(response.info.transactionId, payload)
     })
