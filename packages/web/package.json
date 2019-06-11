@@ -32,8 +32,8 @@
     "gcp-logs": "gcloud app logs tail -s web"
   },
   "dependencies": {
-    "@shio-bot/chatengine": "^1.0.0",
-    "@shio-bot/foundation": "^1.1.0",
+    "@shio-bot/chatengine": "^1.0.4",
+    "@shio-bot/foundation": "^1.1.4",
     "express": "^4.17.1"
   },
   "devDependencies": {

@@ -62,7 +62,7 @@ export const intentMessageHandler = (fulfillment: Fulfillment, intentDetector: I
       })
 
     // pub message
-    let requestId = uuid()
+    let requestId = uuid().toString()
 
     let input: PublishIncomingMessageInput = {
       intent: intent as any,

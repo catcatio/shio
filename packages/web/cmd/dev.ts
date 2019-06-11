@@ -23,6 +23,12 @@ function loadConfig(): Configurations {
               age: 15
             }
           },
+          'purchase book': {
+            name: 'purchase-item',
+            parameters: {
+              merchantTitle: 'WOW!!!!'
+            }
+          },
           unknown: msg => ({
             name: 'input.unknown',
             parameters: {
@@ -30,9 +36,22 @@ function loadConfig(): Configurations {
             }
           })
         }
+      },
+      linepay: {
+        clientConfig: {
+          channelId: 'string',
+          channelSecret: 'string',
+          isSandbox: true
+        },
+        // apiEndpoint: 'string',
+        confirmUrl: 'string'
       }
     },
     pubsub: {
+      cloudPubSub: {
+        apiEndpoint: 'http://localhost:8085',
+        projectId: 'catcat-local'
+      },
       devPubSub: true
     },
     intentProvider: 'fluke'

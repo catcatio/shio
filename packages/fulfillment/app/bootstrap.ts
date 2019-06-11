@@ -18,6 +18,7 @@ import { DefaultFulfillmentEndpoint } from './endpoints'
 import { DatastoreACLRepository, DatastoreUserRepository } from './repositories'
 import { registerPubsub } from './transports/pubsub'
 import { DefaultBoardingUsecase } from './usecases/boarding'
+import { CloudPubsubPaymentChannelTransport } from '@shio-bot/foundation/transports/pubsub'
 import { DefaultMerchandiseUseCase } from './usecases/merchandise';
 import { DatastoreAssetRepository } from './repositories/asset';
 import { registerHttpTransports } from './transports/http';
@@ -47,6 +48,14 @@ export async function bootstrap(config: Config) {
     pubsub: cloudpubsub,
     serviceName: 'fulfillment'
   })
+  // await pubsub.PrepareTopic()
+  await pubsub.CreateIncomingSubscriptionConfig(config.host)
+  const paymentPubsub = new CloudPubsubPaymentChannelTransport({
+    pubsub: cloudpubsub,
+    serviceName: 'fulfillment'
+  })
+  // await paymentPubsub.PrepareTopic()
+  await paymentPubsub.CreateIncomingSubscriptionConfig(config.host)
 
   log.info('prepare data....')
   await acl.prepare()
@@ -63,14 +72,15 @@ export async function bootstrap(config: Config) {
   log.info("🎉 endpoint intial!")
 
   log.info('registry pubsub...')
-  registerPubsub(pubsub, endpoints)
-  log.info("🎉 pubsub transport registered!")
+  registerPubsub(pubsub, paymentPubsub, endpoints)
+  log.info('🎉 pubsub transport registered!')
 
   const app = express()
   registerHttpTransports(app, endpoints)
 
   app.use(express.json())
   app.use('/', pubsub.NotificationRouter)
+  app.use('/', paymentPubsub.NotificationRouter)
   app.get('/', (_, res) => res.status(200).send('ok'))
   log.info(`start server on port ${config.port}`)
   const server = app.listen(atoi(config.port))
@@ -80,6 +90,7 @@ export async function bootstrap(config: Config) {
       log.info('gracefully shutting down service....')
       pubsub.UnsubscribeAllIncomingMessage()
       pubsub.UnsubscribeAllOutgoingMessage()
+      paymentPubsub.UnsubscribeAll()
       await new Promise(resolve => {
         server.close(() => {
           log.info('server is shutdown')
@@ -89,6 +100,6 @@ export async function bootstrap(config: Config) {
 
       log.info('Service is shutdown!!')
     },
-    pubsub,
+    pubsub
   }
 }

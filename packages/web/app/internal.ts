@@ -1,10 +1,11 @@
 import { MessageChannelTransport, MessageChannelManager, PublishIncomingMessageInput, PublishOutgoingMessageInput } from '@shio-bot/foundation'
 
 import { Router } from 'express'
-import { SubscribeListener } from '@shio-bot/foundation/transports/pubsub'
+import { SubscribeListener, PaymentChannelTransport, PaymentChannelManager } from '@shio-bot/foundation/transports/pubsub'
 import { IncomingMessage, OutgoingMessage } from 'http'
 
 export interface MessageChannelTransportExt extends MessageChannelTransport, MessageChannelManager {}
+export interface PaymentChannelTransportExt extends PaymentChannelTransport, PaymentChannelManager {}
 
 export class EchoPubSubTransport implements MessageChannelTransportExt {
   private incomingMessageListener: SubscribeListener<PublishIncomingMessageInput>[] = []

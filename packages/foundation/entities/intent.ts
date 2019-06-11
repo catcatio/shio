@@ -1,4 +1,4 @@
-import { AssetMetadata } from "./asset";
+import { AssetMetadata } from './asset'
 import * as Joi from 'joi'
 import { MessageProvider } from "./message";
 
@@ -40,23 +40,21 @@ export interface GetItemDownloadUrlEventMessageFulfillment {
 }
 
 
-
 export enum ListItemEventMessageIntentParameterFilter {
   RECENT = 'recent',
-  MOST_VIEWED = 'mostviewed',
+  MOST_VIEWED = 'mostviewed'
 }
 
 export const ListItemEventMessageIntentKind = 'list-item'
-export const ListItemEventMessageIntentSchema = Joi.object()
-  .keys({
-    name: Joi.string().only(ListItemEventMessageIntentKind).required(),
-    parameters: Joi.object().keys({
-      merchantId: Joi.string(),
-      limit: Joi.number(),
-      offset: Joi.number(),
-      filter: Joi.required().allow(Object.keys(ListItemEventMessageIntentParameterFilter).map(e => ListItemEventMessageIntentParameterFilter[e]))
-    }).required()
+export const ListItemEventMessageIntentSchema = Joi.object().keys({
+  name: Joi.string().only(ListItemEventMessageIntentKind),
+  parameters: Joi.object().keys({
+    merchantId: Joi.string(),
+    limit: Joi.number(),
+    offset: Joi.number(),
+    filter: Joi.required().allow(Object.keys(ListItemEventMessageIntentParameterFilter).map(e => ListItemEventMessageIntentParameterFilter[e]))
   })
+})
 export interface ListItemEventMessageIntent {
   name: typeof ListItemEventMessageIntentKind
   parameters: {
@@ -85,7 +83,6 @@ export interface ListItemEventMessageFulfillment {
   }
 }
 
-
 export const FollowEventMessageIntentKind = 'follow'
 export const FollowEventMessageIntentSchema = Joi.object().keys({
   name: Joi.string().only(FollowEventMessageIntentKind).required(),
@@ -102,7 +99,7 @@ export interface FollowEventMessageIntent {
 
 export const UnfollowEventMessageIntentKind = 'unfollow'
 export interface UnfollowEventMessageIntent {
-  name: typeof UnfollowEventMessageIntentKind,
+  name: typeof UnfollowEventMessageIntentKind
   parameters: {
     reason?: string
   }
@@ -121,9 +118,17 @@ export interface FollowEventMessageFulfillment {
 }
 export const ErrorEventMessageFulfillmentKind = 'error'
 export interface ErrorEventMessageFulfillment {
-  name: typeof ErrorEventMessageFulfillmentKind,
+  name: typeof ErrorEventMessageFulfillmentKind
   parameters: {
     reason: string
+  }
+}
+
+export const PurchaseItemEventMessageIntentKind = 'purchase-item'
+export interface PurchaseItemEventMessageIntent {
+  name: typeof PurchaseItemEventMessageIntentKind
+  parameters: {
+    merchantTitle: string
   }
 }
 
@@ -133,6 +138,7 @@ export type MessageIntent =
   | ListItemEventMessageIntent
   | GetItemDownloadUrlEventMessageIntent
   | WhoMessageIntent
+  | PurchaseItemEventMessageIntent
 
 export type MessageFulfillment =
   | FollowEventMessageFulfillment
@@ -151,5 +157,4 @@ export function validateMessageIntent(intent: any): { value: MessageIntent, erro
   ]).validate(intent)
 
 }
-
 
