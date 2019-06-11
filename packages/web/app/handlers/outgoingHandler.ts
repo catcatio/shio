@@ -1,6 +1,7 @@
-import { OutgoingMessage } from '@shio-bot/foundation/entities'
+import { OutgoingMessage, ListItemEventMessageFulfillmentKind, FollowEventMessageFulfillmentKind, ErrorEventMessageFulfillmentKind, MessageFulfillment } from '@shio-bot/foundation/entities'
 import { LineMessageClientSendMessageInput, MessagingClientProvider } from '@shio-bot/chatengine/types'
 import { FulfillmentListener } from '../types'
+import { randomFollowMessageFulfillment } from '@shio-bot/foundation/entities/__test__/random';
 
 export const fulfillmentMessageHandler = (messagingClientProvider: MessagingClientProvider): FulfillmentListener => {
   return async (message: OutgoingMessage): Promise<void> => {
@@ -22,3 +23,5 @@ export const fulfillmentMessageHandler = (messagingClientProvider: MessagingClie
     }
   }
 }
+
+

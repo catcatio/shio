@@ -1,5 +1,44 @@
 import { AssetMetadata } from './asset'
 import * as Joi from 'joi'
+import { MessageProvider } from "./message";
+
+export const WhoMessageIntentKind = 'who'
+export const WhoMessageIntentSchema = Joi.object().keys({
+  name: Joi.string().only(WhoMessageIntentKind).required(),
+  parameters: Joi.object().keys({})
+})
+export interface WhoMessageIntent {
+  name: typeof WhoMessageIntentKind
+  parameters: {}
+}
+export const WhoMessageFulfilmentKind = 'who'
+export interface WhoMessageFulfillment {
+  name: typeof WhoMessageFulfilmentKind
+  parameters: any
+}
+
+
+export const GetItemDownloadUrlEventMessageIntentKind = 'get-item-download-url'
+export const GetItemDownloadUrlEventMessageIntentSchema = Joi.object().keys({
+  name: Joi.string().only(GetItemDownloadUrlEventMessageIntentKind).required(),
+  parameters: Joi.object().keys({
+    assetId: Joi.string().required(),
+  }).required()
+})
+export interface GetItemDownloadUrlEventMessageIntent {
+  name: typeof GetItemDownloadUrlEventMessageIntentKind
+  parameters: {
+    assetId: string
+  }
+}
+export const GetItemDownloadUrlEventMessageFulfillmentKind = 'get-item-download-url'
+export interface GetItemDownloadUrlEventMessageFulfillment {
+  name: typeof GetItemDownloadUrlEventMessageFulfillmentKind
+  paramters: {
+    url: string
+  }
+}
+
 
 export enum ListItemEventMessageIntentParameterFilter {
   RECENT = 'recent',
@@ -8,7 +47,7 @@ export enum ListItemEventMessageIntentParameterFilter {
 
 export const ListItemEventMessageIntentKind = 'list-item'
 export const ListItemEventMessageIntentSchema = Joi.object().keys({
-  name: Joi.string().allow(ListItemEventMessageIntentKind),
+  name: Joi.string().only(ListItemEventMessageIntentKind),
   parameters: Joi.object().keys({
     merchantId: Joi.string(),
     limit: Joi.number(),
@@ -46,10 +85,10 @@ export interface ListItemEventMessageFulfillment {
 
 export const FollowEventMessageIntentKind = 'follow'
 export const FollowEventMessageIntentSchema = Joi.object().keys({
-  name: FollowEventMessageIntentKind,
+  name: Joi.string().only(FollowEventMessageIntentKind).required(),
   parameters: Joi.object().keys({
-    displayName: Joi.string().required()
-  })
+    displayName: Joi.string().required(),
+  }).required()
 })
 export interface FollowEventMessageIntent {
   name: typeof FollowEventMessageIntentKind
@@ -58,7 +97,7 @@ export interface FollowEventMessageIntent {
   }
 }
 
-const UnfollowEventMessageIntentKind = 'unfollow'
+export const UnfollowEventMessageIntentKind = 'unfollow'
 export interface UnfollowEventMessageIntent {
   name: typeof UnfollowEventMessageIntentKind
   parameters: {
@@ -93,10 +132,29 @@ export interface PurchaseItemEventMessageIntent {
   }
 }
 
-export type MessageIntent = FollowEventMessageIntent | UnfollowEventMessageIntent | ListItemEventMessageIntent | PurchaseItemEventMessageIntent
+export type MessageIntent =
+  | FollowEventMessageIntent
+  | UnfollowEventMessageIntent
+  | ListItemEventMessageIntent
+  | GetItemDownloadUrlEventMessageIntent
+  | WhoMessageIntent
+  | PurchaseItemEventMessageIntent
 
-export type MessageFulfillment = FollowEventMessageFulfillment | ErrorEventMessageFulfillment | ListItemEventMessageFulfillment
+export type MessageFulfillment =
+  | FollowEventMessageFulfillment
+  | ErrorEventMessageFulfillment
+  | ListItemEventMessageFulfillment
+  | GetItemDownloadUrlEventMessageFulfillment
+  | WhoMessageFulfillment
 
-export function validateMessageIntent(message: any): { value: MessageIntent; error: Joi.ValidationError } {
-  return Joi.validate(message, Joi.alternatives().try(ListItemEventMessageIntentSchema, FollowEventMessageIntentSchema))
+
+export function validateMessageIntent(intent: any): { value: MessageIntent, error: Joi.ValidationError } {
+  return Joi.alternatives([
+    ListItemEventMessageIntentSchema,
+    FollowEventMessageIntentSchema,
+    GetItemDownloadUrlEventMessageIntentSchema,
+    WhoMessageIntentSchema
+  ]).validate(intent)
+
 }
+

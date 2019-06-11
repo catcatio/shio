@@ -1,18 +1,18 @@
-import { IFulfillmentManagerServer } from "../../__generated__/fulfillment_grpc_pb";
-import { CreateBookAssetOutput, CreateBookAssetInput, ListBookAssetOutput } from "../../__generated__/fulfillment_pb";
+import { CreateBookAssetOutput, CreateBookAssetInput, ListBookAssetOutput, ListBookAssetInput } from "../../__generated__/fulfillment_pb";
 import { FulfillmentManagerUseCase } from "../usecase/fulfillment";
 import { newLogger, createStreamTransport } from "@shio-bot/foundation";
 import { Writable } from "stream";
+import { handleServerStreamingCall, handleUnaryCall } from "grpc";
 
 
-export class FulfillmentManager implements IFulfillmentManagerServer {
+export class FulfillmentManager {
 
   private fulfillment: FulfillmentManagerUseCase
   constructor(fulfillment: FulfillmentManagerUseCase) {
     this.fulfillment = fulfillment
   }
 
-  listBookAsset: import("grpc").handleUnaryCall<import("../../__generated__/fulfillment_pb").ListBookAssetInput, import("../../__generated__/fulfillment_pb").ListBookAssetOutput> = (input, cb) => {
+  listBookAsset: handleUnaryCall<ListBookAssetInput, ListBookAssetOutput> = (input, cb) => {
     this.fulfillment.listBookAsset(input.request).then(output => {
       cb(null, output)
     }).catch(err => {
@@ -20,7 +20,7 @@ export class FulfillmentManager implements IFulfillmentManagerServer {
     })
   }
 
-  createBookAsset: import("grpc").handleServerStreamingCall<CreateBookAssetInput, CreateBookAssetOutput> = (call) => {
+  createBookAsset: handleServerStreamingCall<CreateBookAssetInput, CreateBookAssetOutput> = (call) => {
 
     // Stream log from server
     // to client SDK

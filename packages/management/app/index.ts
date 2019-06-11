@@ -5,6 +5,7 @@ import { FulfillmentManager } from "./endpoints/fulfillment-manager";
 import { FulfillmentManagerService } from "../__generated__/fulfillment_grpc_pb";
 import { FulfillmentManagerUseCase } from "./usecase/fulfillment";
 import { getFulfillmentDevelopmentConstant } from '@shio-bot/fulfillment'
+import { randomIncomingMessage, randomOutgoingMessage, randomListItemEventMessageIntent, randomFollowMessageFulfillment } from "@shio-bot/foundation/entities/__test__/random";
 
 const log = newLogger()
 async function createComponent(projectId: string, datastoreNamespace: string, storageName: string) {
@@ -18,7 +19,7 @@ async function createComponent(projectId: string, datastoreNamespace: string, st
     WithDatastoreNameSpace(datastoreNamespace),
     WithDatastoreProjectId(projectId),
   )
-  const assetRepository = new DatastoreAssetRepository(datastore)
+  const assetRepository = new DatastoreAssetRepository(datastore, storage)
   const fulfillmentUseCase = new FulfillmentManagerUseCase(assetRepository, storage)
   const fulfillmentManager = new FulfillmentManager(fulfillmentUseCase)
 

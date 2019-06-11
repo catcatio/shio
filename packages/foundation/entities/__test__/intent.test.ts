@@ -18,10 +18,22 @@ describe('intent testing', () => {
   })
 
   test('validate invalid intent', () => {
-    const { error } = validateMessageIntent({
-      name: 'dobedobedo'
-    })
-    expect(error).toBeDefined()
+    {
+      const { error } = validateMessageIntent({
+        name: 'list-book',
+        parameters: {
+          filter: 'recent'
+        }
+      })
+      expect(error).not.toBeNull()
+    }
+    {
 
+      const { error } = validateMessageIntent({
+        name: 'dobedobedo',
+        parameters: {}
+      })
+      expect(error).not.toBeNull()
+    }
   })
 })

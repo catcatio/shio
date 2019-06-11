@@ -76,12 +76,8 @@ export class DatastoreUserRepository extends DatastoreBaseRepository implements 
         ...input
       }
     })
-    const query = this.db
-      .createQuery(this.UserChatSessionKind)
-      .filter('__key__', k)
-      .limit(1)
-    const [entities] = await this.db.runQuery(query)
-    return toJSON(entities[0])
+    const entities = await this.getByKey(k)
+    return toJSON(entities)
   }
 
   async findMany(...options: OperationOption<User>[]): Promise<PaginationResult<User>> {

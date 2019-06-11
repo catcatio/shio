@@ -14,12 +14,12 @@
     "@types/uuid": "^3.4.4",
     "@types/winston": "^2.4.4",
     "grpc-tools": "^1.7.3",
-    "grpc_tools_node_protoc_ts": "^2.5.3",
     "jest": "^24.8.0",
     "nodemon": "^1.19.1",
     "ora": "^3.4.0",
     "prettier": "1.18.0",
     "protoc-gen-grpc": "^1.2.8",
+    "protoc-gen-grpc-ts": "^1.0.1",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.2.0",
     "tslint": "^5.17.0",
@@ -28,18 +28,19 @@
     "typescript": "^3.5.1"
   },
   "dependencies": {
-    "commander": "^2.20.0",
-    "uuid": "^3.3.2",
     "@shio-bot/fulfillment": "^1.0.0",
     "adm-zip": "^0.4.13",
     "cli-table": "^0.3.1",
+    "commander": "^2.20.0",
     "extract-zip": "^1.6.7",
     "nanoid": "^2.0.3",
     "unzipper": "^0.10.0",
+    "uuid": "^3.3.2",
     "winston": "^3.2.1"
   },
   "scripts": {
     "dev": "yarn ts-node ./app/index.ts",
+    "build-deps": "lerna run build --scope=@shio-bot/fulfillment && lerna run build --scope=@shio-bot/foundation",
     "shio": "yarn ts-node ./cmd/index.ts"
   }
 }

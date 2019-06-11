@@ -16,4 +16,6 @@ export interface AssetMetadataEvent {
     description?: string
 }
 
+export type AssetContentType = 'application/pdf' | 'application/draftjs' | 'text/html'
+
 export type AssetMetadata = AssetMetadataBook | AssetMetadataEvent
