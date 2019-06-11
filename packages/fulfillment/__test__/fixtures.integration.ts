@@ -5,7 +5,7 @@ import { follow } from './fixture/boarding'
 import { FollowEventMessageFulfillmentKind, ListItemEventMessageIntentParameterFilter, ListItemEventMessageFulfillmentKind } from '../app/entities/asset'
 import { listItem } from './fixture/list-item'
 import config from './config'
-import { createDatastoreInstance, WithDatastoreAPIEndpoint, WithDatastoreNameSpace, WithDatastoreProjectId } from '@shio-bot/foundation'
+import { createDatastoreInstance, WithDatastoreAPIEndpoint, WithDatastoreNameSpace, WithDatastoreProjectId, FileStorage, LocalFileStorage } from '@shio-bot/foundation'
 import { DatastoreAssetRepository, WithSystemOperation, WithOperationOwner } from '../app'
 import { randomCreateAssetInput, randomAssetMetadata } from '../app/helpers/random'
 import { Datastore } from '@google-cloud/datastore'
@@ -15,18 +15,20 @@ const nanoid = require('nanoid')
 describe('fulfillment service integration test', () => {
   let outgoingPubsub: UnPromise<ReturnType<typeof createPubsubIntegrationClient>>
   let datastore: Datastore
+  let storage: FileStorage
   let Asset: DatastoreAssetRepository
   jest.setTimeout(60 * 1000)
 
   beforeAll(async () => {
     outgoingPubsub = await createPubsubIntegrationClient()
+    storage = new LocalFileStorage()
     datastore = await createDatastoreInstance(
       WithDatastoreAPIEndpoint(config.datastoreEndpoint!),
       WithDatastoreNameSpace(config.datastoreNamespace),
       WithDatastoreProjectId(config.projectId)
     )
 
-    Asset = new DatastoreAssetRepository(datastore)
+    Asset = new DatastoreAssetRepository(datastore, storage)
     await outgoingPubsub.start()
   })
 

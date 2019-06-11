@@ -4,6 +4,7 @@ import { Datastore, Query } from '@google-cloud/datastore'
 import { ErrorType, newGlobalError } from '../entities/error'
 import { logger, ShioLogger, newLogger } from '@shio-bot/foundation';
 import { MessageProvider, IncomingMessage } from '../entities/asset';
+import { entity } from '@google-cloud/datastore/build/src/entity';
 
 export class DatastoreBaseRepository {
   db: Datastore
@@ -38,8 +39,29 @@ export class DatastoreBaseRepository {
     }
   }
 
+  getIdFromKey(key: entity.Key): { kind: string, id: string } {
+    if (key.id) {
+      return {
+        kind: key.kind,
+        id: key.id,
+      }
+    } else if (key.name) {
+      return {
+        kind: key.kind,
+        id: key.name,
+      }
+    } else {
+      throw newGlobalError(ErrorType.Input, "invalid key....")
+    }
+  }
+
   async runQuery(query: Query) {
     const [entities] = await this.db.runQuery(query)
+    return entities
+  }
+
+  async getByKey(key: entity.Key) {
+    const [entities] = await this.db.get(key)
     return entities
   }
 }

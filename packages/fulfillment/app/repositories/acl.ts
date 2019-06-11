@@ -91,6 +91,9 @@ export class DatastoreACLRepository implements ACLRepository {
   }
 
   async GetPermissionOrThrow(userId: string, resourceTag: ResourceTag, permission: Permission, ...opts: ACLRepositoryOperationOption[]): Promise<ACL> {
+
+    const option = composeOperationOptions(...opts)
+    option.logger.info(`verify permission to ${permission} on ${resourceTag} for ${userId}`)
     const acl = await this.GetPermission(userId, resourceTag, permission, ...opts)
     if (!acl) {
       throw newGlobalError(ErrorType.NotFound, `ACL Permission of ${userId} as ${permission} ${resourceTag} not found`)

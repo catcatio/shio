@@ -5,6 +5,7 @@ import { Datastore } from '@google-cloud/datastore'
 import * as uuid from 'uuid/v4'
 import { User } from '../../entities'
 
+jest.setTimeout(60 * 1000)
 describe('DatastoreUserRepository test', () => {
   let userRepo: DatastoreUserRepository
   let datastore: Datastore
@@ -36,6 +37,7 @@ describe('DatastoreUserRepository test', () => {
 
     const chatSession = await userRepo.createChatSession(chatSessionInput)
 
+    expect(chatSession).toBeDefined()
     // ห้ามสร้าง chatsession ซ้ำด้วย provider, providerId เดิม
     await expect(userRepo.createChatSession(chatSessionInput)).rejects.toBeTruthy()
     const chatSessionKey = await userRepo.getUserChatSessionKey(chatSession)

@@ -9,16 +9,19 @@ import {
   WithDatastoreNameSpace,
   WithDatastoreProjectId,
   WithPubsubEndpoint,
-  WithPubsubProjectId
+  WithPubsubProjectId,
+  GCPFileStorage
 } from '@shio-bot/foundation'
 import * as express from 'express'
 import { Config } from './config'
-import { createFulfillmentEndpoint } from './endpoints'
+import { DefaultFulfillmentEndpoint } from './endpoints'
 import { DatastoreACLRepository, DatastoreUserRepository } from './repositories'
 import { registerPubsub } from './transports/pubsub'
 import { DefaultBoardingUsecase } from './usecases/boarding'
 import { DefaultMerchandiseUseCase } from './usecases/merchandise';
 import { DatastoreAssetRepository } from './repositories/asset';
+import { registerHttpTransports } from './transports/http';
+import { DefaultInventoryUseCase } from './usecases/inventory';
 
 export async function bootstrap(config: Config) {
   const log = newLogger()
@@ -37,6 +40,7 @@ export async function bootstrap(config: Config) {
 
   const datastore = await createDatastoreInstance(...datastoreOptions)
   const cloudpubsub = await createCloudPubSubInstance(...pubsubOptions)
+  const storage = new GCPFileStorage(config.projectId)
 
   const acl = new DatastoreACLRepository(datastore)
   const pubsub = new CloudPubsubMessageChannelTransport({
@@ -48,11 +52,14 @@ export async function bootstrap(config: Config) {
   await acl.prepare()
   log.info('starting up service component...')
 
-  const assetRepository = new DatastoreAssetRepository(datastore)
+  const assetRepository = new DatastoreAssetRepository(datastore, storage)
   const userRepository = new DatastoreUserRepository(datastore)
+
+  const inventoryUseCase = new DefaultInventoryUseCase(storage,assetRepository,acl)
   const boardingUsecase = new DefaultBoardingUsecase(userRepository, acl)
   const merchandiseUseCase = new DefaultMerchandiseUseCase(acl,userRepository,assetRepository)
-  const endpoints = createFulfillmentEndpoint(boardingUsecase, merchandiseUseCase)
+
+  const endpoints = new DefaultFulfillmentEndpoint(boardingUsecase, merchandiseUseCase, inventoryUseCase)
   log.info("🎉 endpoint intial!")
 
   log.info('registry pubsub...')
@@ -60,6 +67,8 @@ export async function bootstrap(config: Config) {
   log.info("🎉 pubsub transport registered!")
 
   const app = express()
+  registerHttpTransports(app, endpoints)
+
   app.use(express.json())
   app.use('/', pubsub.NotificationRouter)
   app.get('/', (_, res) => res.status(200).send('ok'))

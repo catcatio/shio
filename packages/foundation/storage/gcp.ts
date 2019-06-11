@@ -1,7 +1,16 @@
 import { Storage, Bucket, StorageOptions } from '@google-cloud/storage'
-import { FileStorage } from './storage'
+import { FileStorage, FileStorageObject } from './storage'
+import { join, parse } from 'path';
 
 export class GCPFileStorage implements FileStorage {
+
+  async GetObjectUrl(key: string): Promise<string> {
+    const [url] = await this.bucket.file(key).getSignedUrl({
+      action: 'read',
+      expires: new Date(Date.now() + 1000 * 60),
+    })
+    return url
+  }
   private bucket: Bucket
   constructor(bucketName: string, options?: StorageOptions) {
     let storage = new Storage(options)
@@ -24,8 +33,8 @@ export class GCPFileStorage implements FileStorage {
         })
     })
   }
-  PutObject(key: string, data: Buffer): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  PutObject(key: string, data: Buffer): Promise<FileStorageObject> {
+    return new Promise<FileStorageObject>((resolve, reject) => {
       let fileStream = this.bucket.file(key).createWriteStream()
       fileStream
         .once('error', err => {
@@ -33,7 +42,14 @@ export class GCPFileStorage implements FileStorage {
           reject(err)
         })
         .on('finish', () => {
-          resolve()
+          const pathInfo = parse(key)
+          const uri = new URL(`gs://${join(this.bucket.name, key)}`)
+          resolve(
+            {
+              path: pathInfo,
+              href: uri.href,
+            }
+          )
         })
         .end(data, () => { })
     })

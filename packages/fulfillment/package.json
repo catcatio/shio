@@ -24,6 +24,7 @@
   "scripts": {
     "start": "node cmd/entry.js",
     "dev": "sh ../../scripts/clean.bash && nodemon",
+    "dev-remote": "PORT=8080 SHIO_FULFILLMENT_PROJECT_ID=catcat-development SHIO_FULFILLMENT_DATASTORE_NAMESPACE=fulfillment-development SHIO_FULFILLMENT_HOST=https://fulfillment-dot-catcat-development.appspot.com yarn ts-node ./cmd/entry.ts",
     "build": "yarn tsc",
     "test": "yarn unit && yarn integration",
     "integration": "yarn jest --runInBand --config jest.integration.json",
@@ -32,7 +33,8 @@
     "cloudbuild-build": "gcloud builds submit --config cloudbuild.yaml",
     "clean": "find -E . -regex '.*\\.(js|map|d\\.ts)' -not -path \"**/node_modules/*\" -not -path  \"./.next/*\" -delete",
     "gcp-deploy": "yarn build && gcloud app deploy service.yaml",
-    "gcp-logs": "gcloud app logs tail -s fulfillment"
+    "gcp-logs": "gcloud app logs tail -s fulfillment",
+    "prepublish": "yarn build"
   },
   "dependencies": {
     "@google-cloud/datastore": "^3.1.2",
@@ -52,6 +54,7 @@
     "@types/node-fetch": "^2.3.4",
     "@types/uuid": "^3.4.4",
     "@types/winston": "^2.4.4",
+    "babel-jest": "^24.8.0",
     "jest": "^24.8.0",
     "nanoid": "^2.0.3",
     "nodemon": "^1.19.1",

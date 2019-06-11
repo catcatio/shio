@@ -36,14 +36,14 @@ export class FulfillmentManagerUseCase {
   private log = newLogger().withUserId("shio-management")
   private BookAssetFileNames = ['content.pdf', 'cover.jpg']
 
-  constructor(Asset: AssetRepository, Storage: FileStorage){
+  constructor(Asset: AssetRepository, Storage: FileStorage) {
     this.Asset = Asset
     this.Storage = Storage
   }
 
   async listBookAsset(input: ListBookAssetInput): Promise<ListBookAssetOutput> {
     const assets = await this.Asset.findMany(
-      WithPagination(input.getLimit(),input.getOffset())
+      WithPagination(input.getLimit(), input.getOffset())
     )
     const output = new ListBookAssetOutput()
     output.setRecordsList(assets.records.map(a => {
@@ -59,23 +59,11 @@ export class FulfillmentManagerUseCase {
   async createBookAsset(input: CreateBookAssetInput, log = this.log): Promise<CreateBookAssetOutput> {
     const zipFileBuffer = Buffer.from(input.getSource(), 'base64')
 
-    log.info("create new book asset record....")
     const id = nanoid(10)
-    log.info('generate ID '+ id)
+    log.info('generate ID ' + id)
 
-    const describePath = join("${bucketName}/assets/books", id)
-    const result = await this.Asset.create({
-      id,
-      describeURL: "gs://" + describePath,
-      meta: {
-        kind: AssetMetadataBookKind,
-        coverImageURL: "gs://" + describePath + "/cover.jpg",
-        description: input.getDescription(),
-        teaser: input.getTeaser(),
-        title: input.getTitle(),
-        slug: input.getSlug()
-      },
-    })
+    const describePath = join("/assets/books", id)
+
 
     const requireFileBuffers = await Promise.all(this.BookAssetFileNames.map(async f => {
       const buf = await getFileNameFromZipOrThrow(zipFileBuffer, f)
@@ -86,13 +74,27 @@ export class FulfillmentManagerUseCase {
 
     log.info("upload book asset source....")
     await this.Storage.PutObject(join(describePath, "source.zip"), zipFileBuffer)
-
-    await Promise.all(requireFileBuffers.map(async ({ f, buf }) => {
+    const [pdf, cover] =  await Promise.all(requireFileBuffers.map(async ({ f, buf }) => {
       log.info('upload ' + f)
-      await this.Storage.PutObject(join(describePath, f), buf)
+      return await this.Storage.PutObject(join(describePath, f), buf)
     }))
-
     log.info("Upload complete, writing a record of asset...")
+
+    const uri = new URL(pdf.href)
+    uri.pathname = pdf.path.dir
+    const result = await this.Asset.create({
+      id,
+      describeURL: uri.href,
+      meta: {
+        kind: AssetMetadataBookKind,
+        coverImageURL: cover.href,
+        description: input.getDescription(),
+        teaser: input.getTeaser(),
+        title: input.getTitle(),
+        slug: input.getSlug()
+      },
+    })
+    log.info("asset record created!!")
 
     const output = new CreateBookAssetOutput()
     output.setId(result.id)

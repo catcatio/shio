@@ -27,6 +27,15 @@ export class ResourceTag {
   type: string
   id: string
   prefix: string
+  static fromAclTag(v: string) {
+    const seq = v.split("::")
+    const tag = new ResourceTag({
+      prefix: seq[0],
+      type: seq[1],
+      id: seq[2],
+    })
+    return tag
+  }
   constructor(option: { type: string; id: string; prefix: string }) {
     this.type = option.type
     this.id = option.id
@@ -35,7 +44,7 @@ export class ResourceTag {
   toString() {
     return `${this.prefix}::${this.type}::${this.id}`
   }
-  withId(id: string){
+  withId(id: string) {
     return new ResourceTag({
       ...this,
       id,
