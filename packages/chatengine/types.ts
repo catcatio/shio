@@ -85,6 +85,7 @@ export interface Provider<T> {
 
 export interface IntentDetectorProvider extends Provider<IntentDetector> {}
 export interface MessagingClientProvider extends Provider<MessagingClient> {}
+export interface PaymentClientProvider extends Provider<PaymentClient> {}
 
 export type MessageClientSendImageInput = LineMessageClientSendImageInput
 export type MessageClientSendImageOutput = LineMessageClientSendImageOutput
@@ -188,7 +189,7 @@ export type LinePaySettings = {
     channelSecret: string
     isSandbox: boolean
   }
-  apiEndpoint: string
+  // apiEndpoint: string
   confirmUrl: string
   routerPath?: string
 }
@@ -223,7 +224,7 @@ export const OnPaymentConfirmationReceivedEventName = 'PaymentConfirmationReceiv
 
 export type OnMessageReceivedCallback = (message: ParsedMessage) => void
 
-export type ConfirmTransaction = (confirmRequest: PaymentConfirmRequest) => Promise<PaymentConfirmResponse>
+export type ConfirmTransaction = (confirmRequest: PaymentConfirmRequest, error: Error) => Promise<PaymentConfirmResponse>
 
 export type OnPaymentConfirmationReceivedCallback = (payload: PaymentConfirmationPayload, confirmTransaction: ConfirmTransaction) => Promise<any>
 
@@ -237,7 +238,7 @@ export interface IPaymentNotifier {
   notify(payload: PaymentConfirmationPayload, cb: ConfirmTransaction): void
 }
 
-export type PaymentConfirmationPayload = LinePaymentConfirmationPayload
+export type PaymentConfirmationPayload = LinepayPaymentConfirmationPayload
 
 export type PaymentConfirmRequest = LineMessageConfirmRequest
 
@@ -249,12 +250,14 @@ export interface LineMessageConfirmRequest {
   currency: string
 }
 
-export interface LinePaymentConfirmationPayload {
+export interface LinepayPaymentConfirmationPayload {
+  provider: 'linepay'
   transactionId: string
+  orderId: string
 }
 
 export type ReservePaymentRequest = LineReservePaymentRequest
-export type ReservePaymentResponse = LineReservePaymentRequest
+export type ReservePaymentResponse = LineReservePaymentResponse
 
 export interface LineReservePaymentRequest {
   productName: string
@@ -275,6 +278,18 @@ export interface LineReservePaymentRequest {
   capture?: boolean
 }
 
+export interface LineReservePaymentResponseInfo {
+  transactionId: string
+  paymentAccessToken: string
+}
+export interface LineReservePaymentResponse {
+  returnCode: string
+  returnMessage: string
+  info: LineReservePaymentResponseInfo
+  transactionId: string
+}
+
 export interface PaymentClient {
+  name: string
   reserve(request: ReservePaymentRequest): Promise<ReservePaymentResponse>
 }

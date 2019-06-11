@@ -30,9 +30,22 @@ function loadConfig(): Configurations {
             }
           })
         }
+      },
+      linepay: {
+        clientConfig: {
+          channelId: 'string',
+          channelSecret: 'string',
+          isSandbox: true
+        },
+        // apiEndpoint: 'string',
+        confirmUrl: 'string'
       }
     },
     pubsub: {
+      cloudPubSub: {
+        apiEndpoint: 'http://localhost:8085',
+        projectId: 'catcat-local'
+      },
       devPubSub: true
     },
     intentProvider: 'fluke'

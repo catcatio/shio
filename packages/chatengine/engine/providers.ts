@@ -1,4 +1,4 @@
-import { IntentDetector, IntentDetectorProvider, MessagingClientProvider, MessagingClient } from '../types'
+import { IntentDetector, IntentDetectorProvider, MessagingClientProvider, MessagingClient, PaymentClient, PaymentClientProvider } from '../types'
 
 export const messagingClientProvider = (): MessagingClientProvider => {
   const providers: { [name: string]: MessagingClient } = {}
@@ -38,6 +38,29 @@ export const intentDetectorProvider = (): IntentDetectorProvider => {
     }
 
     return intentDetector
+  }
+
+  return {
+    add,
+    get
+  }
+}
+
+export const paymentClientProvider = (): PaymentClientProvider => {
+  const providers: { [name: string]: PaymentClient } = {}
+
+  const add = (payment: PaymentClient): void => {
+    providers[payment.name] = payment
+  }
+
+  const get = (name: string): PaymentClient => {
+    let payment = providers[name]
+
+    if (!payment) {
+      throw new Error('not found')
+    }
+
+    return payment
   }
 
   return {

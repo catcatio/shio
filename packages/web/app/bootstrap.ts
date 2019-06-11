@@ -2,14 +2,20 @@ import { server } from './server'
 import { Configurations, PubSubSettings, Endpoint } from './types'
 import { chatEndpoint } from './endpoints/chat'
 import { createCloudPubSubInstance, WithClientConfig, CloudPubsubMessageChannelTransport } from '@shio-bot/foundation'
-import { ChatEngine } from '@shio-bot/chatengine'
+import { ChatEngine, PaymentEngine } from '@shio-bot/chatengine'
 import { fulfillment } from './fulfillment'
 import { intentMessageHandler, fulfillmentMessageHandler } from './handlers'
-import { EchoPubSubTransport, MessageChannelTransportExt } from './internal'
+import { EchoPubSubTransport, MessageChannelTransportExt, PaymentChannelTransportExt } from './internal'
+import { paymentEndpoint } from './endpoints/payment'
+import { CloudPubsubPaymentChannelTransport, PaymentChannelTransport } from '@shio-bot/foundation/transports/pubsub'
+import { payment } from './payment'
+import { reservePaymentHandler } from './handlers/reservePaymentHandler'
+import { confirmPaymentHandler } from './handlers/confirmPaymentHandler'
+import { paymentRepository } from './repositories'
 
-const msgPubsubPath = '/msgpubsub'
+const pubsubPath = '/pubsub'
 
-const createPubsubTransportInstance = async (settings: PubSubSettings, serviceName: string): Promise<MessageChannelTransportExt> => {
+const createPubsubMessageTransportInstance = async (settings: PubSubSettings, serviceName: string): Promise<MessageChannelTransportExt> => {
   if (settings.devPubSub) {
     return new EchoPubSubTransport()
   }
@@ -18,27 +24,53 @@ const createPubsubTransportInstance = async (settings: PubSubSettings, serviceNa
   return new CloudPubsubMessageChannelTransport({ pubsub, serviceName })
 }
 
-function makePubsubEndpoint(pubsub: MessageChannelTransportExt): Endpoint {
+const createPubsubPaymentTransportInstance = async (settings: PubSubSettings, serviceName: string): Promise<PaymentChannelTransportExt> => {
+  let pubsub = await createCloudPubSubInstance(WithClientConfig(settings.cloudPubSub || {}))
+  return new CloudPubsubPaymentChannelTransport({ pubsub, serviceName })
+}
+
+function makeMessagePubsubEndpoint(pubsub: MessageChannelTransportExt): Endpoint {
   let ep: Endpoint = pubsub.NotificationRouter as any
-  ep.path = msgPubsubPath
+  ep.path = pubsubPath
+  return ep
+}
+
+function makePaymentPubsubEndpoint(pubsub: PaymentChannelTransportExt): Endpoint {
+  let ep: Endpoint = pubsub.NotificationRouter as any
+  ep.path = pubsubPath
   return ep
 }
 
 export async function bootstrap(config: Configurations) {
   let chatEngine = new ChatEngine(config.chatEngine)
-  let pubsub = await createPubsubTransportInstance(config.pubsub, config.serviceName)
-  let ff = fulfillment(pubsub)
+  let paymentEngine = new PaymentEngine(config.chatEngine)
+  let msgPubsub = await createPubsubMessageTransportInstance(config.pubsub, config.serviceName)
+  let paymentPubsub = await createPubsubPaymentTransportInstance(config.pubsub, config.serviceName)
+  await paymentPubsub.PrepareTopic()
+  let ff = fulfillment(msgPubsub)
+  let pm = payment(paymentPubsub)
   let intentDetector = chatEngine.intentDetectorProvider.get(config.intentProvider)
 
   let inMsgHandler = intentMessageHandler(ff, intentDetector, chatEngine.messagingClientProvider)
   let outMsgHandler = fulfillmentMessageHandler(chatEngine.messagingClientProvider)
-
-  pubsub.CreateOutgoingSubscriptionConfig(`${config.host}${msgPubsubPath}`)
+  msgPubsub.CreateOutgoingSubscriptionConfig(`${config.host}${pubsubPath}`)
   ff.onFulfillment(outMsgHandler)
 
-  chatEngine.onMessageReceived(inMsgHandler.handle)
+  let paymentRepo = paymentRepository()
+  let rpHandler = reservePaymentHandler(paymentEngine.paymentClientProvider)
+  let cpHandler = confirmPaymentHandler(pm, paymentRepo)
+  paymentPubsub.CreateIncomingSubscriptionConfig(`${config.host}${pubsubPath}`)
+  pm.onReservePayment(rpHandler)
 
-  let eps: Endpoint[] = [chatEndpoint(chatEngine), makePubsubEndpoint(pubsub)]
+  chatEngine.onMessageReceived(inMsgHandler.handle)
+  paymentEngine.onPaymentConfirmationReceived(cpHandler.handle)
+
+  let eps: Endpoint[] = [chatEndpoint(chatEngine), paymentEndpoint(paymentEngine), makeMessagePubsubEndpoint(msgPubsub), makePaymentPubsubEndpoint(paymentPubsub)]
+
+  process.on('uncaughtException', function(err) {
+    console.log('THIS IS BAD:', err)
+  })
+
   return server(config, ...eps)
     .start()
     .then(_ => console.log('D O N E'))
