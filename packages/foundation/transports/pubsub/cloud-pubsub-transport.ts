@@ -135,7 +135,7 @@ export class CloudPubsubTransport<T> implements ChannelTransport<T>, ChannelMana
   // eg. on migration script, cron, or deployment manager
 
   async CreateSubscriptionConfig(pushEndpointHost: string) {
-    this.log.info(`Update subscription config endpoint ${pushEndpointHost}`)
+    this.log.info(`Update ${this.subscription.name} subscription config endpoint ${pushEndpointHost}`)
     const isExists = await this.subscription.exists()
     if (!isExists[0]) {
       await this.topic.createSubscription(this.subscription.name, {

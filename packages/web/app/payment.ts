@@ -9,11 +9,11 @@ export const payment = (pubsub: PaymentChannelTransport): Payment => {
       acknowledge()
     }
 
-    pubsub.SubscribeIncoming(paymentListener)
+    pubsub.SubscribeReservePayment(paymentListener)
   }
 
   const confirmPayment = async (msg: ConfirmPaymentMessage): Promise<void> => {
-    return pubsub.PublishOutgoing(msg)
+    return pubsub.PublishConfirmPayment(msg)
   }
 
   return {

@@ -29,29 +29,29 @@ export class __mock__CloudPubsubMessageTransports implements MessageChannelTrans
 }
 
 export class __mock__CloudPubsubPaymentTransports implements PaymentChannelTransport {
-  incomingSubs: SubscribeListener<ReservePaymentMessage>[] = []
-  outgoingSubs: SubscribeListener<ConfirmPaymentMessage>[] = []
+  incomingSubs: SubscribeListener<ConfirmPaymentMessage>[] = []
+  outgoingSubs: SubscribeListener<ReservePaymentMessage>[] = []
 
   ack = jest.fn()
 
-  async PublishIncoming(input: ReservePaymentMessage): Promise<void> {
+  async PublishIncoming(input: ConfirmPaymentMessage): Promise<void> {
     await Promise.all(
       this.incomingSubs.map(async i => {
         await i(input, this.ack)
       })
     )
   }
-  SubscribeIncoming(listener: SubscribeListener<ReservePaymentMessage>): void {
+  SubscribeIncoming(listener: SubscribeListener<ConfirmPaymentMessage>): void {
     this.incomingSubs.push(listener)
   }
-  async PublishOutgoing(input: ConfirmPaymentMessage): Promise<void> {
+  async PublishOutgoing(input: ReservePaymentMessage): Promise<void> {
     await Promise.all(
       this.outgoingSubs.map(async i => {
         await i(input, this.ack)
       })
     )
   }
-  SubscribeOutgoing(listener: SubscribeListener<ConfirmPaymentMessage>): void {
+  SubscribeOutgoing(listener: SubscribeListener<ReservePaymentMessage>): void {
     this.outgoingSubs.push(listener)
   }
   UnsubscribeAll(): void {
@@ -59,18 +59,18 @@ export class __mock__CloudPubsubPaymentTransports implements PaymentChannelTrans
   }
 
   PublishReservePayment(input: ReservePaymentMessage): Promise<void> {
-    return this.PublishIncoming(input)
-  }
-
-  SubscribeReservePayment(listener: SubscribeListener<ReservePaymentMessage>): void {
-    return this.SubscribeIncoming(listener)
-  }
-
-  PublishConfirmPayment(input: ConfirmPaymentMessage): Promise<void> {
     return this.PublishOutgoing(input)
   }
 
-  SubscribeConfirmPayment(listener: SubscribeListener<ConfirmPaymentMessage>): void {
+  SubscribeReservePayment(listener: SubscribeListener<ReservePaymentMessage>): void {
     return this.SubscribeOutgoing(listener)
+  }
+
+  PublishConfirmPayment(input: ConfirmPaymentMessage): Promise<void> {
+    return this.PublishIncoming(input)
+  }
+
+  SubscribeConfirmPayment(listener: SubscribeListener<ConfirmPaymentMessage>): void {
+    return this.SubscribeIncoming(listener)
   }
 }
