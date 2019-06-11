@@ -1,9 +1,9 @@
 import { ReservePaymentListener } from '../types'
-import { ReservePayment } from '@shio-bot/foundation/entities'
-import { PaymentClientProvider, ReservePaymentRequest, LineReservePaymentRequest } from '@shio-bot/chatengine'
+import { ReservePaymentMessage } from '@shio-bot/foundation/entities'
+import { PaymentClientProvider, LineReservePaymentRequest } from '@shio-bot/chatengine'
 
 export const reservePaymentHandler = (provider: PaymentClientProvider): ReservePaymentListener => {
-  return async (payload: ReservePayment): Promise<void> => {
+  return async (payload: ReservePaymentMessage): Promise<void> => {
     let client = provider.get(payload.provider)
     if (!client) {
       console.log('payment client not found')

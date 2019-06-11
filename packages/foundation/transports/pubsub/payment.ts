@@ -1,12 +1,19 @@
-import { CloudPubsubChannelOptions } from './cloud-pubsub-transport'
+import { CloudPubsubChannelOptions, SubscribeListener } from './cloud-pubsub-transport'
 import { CloudPubsubDuoChannel, CloudPubsubDuoChannelTransport, CloudPubsubDuoChannelManager } from './duo-cloud-pubsub-transport'
-import { ReservePayment, ConfirmPayment } from '../../entities'
+import { ReservePaymentMessage, ConfirmPaymentMessage } from '../../entities'
 
-export interface PaymentChannelTransport extends CloudPubsubDuoChannelTransport<ReservePayment, ConfirmPayment> {}
+export interface PaymentChannelTransport extends CloudPubsubDuoChannelTransport<ReservePaymentMessage, ConfirmPaymentMessage> {
+  PublishReservePayment(input: ReservePaymentMessage): Promise<void>
+  SubscribeReservePayment(listener: SubscribeListener<ReservePaymentMessage>): void
+
+  PublishConfirmPayment(input: ConfirmPaymentMessage): Promise<void>
+  SubscribeConfirmPayment(listener: SubscribeListener<ConfirmPaymentMessage>): void
+}
 
 export interface PaymentChannelManager extends CloudPubsubDuoChannelManager {}
 
-export class CloudPubsubPaymentChannelTransport extends CloudPubsubDuoChannel<ReservePayment, ConfirmPayment> implements PaymentChannelTransport, PaymentChannelManager {
+export class CloudPubsubPaymentChannelTransport extends CloudPubsubDuoChannel<ReservePaymentMessage, ConfirmPaymentMessage>
+  implements PaymentChannelTransport, PaymentChannelManager {
   constructor(options: CloudPubsubChannelOptions) {
     super(
       options,
@@ -21,5 +28,21 @@ export class CloudPubsubPaymentChannelTransport extends CloudPubsubDuoChannel<Re
         notificationPath: '/confirmpayment'
       }
     )
+  }
+
+  PublishReservePayment(input: ReservePaymentMessage): Promise<void> {
+    return this.PublishIncoming(input)
+  }
+
+  SubscribeReservePayment(listener: SubscribeListener<ReservePaymentMessage>): void {
+    return this.SubscribeIncoming(listener)
+  }
+
+  PublishConfirmPayment(input: ConfirmPaymentMessage): Promise<void> {
+    return this.PublishOutgoing(input)
+  }
+
+  SubscribeConfirmPayment(listener: SubscribeListener<ConfirmPaymentMessage>): void {
+    return this.SubscribeOutgoing(listener)
   }
 }

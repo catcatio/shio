@@ -1,7 +1,3 @@
-export interface ReservePayment {}
-
-export interface ConfirmPayment {}
-
 export type PaymentProvider = 'linepay'
 
 export type CurrencyTHB = 'THB'
@@ -11,7 +7,7 @@ export type CurrencyUSD = 'USD'
 
 export type Currency = CurrencyTHB | CurrencyTWD | CurrencyJPY | CurrencyUSD
 
-export interface ReservePayment {
+export interface ReservePaymentMessage {
   provider: PaymentProvider
   orderId: string
   productName: string
@@ -20,7 +16,7 @@ export interface ReservePayment {
   currency: Currency
 }
 
-export interface ConfirmPayment {
+export interface ConfirmPaymentMessage {
   provider: PaymentProvider
   orderId: string
   transactionId: string

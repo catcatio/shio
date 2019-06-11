@@ -23,6 +23,12 @@ function loadConfig(): Configurations {
               age: 15
             }
           },
+          'purchase book': {
+            name: 'purchase-item',
+            parameters: {
+              merchantTitle: 'WOW!!!!'
+            }
+          },
           unknown: msg => ({
             name: 'input.unknown',
             parameters: {

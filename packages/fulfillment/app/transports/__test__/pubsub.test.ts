@@ -1,24 +1,34 @@
 import { FulfillmentEndpoint } from '../../endpoints'
 import { registerPubsub } from '../pubsub'
-import { __mock__CloudPubsubMessageTransports } from '@shio-bot/foundation/transports/__test__/mock'
-import { randomIncomingMessage, randomFollowMessageIntent } from '@shio-bot/foundation/entities/__test__/random'
-import { ListItemEventMessageIntentKind } from '../../entities/asset'
+import { __mock__CloudPubsubMessageTransports, __mock__CloudPubsubPaymentTransports } from '@shio-bot/foundation/transports/__test__/mock'
+import { randomIncomingMessage, randomFollowMessageIntent, randomReservePaymentMessage, randomPurchaseItemIntent } from '@shio-bot/foundation/entities/__test__/random'
+import { ListItemEventMessageIntentKind, PurchaseItemEventMessageIntentKind } from '../../entities/asset'
 
 describe('Pubsub transport test', () => {
   const mockEndpoints: FulfillmentEndpoint = {
     follow: jest.fn(),
-    [ListItemEventMessageIntentKind]: jest.fn()
+    [ListItemEventMessageIntentKind]: jest.fn(),
+    [PurchaseItemEventMessageIntentKind]: jest.fn()
   }
   let pubsub: __mock__CloudPubsubMessageTransports
+  let paymentPubsub: __mock__CloudPubsubPaymentTransports
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     pubsub = new __mock__CloudPubsubMessageTransports()
+    paymentPubsub = new __mock__CloudPubsubPaymentTransports()
+    registerPubsub(pubsub, paymentPubsub, mockEndpoints)
   })
   test('Incoming message follow', async () => {
-    registerPubsub(pubsub, mockEndpoints)
     const message = randomIncomingMessage(randomFollowMessageIntent())
     await pubsub.PublishIncoming(message)
     expect(pubsub.ack).toBeCalledTimes(1)
     expect(mockEndpoints.follow).toBeCalledTimes(1)
+  })
+
+  test('reserve payment', async () => {
+    const message = randomIncomingMessage(randomPurchaseItemIntent())
+    await pubsub.PublishIncoming(message)
+    expect(pubsub.ack).toBeCalledTimes(1)
+    expect(mockEndpoints['purchase-item']).toBeCalledTimes(1)
   })
 })

@@ -1,5 +1,5 @@
 import { Configuration as ChatEngineSettings } from '@shio-bot/chatengine/types'
-import { OutgoingMessage, IncomingMessage, ReservePayment, ConfirmPayment } from '@shio-bot/foundation/entities'
+import { OutgoingMessage, IncomingMessage, ReservePaymentMessage, ConfirmPaymentMessage } from '@shio-bot/foundation/entities'
 import express = require('express')
 import { ClientConfig } from '@google-cloud/pubsub/build/src/pubsub'
 
@@ -19,7 +19,7 @@ export interface PubSubSettings {
 
 export type FulfillmentListener = (message: OutgoingMessage) => Promise<void>
 
-export type ReservePaymentListener = (payload: ReservePayment) => Promise<void>
+export type ReservePaymentListener = (payload: ReservePaymentMessage) => Promise<void>
 
 export interface Endpoint extends express.RequestHandler {
   path: string
@@ -32,5 +32,5 @@ export interface Fulfillment {
 
 export interface Payment {
   onReservePayment(listener: ReservePaymentListener): void
-  confirmPayment(msg: ConfirmPayment): Promise<void>
+  confirmPayment(msg: ConfirmPaymentMessage): Promise<void>
 }

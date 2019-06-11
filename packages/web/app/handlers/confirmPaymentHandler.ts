@@ -1,9 +1,8 @@
-import { PaymentConfirmRequest, PaymentConfirmationPayload, ConfirmTransaction } from '@shio-bot/chatengine'
+import { PaymentConfirmationPayload, ConfirmTransaction } from '@shio-bot/chatengine'
 import { Payment } from '../types'
 import { newLogger } from '@shio-bot/foundation'
-import { ConfirmPayment } from '@shio-bot/foundation/entities'
+import { ConfirmPaymentMessage } from '@shio-bot/foundation/entities'
 import { PaymentRepository } from '../repositories'
-import { response } from 'express'
 
 export const confirmPaymentHandler = (p: Payment, paymentRepository: PaymentRepository) => {
   const log = newLogger()
@@ -21,7 +20,7 @@ export const confirmPaymentHandler = (p: Payment, paymentRepository: PaymentRepo
       log.info(`orderId [${payload.orderId}] mismatch: (actual: ${reservePayment.orderId})`)
       return await confirmTransaction(null as any, new Error('mismatch information'))
     }
-    let c: ConfirmPayment = {
+    let c: ConfirmPaymentMessage = {
       provider: payload.provider,
       transactionId: payload.transactionId,
       orderId: payload.orderId,

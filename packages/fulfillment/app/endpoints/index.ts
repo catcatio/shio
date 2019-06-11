@@ -1,20 +1,29 @@
-import { BoardingUsecase } from "../usecases/boarding";
-import { ListItemEventMessageIntentKind, FollowEventMessageIntentKind, IncomingMessage, createOutgoingFromIncomingMessage, ListItemEventMessageFulfillmentKind } from "../entities/asset";
-import { MerchandiseUseCase } from "../usecases/merchandise";
-import { EndpointFuntion, createEndpointFunction } from "./default";
-import { UsecaseErrorMessages } from "../usecases";
-import { GlobalError, newGlobalError, ErrorType } from "../entities/error";
-import { WithOperationOwner, WithSystemOperation, WithIncomingMessage } from "../repositories";
-import { UserChatSession } from "../entities";
+import { BoardingUsecase } from '../usecases/boarding'
+import {
+  ListItemEventMessageIntentKind,
+  FollowEventMessageIntentKind,
+  IncomingMessage,
+  createOutgoingFromIncomingMessage,
+  ListItemEventMessageFulfillmentKind,
+  PurchaseItemEventMessageIntentKind,
+  ReservePaymentMessage
+} from '../entities/asset'
+import { MerchandiseUseCase } from '../usecases/merchandise'
+import { EndpointFuntion, createEndpointFunction } from './default'
+import { UsecaseErrorMessages } from '../usecases'
+import { GlobalError, newGlobalError, ErrorType } from '../entities/error'
+import { WithOperationOwner, WithSystemOperation, WithIncomingMessage } from '../repositories'
+import { UserChatSession } from '../entities'
+import * as uuid from 'uuid/v4'
 
 export interface FulfillmentEndpoint {
   [FollowEventMessageIntentKind]: EndpointFuntion
   [ListItemEventMessageIntentKind]: EndpointFuntion
+  [PurchaseItemEventMessageIntentKind]: EndpointFuntion
 }
 
 export class DefaultFulfillmentEndpoint {
-
-  public [FollowEventMessageIntentKind]: EndpointFuntion = createEndpointFunction(FollowEventMessageIntentKind, async (message) => {
+  public [FollowEventMessageIntentKind]: EndpointFuntion = createEndpointFunction(FollowEventMessageIntentKind, async message => {
     try {
       const output = await this.boarding.userFollow(
         {
@@ -33,7 +42,7 @@ export class DefaultFulfillmentEndpoint {
             chatSessionId: output.userChatSession.id,
             userId: output.user.id,
             isCompleted: true,
-            isExists: false,
+            isExists: false
           }
         }
       ])
@@ -53,16 +62,14 @@ export class DefaultFulfillmentEndpoint {
         throw e
       }
     }
-
   })
-  public [ListItemEventMessageIntentKind]: EndpointFuntion = createEndpointFunction(ListItemEventMessageIntentKind, async (message) => {
-
+  public [ListItemEventMessageIntentKind]: EndpointFuntion = createEndpointFunction(ListItemEventMessageIntentKind, async message => {
     const session = await this.getSessionFromIncomingMessageOrThrow(message)
     const { limit, offset } = message.intent.parameters
     const output = await this.merchandise.listItem(
       {
         limit: message.intent.parameters.limit,
-        offset: message.intent.parameters.offset,
+        offset: message.intent.parameters.offset
       },
       WithOperationOwner(session.userId)
     )
@@ -75,12 +82,26 @@ export class DefaultFulfillmentEndpoint {
           hasPrev: false,
           limit: limit || 10,
           offset: offset || 0,
-          merchantTitle: "Reed",
-        },
+          merchantTitle: 'Reed'
+        }
       }
     ])
   })
+  public [PurchaseItemEventMessageIntentKind]: EndpointFuntion = createEndpointFunction(PurchaseItemEventMessageIntentKind, async message => {
+    const { merchantTitle } = message.intent.parameters
 
+    // TODO: create
+    const reservePaymentMessage: ReservePaymentMessage = {
+      provider: 'linepay',
+      orderId: uuid(), // primary key of purchasing
+      productName: merchantTitle,
+      productImageUrl: 'https://static.reeeed.com/book/cjn66col600cw08027wemah6s/thumbnail-large.jpg', // optional
+      amount: 120, // unit price
+      currency: 'THB'
+    }
+
+    return reservePaymentMessage
+  })
 
   private boarding: BoardingUsecase
   private merchandise: MerchandiseUseCase
@@ -95,9 +116,9 @@ export class DefaultFulfillmentEndpoint {
       const result = await this.boarding.userFollow({
         displayName: incomingMessage.userProfile.displayName,
         provider: incomingMessage.provider,
-        providerId: incomingMessage.source.userId,
-      }) 
-      session = result.userChatSession 
+        providerId: incomingMessage.source.userId
+      })
+      session = result.userChatSession
     }
     return session
   }

@@ -1,18 +1,18 @@
-import { ReservePayment } from '@shio-bot/foundation/entities'
+import { ReservePaymentMessage } from '@shio-bot/foundation/entities'
 
 export interface PaymentRepository {
-  get(transactionId: string): Promise<ReservePayment>
-  push(transactionId: string, payment: ReservePayment): Promise<void>
+  get(transactionId: string): Promise<ReservePaymentMessage>
+  push(transactionId: string, payment: ReservePaymentMessage): Promise<void>
   remove(transactionId: string): Promise<void>
 }
 
 export const paymentRepository = (): PaymentRepository => {
-  const cache: { [transactionId: string]: ReservePayment } = {}
-  const get = async (transactionId: string): Promise<ReservePayment> => {
+  const cache: { [transactionId: string]: ReservePaymentMessage } = {}
+  const get = async (transactionId: string): Promise<ReservePaymentMessage> => {
     return cache[transactionId]
   }
 
-  const push = async (transactionId: string, payment: ReservePayment): Promise<void> => {
+  const push = async (transactionId: string, payment: ReservePaymentMessage): Promise<void> => {
     cache[transactionId] = payment
   }
 

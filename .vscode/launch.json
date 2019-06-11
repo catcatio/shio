@@ -13,7 +13,7 @@
       "runtimeArgs": ["-r", "ts-node/register"],
       "protocol": "inspector",
       "internalConsoleOptions": "openOnSessionStart"
-    }, 
+    },
 
     {
       "name": "Run current file",
@@ -55,6 +55,7 @@
       "args": ["${workspaceRoot}/packages/fulfillment/cmd/local.ts"],
       "cwd": "${workspaceRoot}/packages/fulfillment",
       "protocol": "inspector",
+      "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
@@ -65,6 +66,7 @@
       "cwd": "${workspaceRoot}/packages/fulfillment",
       "runtimeArgs": ["-r", "ts-node/register"],
       "protocol": "inspector",
+      "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
@@ -96,6 +98,7 @@
       "cwd": "${workspaceRoot}/packages/web",
       "runtimeArgs": ["-r", "ts-node/register"],
       "protocol": "inspector",
+      "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
@@ -106,6 +109,7 @@
       "cwd": "${workspaceRoot}/packages/web",
       "runtimeArgs": ["-r", "ts-node/register"],
       "protocol": "inspector",
+      "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
