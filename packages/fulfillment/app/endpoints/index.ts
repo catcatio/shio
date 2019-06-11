@@ -92,12 +92,14 @@ export class DefaultFulfillmentEndpoint {
 
     // TODO: create
     const reservePaymentMessage: ReservePaymentMessage = {
+      type: 'ReservePayment',
       provider: 'linepay',
       orderId: uuid(), // primary key of purchasing
       productName: merchantTitle,
       productImageUrl: 'https://static.reeeed.com/book/cjn66col600cw08027wemah6s/thumbnail-large.jpg', // optional
       amount: 120, // unit price
-      currency: 'THB'
+      currency: 'THB',
+      source: message.source
     }
 
     return reservePaymentMessage

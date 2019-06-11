@@ -1,10 +1,10 @@
-import { PaymentConfirmationPayload, ConfirmTransaction } from '@shio-bot/chatengine'
+import { PaymentConfirmationPayload, ConfirmTransaction, MessagingClientProvider } from '@shio-bot/chatengine'
 import { Payment } from '../types'
 import { newLogger } from '@shio-bot/foundation'
 import { ConfirmPaymentResultMessage } from '@shio-bot/foundation/entities'
 import { PaymentRepository } from '../repositories'
 
-export const confirmPaymentHandler = (p: Payment, paymentRepository: PaymentRepository) => {
+export const confirmPaymentHandler = (p: Payment, cp: MessagingClientProvider, paymentRepository: PaymentRepository) => {
   const log = newLogger()
 
   const handle = async (payload: PaymentConfirmationPayload, confirmTransaction: ConfirmTransaction): Promise<any> => {
@@ -42,12 +42,31 @@ export const confirmPaymentHandler = (p: Payment, paymentRepository: PaymentRepo
       .then(response => {
         console.log(response)
         // send success reply to fulfillment
+        // HACK: to remove
+        reservePayment &&
+          reservePayment.source &&
+          cp.get('line').sendMessage({
+            provider: 'line',
+            replyToken: '',
+            to: reservePayment.source.userId,
+            text: 'purchase completed'
+          })
+
         c.isCompleted = true
         return p.confirmPayment(c)
       })
       .catch(err => {
         log.info(`failed to confirm transaction: ${err}`)
         // send failure reply to fulfillment
+        // HACK: to remove
+        reservePayment &&
+          reservePayment.source &&
+          cp.get('line').sendMessage({
+            provider: 'line',
+            replyToken: '',
+            to: reservePayment.source.userId,
+            text: 'purchase failed'
+          })
         c.isCompleted = false
         return p.confirmPayment(c)
       })

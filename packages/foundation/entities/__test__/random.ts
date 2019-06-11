@@ -88,6 +88,7 @@ export function randomOutgoingMessage(...fulfillment: MessageFulfillment[]): Out
 
 export function randomReservePaymentMessage(): ReservePaymentMessage {
   return {
+    type: 'ReservePayment',
     provider: 'linepay',
     orderId: uuid().toString(),
     productName: 'spongebob squarepants',

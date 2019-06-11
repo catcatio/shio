@@ -60,8 +60,8 @@ export async function bootstrap(config: Configurations) {
   let confirmUrl = config.chatEngine.linepay ? config.chatEngine.linepay.confirmUrl : ''
 
   let paymentRepo = paymentRepository()
-  let rpHandler = reservePaymentHandler(confirmUrl, pm, paymentEngine.paymentClientProvider, paymentRepo)
-  let cpHandler = confirmPaymentHandler(pm, paymentRepo)
+  let rpHandler = reservePaymentHandler(confirmUrl, pm, chatEngine.messagingClientProvider, paymentEngine.paymentClientProvider, paymentRepo)
+  let cpHandler = confirmPaymentHandler(pm, chatEngine.messagingClientProvider, paymentRepo)
   paymentPubsub.CreateOutgoingSubscriptionConfig(`${config.host}${pubsubPath}`)
   pm.onReservePayment(rpHandler)
 

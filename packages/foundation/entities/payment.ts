@@ -1,3 +1,5 @@
+import { IncommingMessageSource } from './message'
+
 export type PaymentProvider = 'linepay'
 
 export type CurrencyTHB = 'THB'
@@ -8,12 +10,14 @@ export type CurrencyUSD = 'USD'
 export type Currency = CurrencyTHB | CurrencyTWD | CurrencyJPY | CurrencyUSD
 
 export interface ReservePaymentMessage {
+  type: 'ReservePayment'
   provider: PaymentProvider
   orderId: string
   productName: string
   productImageUrl?: string
   amount: number
   currency: Currency
+  source?: IncommingMessageSource
 }
 
 export type ConfirmPaymentMessage = ConfirmPaymentResultMessage | ReservePaymentResultMessage

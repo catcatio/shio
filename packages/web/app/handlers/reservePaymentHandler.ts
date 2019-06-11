@@ -1,10 +1,16 @@
 import { ReservePaymentListener, Payment } from '../types'
 import { ReservePaymentMessage, ReservePaymentResultMessage } from '@shio-bot/foundation/entities'
-import { PaymentClientProvider, LineReservePaymentRequest, PaymentClient } from '@shio-bot/chatengine'
+import { PaymentClientProvider, LineReservePaymentRequest, PaymentClient, MessagingClientProvider } from '@shio-bot/chatengine'
 import { PaymentRepository } from '../repositories'
 import { newLogger } from '@shio-bot/foundation'
 
-export const reservePaymentHandler = (confirmUrl: string, p: Payment, provider: PaymentClientProvider, paymentRepository: PaymentRepository): ReservePaymentListener => {
+export const reservePaymentHandler = (
+  confirmUrl: string,
+  p: Payment,
+  cp: MessagingClientProvider,
+  provider: PaymentClientProvider,
+  paymentRepository: PaymentRepository
+): ReservePaymentListener => {
   let log = newLogger()
   return async (payload: ReservePaymentMessage): Promise<void> => {
     let client: PaymentClient
@@ -56,6 +62,15 @@ export const reservePaymentHandler = (confirmUrl: string, p: Payment, provider: 
             app: response.info['paymentUrl'].app
           }
         : undefined
+
+      // HACK: to remove
+      payload.source &&
+        cp.get('line').sendMessage({
+          provider: 'line',
+          replyToken: '',
+          to: payload.source.userId,
+          text: response.info['paymentUrl'].web
+        })
 
       await p.confirmPayment(result)
       return paymentRepository.push(response.info.transactionId, payload)
