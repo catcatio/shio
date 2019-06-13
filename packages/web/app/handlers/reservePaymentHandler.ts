@@ -71,18 +71,8 @@ const formatPaymentMessage = (title: string, imageUrl: string, amount: number, c
           height: 'sm',
           action: {
             type: 'uri',
-            label: 'Pay with LINE Pay (web)',
+            label: 'Pay with LINE Pay',
             uri: `${paymentWeb}`
-          }
-        },
-        {
-          type: 'button',
-          style: 'link',
-          height: 'sm',
-          action: {
-            type: 'uri',
-            label: 'Pay with LINE Pay (app)',
-            uri: `${paymentApp}`
           }
         },
         {
@@ -134,53 +124,58 @@ export const reservePaymentHandler = (
     }
 
     // store to memcache
-    await client.reserve(request).then(async response => {
-      let result: ReservePaymentResultMessage = {
-        type: 'ReservePaymentResult',
-        provider: 'linepay',
-        isCompleted: false
-      }
-      console.log(response)
-      if (response.returnCode != '0000') {
-        console.error('failed to reserve payment: ', response)
-        await p.confirmPayment(result)
-        return
-      }
+    await client
+      .reserve(request)
+      .then(async response => {
+        let result: ReservePaymentResultMessage = {
+          type: 'ReservePaymentResult',
+          provider: 'linepay',
+          isCompleted: false
+        }
+        console.log(response)
+        if (response.returnCode != '0000') {
+          console.error('failed to reserve payment: ', response)
+          await p.confirmPayment(result)
+          return
+        }
 
-      if (!response.info) {
-        console.error('failed to reserve payment: ', response)
-        await p.confirmPayment(result)
-        return
-      }
-      result.transactionId = response.info.transactionId
-      result.paymentUrl = response.info['paymentUrl']
-        ? {
-            web: response.info['paymentUrl'].web,
-            app: response.info['paymentUrl'].app
-          }
-        : undefined
+        if (!response.info) {
+          console.error('failed to reserve payment: ', response)
+          await p.confirmPayment(result)
+          return
+        }
+        result.transactionId = response.info.transactionId
+        result.paymentUrl = response.info['paymentUrl']
+          ? {
+              web: response.info['paymentUrl'].web,
+              app: response.info['paymentUrl'].app
+            }
+          : undefined
 
-      const m = formatPaymentMessage(
-        payload.productName,
-        payload.productImageUrl ? payload.productImageUrl : '',
-        payload.amount,
-        payload.currency,
-        response.info['paymentUrl'].web,
-        response.info['paymentUrl'].app
-      )
-      console.log(`payload: ${JSON.stringify(m)}`)
-      // HACK: to remove
-      payload.source &&
-        cp.get('line').sendCustomMessages({
-          provider: 'line',
-          replyToken: '',
-          to: payload.source.userId,
-          message: m
-        })
-      result.isCompleted = true
-      await p.confirmPayment(result)
-      return paymentRepository.push(response.info.transactionId, payload)
-    })
+        const m = formatPaymentMessage(
+          payload.productName,
+          payload.productImageUrl ? payload.productImageUrl : '',
+          payload.amount,
+          payload.currency,
+          response.info['paymentUrl'].web,
+          response.info['paymentUrl'].app
+        )
+        console.log(`payload: ${JSON.stringify(m)}`)
+        // HACK: to remove
+        payload.source &&
+          cp.get('line').sendCustomMessages({
+            provider: 'line',
+            replyToken: '',
+            to: payload.source.userId,
+            message: m
+          })
+        result.isCompleted = true
+        await p.confirmPayment(result)
+        return paymentRepository.push(response.info.transactionId, payload)
+      })
+      .catch(err => {
+        log.error(`failed to reserve payment ${payload.orderId}: ${err}`)
+      })
 
     //NC:TODO: handle failure case, reply to confirm payment channel
   }

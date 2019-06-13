@@ -12,7 +12,7 @@ export const PurchaseItemEventMessageIntentEndpoint = (ancestor: EndpointFunctio
       provider: 'linepay',
       orderId: uuid(), // primary key of purchasing
       productName: merchantTitle,
-      productImageUrl: 'https://static.reeeed.com/book/cjn66col600cw08027wemah6s/thumbnail-large.jpg', // optional
+      productImageUrl: 'https://static.reeeed.com/book/cjn66col600cw08027wemah6s/shareThumbnailImage-medium.jpg', // optional
       amount: 120, // unit price
       currency: 'THB',
       source: message.source
