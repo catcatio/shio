@@ -4,6 +4,103 @@ import { PaymentClientProvider, LineReservePaymentRequest, PaymentClient, Messag
 import { PaymentRepository } from '../repositories'
 import { newLogger } from '@shio-bot/foundation'
 
+const formatPaymentMessage = (title: string, imageUrl: string, amount: number, currency: string, paymentWeb: string, paymentApp: string) => {
+  let a = {
+    type: 'bubble',
+    hero: {
+      type: 'image',
+      url: `${imageUrl}`,
+      size: 'full',
+      aspectRatio: '20:13',
+      aspectMode: 'cover',
+      action: {
+        type: 'uri',
+        uri: 'http://linecorp.com/'
+      }
+    },
+    body: {
+      type: 'box',
+      layout: 'vertical',
+      contents: [
+        {
+          type: 'text',
+          text: `${title}`,
+          weight: 'bold',
+          size: 'xl'
+        },
+        {
+          type: 'box',
+          layout: 'vertical',
+          margin: 'lg',
+          spacing: 'sm',
+          contents: [
+            {
+              type: 'box',
+              layout: 'baseline',
+              spacing: 'sm',
+              contents: [
+                {
+                  type: 'text',
+                  text: 'Price',
+                  color: '#aaaaaa',
+                  size: 'sm',
+                  flex: 1
+                },
+                {
+                  type: 'text',
+                  text: `${amount} ${currency}`,
+                  wrap: true,
+                  color: '#666666',
+                  size: 'sm',
+                  flex: 5
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    footer: {
+      type: 'box',
+      layout: 'vertical',
+      spacing: 'sm',
+      contents: [
+        {
+          type: 'button',
+          style: 'link',
+          height: 'sm',
+          action: {
+            type: 'uri',
+            label: 'Pay with LINE Pay (web)',
+            uri: `${paymentWeb}`
+          }
+        },
+        {
+          type: 'button',
+          style: 'link',
+          height: 'sm',
+          action: {
+            type: 'uri',
+            label: 'Pay with LINE Pay (app)',
+            uri: `${paymentApp}`
+          }
+        },
+        {
+          type: 'spacer',
+          size: 'sm'
+        }
+      ],
+      flex: 0
+    }
+  }
+
+  return {
+    type: 'flex',
+    altText: 'pay with line pay',
+    contents: a
+  }
+}
+
 export const reservePaymentHandler = (
   confirmUrl: string,
   p: Payment,
@@ -63,13 +160,22 @@ export const reservePaymentHandler = (
           }
         : undefined
 
+      const m = formatPaymentMessage(
+        payload.productName,
+        payload.productImageUrl ? payload.productImageUrl : '',
+        payload.amount,
+        payload.currency,
+        response.info['paymentUrl'].web,
+        response.info['paymentUrl'].app
+      )
+      console.log(`payload: ${JSON.stringify(m)}`)
       // HACK: to remove
       payload.source &&
-        cp.get('line').sendMessage({
+        cp.get('line').sendCustomMessages({
           provider: 'line',
           replyToken: '',
           to: payload.source.userId,
-          text: response.info['paymentUrl'].web
+          message: m
         })
       result.isCompleted = true
       await p.confirmPayment(result)

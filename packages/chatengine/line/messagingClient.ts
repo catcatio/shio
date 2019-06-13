@@ -100,7 +100,7 @@ export class LineMessagingClient implements MessagingClient {
   async sendCustomMessages(input: LineMessageClientSendCustomMessagesInput): Promise<LineMessageClientSendCustomMessagesOutput> {
     let msgs: Message[] = Array.isArray(input.message) ? input.message : [input.message]
 
-    await this.send(input.replyToken, input.provider, msgs)
+    await this.send(input.replyToken, input.to, msgs)
 
     return {
       provider: 'line',
