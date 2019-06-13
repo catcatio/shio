@@ -14,7 +14,7 @@
       "when": "$(basename).ts"
     },
     "**/*.js.map": {
-      "when": "$(basename).ts"
+      "when": "$(basename)"
     }
   },
   "files.autoSave": "off"
