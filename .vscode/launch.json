@@ -129,6 +129,19 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "disableOptimisticBPs": true
-    }
+    },
+    {
+      "name": "[views] Run local development",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "args": ["${workspaceRoot}/packages/viewer/cmd/local.ts"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "cwd": "${workspaceRoot}/packages/viewer",
+      "protocol": "inspector",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
   ]
 }

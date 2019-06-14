@@ -14,7 +14,13 @@ export interface WhoMessageIntent {
 export const WhoMessageFulfilmentKind = 'who'
 export interface WhoMessageFulfillment {
   name: typeof WhoMessageFulfilmentKind
-  parameters: any
+  parameters: {
+    id: string
+    provider: MessageProvider
+    providerId: string
+    userId: string
+    displayName: string
+  }
 }
 
 

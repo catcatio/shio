@@ -2,9 +2,12 @@ import * as express from 'express'
 import { validate, object, string, any } from 'joi';
 import { GetItemDownloadUrlEventMessageIntentSchema, GetItemDownloadUrlEventMessageFulfillmentKind, validateMessageIntent, MessageProvider } from '../entities/asset';
 import { FulfillmentEndpoint } from '../endpoints';
+const nanoid = require('nanoid')
 
 export function registerHttpTransports(http: express.Application, endpoints: FulfillmentEndpoint) {
-  http.get('/fulfillment/:intentName', async (req, res) => {
+
+
+  http.get('/internal/:intentName', async (req, res) => {
     const intent = {
       name: req.params['intentName'],
       parameters: {
@@ -31,12 +34,13 @@ export function registerHttpTransports(http: express.Application, endpoints: Ful
 
     const [provider, providerId] = authInfo.value!.split(' ')
 
+    const requestId = req.headers['x-request-id']
     const output = await endpoints[value.name]({
       intent: value,
       languageCode: 'th',
       original: "",
       provider: provider as MessageProvider,
-      requestId: 'test',
+      requestId: typeof  requestId  === 'string' ? requestId : nanoid(5),
       source: {
         type: 'user',
         userId: providerId

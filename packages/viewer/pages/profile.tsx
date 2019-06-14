@@ -5,7 +5,7 @@ import { WhoMessageFulfillment } from '@shio-bot/foundation/entities';
 import { ServiceConnector } from '../common/service-connector';
 
 
-export default class BookPage extends BasePage<{ profile: WhoMessageFulfillment['parameters'] }>  {
+export default class ProfilePage extends BasePage<{ profile: WhoMessageFulfillment['parameters'] }>  {
 
   static async getInitialProps(c: NextContext<Record<string, string | string[]>, {}>) {
     const p = await super.getInitialProps(c)
@@ -25,7 +25,8 @@ export default class BookPage extends BasePage<{ profile: WhoMessageFulfillment[
   render() {
     return (
       <div>
-        
+        Hello, {this.props.profile.displayName}<br />
+        CurrentProvider is {this.props.provider}
       </div>
     )
   }

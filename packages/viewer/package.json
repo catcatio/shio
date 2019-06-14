@@ -3,11 +3,22 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "dev": "NODE_ENV=development yarn ts-node cmd/local.ts"
+  },
   "dependencies": {
     "@shio-bot/foundation": "^1.1.0",
     "isomorphic-fetch": "^2.2.1",
     "next": "^8.1.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
+  },
+  "devDependencies": {
+    "@types/isomorphic-fetch": "^0.0.35",
+    "@types/next": "^8.0.5",
+    "@types/react": "^16.8.20",
+    "@types/react-dom": "^16.8.4",
+    "@zeit/next-sass": "^1.0.1",
+    "@zeit/next-typescript": "^1.1.1"
   }
 }

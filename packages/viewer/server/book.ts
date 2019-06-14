@@ -13,5 +13,8 @@ export class BookResolver {
 
   public getBookDownloadableUrl(asset: AssetMetadataBook) {
 
+
+
+
   }
 }
