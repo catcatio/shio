@@ -54,7 +54,7 @@ export async function bootstrap(config: Configurations) {
 
   let inMsgHandler = intentMessageHandler(ff, intentDetector, chatEngine.messagingClientProvider)
   let outMsgHandler = fulfillmentMessageHandler(chatEngine.messagingClientProvider)
-  msgPubsub.CreateOutgoingSubscriptionConfig(`${config.host}${pubsubPath}`)
+  await msgPubsub.CreateOutgoingSubscriptionConfig(`${config.host}${pubsubPath}`)
   ff.onFulfillment(outMsgHandler)
 
   let confirmUrl = config.chatEngine.linepay ? config.chatEngine.linepay.confirmUrl : ''
@@ -62,7 +62,7 @@ export async function bootstrap(config: Configurations) {
   let paymentRepo = paymentRepository()
   let rpHandler = reservePaymentHandler(confirmUrl, pm, chatEngine.messagingClientProvider, paymentEngine.paymentClientProvider, paymentRepo)
   let cpHandler = confirmPaymentHandler(pm, chatEngine.messagingClientProvider, paymentRepo)
-  paymentPubsub.CreateOutgoingSubscriptionConfig(`${config.host}${pubsubPath}`)
+  await paymentPubsub.CreateOutgoingSubscriptionConfig(`${config.host}${pubsubPath}`)
   pm.onReservePayment(rpHandler)
 
   chatEngine.onMessageReceived(inMsgHandler.handle)
@@ -76,6 +76,6 @@ export async function bootstrap(config: Configurations) {
 
   return server(config, ...eps)
     .start()
-    .then(_ => console.log('D O N E'))
+    .then(_ => console.log('D O N E!!!'))
     .catch(err => console.error(err))
 }

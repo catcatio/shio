@@ -1,5 +1,5 @@
 import { Configuration as ChatEngineSettings } from '@shio-bot/chatengine/types'
-import { OutgoingMessage, IncomingMessage, ReservePaymentMessage, ConfirmPaymentMessage } from '@shio-bot/foundation/entities'
+import { OutgoingMessage, IncomingMessage, ReservePaymentMessage, ConfirmPaymentMessage, MessageFulfillment } from '@shio-bot/foundation/entities'
 import express = require('express')
 import { ClientConfig } from '@google-cloud/pubsub/build/src/pubsub'
 
@@ -34,3 +34,7 @@ export interface Payment {
   onReservePayment(listener: ReservePaymentListener): void
   confirmPayment(msg: ConfirmPaymentMessage): Promise<void>
 }
+
+export type NarrowUnion<T, N> = T extends { name: N } ? T : never
+export type parserFunc<M, F> = (fulfillment: NarrowUnion<MessageFulfillment, F>) => M
+export type MessageProviderParser<T> = { [key in MessageFulfillment['name']]: parserFunc<T, key> }
