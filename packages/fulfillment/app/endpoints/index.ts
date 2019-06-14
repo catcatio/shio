@@ -3,15 +3,13 @@ import {
   ListItemEventMessageIntentKind,
   FollowEventMessageIntentKind,
   IncomingMessage,
-  createOutgoingFromIncomingMessage,
-  ListItemEventMessageFulfillmentKind,
   MessageIntent,
-  GetItemDownloadUrlEventMessageFulfillmentKind,
   GetItemDownloadUrlEventMessageIntentKind,
   UnfollowEventMessageIntentKind,
   WhoMessageIntentKind,
   PurchaseItemEventMessageIntentKind,
-  DescribeItemMessageIntentKind
+  DescribeItemMessageIntentKind,
+  ClaimFreeItemEventMessageIntentKind
 } from '@shio-bot/foundation/entities'
 import { MerchandiseUseCase } from '../usecases/merchandise'
 import { EndpointFuntion, endpointFn, EndpointFunctionAncestor } from './default'
@@ -22,7 +20,8 @@ import { PurchaseItemEventMessageIntentEndpoint } from './Purchase'
 import { GetItemDownloadUrlEventMessageIntentEndpoint } from './GetItemDownloadUrl'
 import { InventoryUseCase } from '../usecases/inventory'
 import { WhoMessageIntentEndpoint } from './Who'
-import { DescribeItemEndpoint } from './DescribeItem';
+import { DescribeItemEndpoint } from './DescribeItem'
+import { ClaimFreeItemEventMessageIntentEndpoint } from './ClaimFree'
 
 export class DefaultFulfillmentEndpoint implements FulfillmentEndpoint, EndpointFunctionAncestor {
   public boarding: BoardingUsecase
@@ -37,12 +36,13 @@ export class DefaultFulfillmentEndpoint implements FulfillmentEndpoint, Endpoint
   public [WhoMessageIntentKind] = WhoMessageIntentEndpoint(this)
   public [DescribeItemMessageIntentKind] = DescribeItemEndpoint(this)
 
-  public [UnfollowEventMessageIntentKind] = endpointFn(UnfollowEventMessageIntentKind, async () => { })
+  public [UnfollowEventMessageIntentKind] = endpointFn(UnfollowEventMessageIntentKind, async () => {})
 
   public [GetItemDownloadUrlEventMessageIntentKind] = GetItemDownloadUrlEventMessageIntentEndpoint(this)
   public [FollowEventMessageIntentKind] = FollowEventMessageIntentEndpoint(this)
   public [ListItemEventMessageIntentKind] = ListItemEventMessageIntentEndpoint(this)
   public [PurchaseItemEventMessageIntentKind] = PurchaseItemEventMessageIntentEndpoint(this)
+  public [ClaimFreeItemEventMessageIntentKind] = ClaimFreeItemEventMessageIntentEndpoint(this)
 
   public async getSessionFromIncomingMessage(incomingMessage: IncomingMessage) {
     return this.boarding.getUserChatSession(incomingMessage.provider, incomingMessage.source.userId)

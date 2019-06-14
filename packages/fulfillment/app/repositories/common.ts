@@ -2,9 +2,9 @@ import { SYSTEM_USER } from '../entities'
 import { SchemaLike } from 'joi'
 import { Datastore, Query } from '@google-cloud/datastore'
 import { ErrorType, newGlobalError } from '../entities/error'
-import { logger, ShioLogger, newLogger } from '@shio-bot/foundation';
-import { MessageProvider, IncomingMessage } from '@shio-bot/foundation/entities';
-import { entity } from '@google-cloud/datastore/build/src/entity';
+import { logger, ShioLogger, newLogger } from '@shio-bot/foundation'
+import { MessageProvider, IncomingMessage } from '@shio-bot/foundation/entities'
+import { entity } from '@google-cloud/datastore/build/src/entity'
 
 export class DatastoreBaseRepository {
   db: Datastore
@@ -39,19 +39,19 @@ export class DatastoreBaseRepository {
     }
   }
 
-  getIdFromKey(key: entity.Key): { kind: string, id: string } {
+  getIdFromKey(key: entity.Key): { kind: string; id: string } {
     if (key.id) {
       return {
         kind: key.kind,
-        id: key.id,
+        id: key.id
       }
     } else if (key.name) {
       return {
         kind: key.kind,
-        id: key.name,
+        id: key.name
       }
     } else {
-      throw newGlobalError(ErrorType.Input, "invalid key....")
+      throw newGlobalError(ErrorType.Input, 'invalid key....')
     }
   }
 
@@ -104,30 +104,27 @@ export type OperationOption<T = any> = (option: OperationOptions<T>) => Operatio
 
 export function composeOperationOptions<T>(...opt: OperationOption<T>[]) {
   const option = new OperationOptions()
-  return opt.reduce<OperationOptions<T>>(
-    (options, opt) => {
-      return opt(options)
-    },
-    option
-  )
+  return opt.reduce<OperationOptions<T>>((options, opt) => {
+    return opt(options)
+  }, option)
 }
 
 export function WithWhere<T>(condition: WhereConditions<Partial<T>>): OperationOption<T> {
-  return function (opts) {
+  return function(opts) {
     opts.where.push(condition)
     return opts
   }
 }
 
 export function WithSystemOperation<T>(): OperationOption<T> {
-  return function (opts) {
+  return function(opts) {
     opts.operationOwnerId = SYSTEM_USER
     return opts
   }
 }
 
 export function WithKey(id: string): OperationOption<any> {
-  return function (opts) {
+  return function(opts) {
     opts.key = id
     return opts
   }
@@ -135,7 +132,7 @@ export function WithKey(id: string): OperationOption<any> {
 
 // config operation attribute with incoming message object
 export function WithIncomingMessage(msg: IncomingMessage): OperationOption<any> {
-  return function (opts) {
+  return function(opts) {
     opts.provider = msg.provider
     opts.requestId = msg.requestId
     return opts
@@ -143,14 +140,14 @@ export function WithIncomingMessage(msg: IncomingMessage): OperationOption<any> 
 }
 
 export function WithPagination<T = any>(limit: number = 5, offset: number = 10): OperationOption<T> {
-  return function (opts) {
+  return function(opts) {
     opts.limit = limit
     opts.offset = offset
     return opts
   }
 }
 export function WithOperationOwner<T>(userId: string): OperationOption<T> {
-  return function (opts) {
+  return function(opts) {
     opts.operationOwnerId = userId
     return opts
   }

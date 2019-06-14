@@ -1,17 +1,25 @@
 import { newLogger, MessageChannelTransport } from '@shio-bot/foundation'
 import { FulfillmentEndpoint } from '../endpoints'
-import { createOutgoingFromIncomingMessage, OutgoingMessage, ReservePaymentMessage } from '@shio-bot/foundation/entities'
+import {
+  createOutgoingFromIncomingMessage,
+  OutgoingMessage,
+  ReservePaymentMessage,
+  ReservePaymentResultMessage,
+  ReservePaymentResultMessageType,
+  ConfirmPaymentResultMessage,
+  ConfirmPaymentResultMessageType
+} from '@shio-bot/foundation/entities'
 import { newGlobalError, ErrorType } from '../entities/error'
 import { PaymentChannelTransport } from '@shio-bot/foundation/transports/pubsub'
 
 export function registerPubsub(pubsub: MessageChannelTransport, paymentPubsub: PaymentChannelTransport, endpoints: FulfillmentEndpoint) {
   const log = newLogger()
 
-  const isOutgoingMessage = (obj: any): boolean => {
+  const isOutgoingMessage = (obj: any): obj is OutgoingMessage => {
     return obj && obj.requestId
   }
 
-  const isReservePaymentMessage = (obj: any): boolean => {
+  const isReservePaymentMessage = (obj: any): obj is ReservePaymentMessage => {
     return obj && obj.orderId
   }
 
@@ -35,17 +43,16 @@ export function registerPubsub(pubsub: MessageChannelTransport, paymentPubsub: P
       // do task and resolve
       // outoging message
       msg = await endpoint(message)
-
       ack()
 
       // Send outgoing message
 
       if (isOutgoingMessage(msg)) {
-        log.info('OutgoingMessage')
-        await pubsub.PublishOutgoing(msg as OutgoingMessage)
+        log.withFields({ fulfillments: msg.fulfillment.map(f => f.name).join(',') }).info('publish outgoing message')
+        await pubsub.PublishOutgoing(msg)
       } else if (isReservePaymentMessage(msg)) {
         log.info('ReservePaymentMessage')
-        await paymentPubsub.PublishReservePayment(msg as ReservePaymentMessage)
+        await paymentPubsub.PublishReservePayment(msg)
       }
     } catch (e) {
       await pubsub.PublishOutgoing(
@@ -68,7 +75,6 @@ export function registerPubsub(pubsub: MessageChannelTransport, paymentPubsub: P
         - ConfirmPaymentResultMessage
     */
     log.info(JSON.stringify(message))
-
     ack()
   })
 }

@@ -9,7 +9,8 @@ import {
   WhoMessageIntentKind,
   UnfollowEventMessageIntentKind,
   PurchaseItemEventMessageIntentKind,
-  DescribeItemMessageIntentKind
+  DescribeItemMessageIntentKind,
+  ClaimFreeItemEventMessageIntentKind
 } from '@shio-bot/foundation/entities'
 
 describe('Pubsub transport test', () => {
@@ -20,7 +21,8 @@ describe('Pubsub transport test', () => {
     [WhoMessageIntentKind]: jest.fn(),
     [FollowEventMessageIntentKind]: jest.fn(),
     [UnfollowEventMessageIntentKind]: jest.fn(),
-    [PurchaseItemEventMessageIntentKind]: jest.fn()
+    [PurchaseItemEventMessageIntentKind]: jest.fn(),
+    [ClaimFreeItemEventMessageIntentKind]: jest.fn()
   }
   let pubsub: __mock__CloudPubsubMessageTransports
   let paymentPubsub: __mock__CloudPubsubPaymentTransports
