@@ -8,11 +8,13 @@ import {
   GetItemDownloadUrlEventMessageIntentKind,
   WhoMessageIntentKind,
   UnfollowEventMessageIntentKind,
-  PurchaseItemEventMessageIntentKind
-} from '../../entities/asset'
+  PurchaseItemEventMessageIntentKind,
+  DescribeItemMessageIntentKind
+} from '@shio-bot/foundation/entities'
 
 describe('Pubsub transport test', () => {
   const mockEndpoints: FulfillmentEndpoint = {
+    [DescribeItemMessageIntentKind]: jest.fn(),
     [ListItemEventMessageIntentKind]: jest.fn(),
     [GetItemDownloadUrlEventMessageIntentKind]: jest.fn(),
     [WhoMessageIntentKind]: jest.fn(),

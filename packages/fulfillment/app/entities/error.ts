@@ -8,6 +8,7 @@ export enum ErrorType {
 }
 
 export class GlobalError extends Error {
+  kind: '_GLOBERR'
   errorType: ErrorType
   detail: any[] = []
   constructor(errorType: ErrorType, message: string) {
@@ -27,6 +28,10 @@ export class GlobalError extends Error {
 
 function newGlobalError(errorType: ErrorType, message: string): GlobalError {
   return new GlobalError(errorType, message)
+}
+
+export function isGlobError(error: any): error is GlobalError {
+  return error['errorType']
 }
 
 export function newValidateError(error: ValidationError) {

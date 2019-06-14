@@ -59,6 +59,20 @@
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
+      "name": "[Fulfillment] Run remote development",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "args": ["${workspaceRoot}/packages/fulfillment/cmd/entry.ts"],
+      "env": {
+        "SHIO_LOCAL": "0"
+      },
+      "cwd": "${workspaceRoot}/packages/fulfillment",
+      "protocol": "inspector",
+      "outputCapture": "std",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
       "name": "[Fulfillment] Run playground",
       "type": "node",
       "request": "launch",

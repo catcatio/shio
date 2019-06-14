@@ -1,4 +1,4 @@
-import { ListItemEventMessageIntent } from "../../app/entities/asset";
+import { ListItemEventMessageIntent } from "@shio-bot/foundation/entities";
 import { FixtureExpect, FixtureStep, FixtureContext, createIncomingMessageFromFixtureContext } from "./step";
 import { randomListItemEventMessageIntent } from "@shio-bot/foundation/entities/__test__/random";
 

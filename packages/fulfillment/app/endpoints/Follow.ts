@@ -1,6 +1,6 @@
 
 import { endpointFn, EndpointFunctionAncestor } from "./default";
-import { FollowEventMessageIntentKind, createOutgoingFromIncomingMessage } from "../entities/asset";
+import { FollowEventMessageIntentKind, createOutgoingFromIncomingMessage } from "@shio-bot/foundation/entities";
 import { WithSystemOperation, WithIncomingMessage } from "../repositories";
 import { GlobalError } from "../entities/error";
 import { UsecaseErrorMessages } from "../usecases";

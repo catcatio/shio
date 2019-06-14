@@ -1,6 +1,6 @@
 import { FixtureStep, FixtureExpect, FixtureContext } from "./step";
 import { randomIncomingMessage, randomFollowMessageIntent } from "@shio-bot/foundation/entities/__test__/random";
-import { FollowEventMessageIntent } from "../../app/entities/asset";
+import { FollowEventMessageIntent } from "@shio-bot/foundation/entities";
 
 export function follow(parameters: FollowEventMessageIntent['parameters'],expect: FixtureExpect = () => {}): FixtureStep {
   return (ctx: FixtureContext) => {

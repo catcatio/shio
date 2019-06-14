@@ -24,7 +24,8 @@
   "scripts": {
     "start": "node cmd/entry.js",
     "dev": "sh ../../scripts/clean.bash && nodemon",
-    "dev-remote": "PORT=8080 SHIO_FULFILLMENT_PROJECT_ID=catcat-development SHIO_FULFILLMENT_DATASTORE_NAMESPACE=fulfillment-development SHIO_FULFILLMENT_HOST=https://fulfillment-dot-catcat-development.appspot.com yarn ts-node ./cmd/entry.ts",
+    "dev-remote": "SHIO_LOCAL=0 yarn ts-node ./cmd/entry.ts",
+    "prepare-pubsub": "yarn ts-node ./cmd/preparepubsub.ts",
     "build": "yarn tsc",
     "test": "yarn unit && yarn integration",
     "integration": "yarn jest --runInBand --config jest.integration.json",

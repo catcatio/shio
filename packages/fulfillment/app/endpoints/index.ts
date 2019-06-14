@@ -10,8 +10,9 @@ import {
   GetItemDownloadUrlEventMessageIntentKind,
   UnfollowEventMessageIntentKind,
   WhoMessageIntentKind,
-  PurchaseItemEventMessageIntentKind
-} from '../entities/asset'
+  PurchaseItemEventMessageIntentKind,
+  DescribeItemMessageIntentKind
+} from '@shio-bot/foundation/entities'
 import { MerchandiseUseCase } from '../usecases/merchandise'
 import { EndpointFuntion, endpointFn, EndpointFunctionAncestor } from './default'
 import { UserChatSession } from '../entities'
@@ -21,6 +22,7 @@ import { PurchaseItemEventMessageIntentEndpoint } from './Purchase'
 import { GetItemDownloadUrlEventMessageIntentEndpoint } from './GetItemDownloadUrl'
 import { InventoryUseCase } from '../usecases/inventory'
 import { WhoMessageIntentEndpoint } from './Who'
+import { DescribeItemEndpoint } from './DescribeItem';
 
 export class DefaultFulfillmentEndpoint implements FulfillmentEndpoint, EndpointFunctionAncestor {
   public boarding: BoardingUsecase
@@ -33,8 +35,9 @@ export class DefaultFulfillmentEndpoint implements FulfillmentEndpoint, Endpoint
   }
 
   public [WhoMessageIntentKind] = WhoMessageIntentEndpoint(this)
+  public [DescribeItemMessageIntentKind] = DescribeItemEndpoint(this)
 
-  public [UnfollowEventMessageIntentKind] = endpointFn(UnfollowEventMessageIntentKind, async () => {})
+  public [UnfollowEventMessageIntentKind] = endpointFn(UnfollowEventMessageIntentKind, async () => { })
 
   public [GetItemDownloadUrlEventMessageIntentKind] = GetItemDownloadUrlEventMessageIntentEndpoint(this)
   public [FollowEventMessageIntentKind] = FollowEventMessageIntentEndpoint(this)

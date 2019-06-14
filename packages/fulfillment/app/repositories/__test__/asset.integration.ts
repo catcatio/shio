@@ -1,9 +1,10 @@
 import { createDatastoreInstance, WithDatastoreAPIEndpoint, LocalFileStorage } from "@shio-bot/foundation";
 import { LocalDatastoreEndpoint } from "../../helpers/datastore";
 import { DatastoreAssetRepository } from "../asset";
-import { AssetMetadataBookKind, Asset } from "../../entities/asset";
+import { AssetMetadataBookKind } from "@shio-bot/foundation/entities";
 import { WithWhere } from "../common";
 import { randomCreateAssetInput, randomAssetMetadata } from "../../helpers/random";
+import { Asset } from "../../entities/asset";
 
 describe('Asset', () => {
 

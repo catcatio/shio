@@ -4,6 +4,7 @@ export interface Config {
   datastoreNamespace: string
   datastoreEndpoint?: string
   pubsubEndpoint?: string
+  bucketName: string
   port: string,  
   dev?: boolean
 }

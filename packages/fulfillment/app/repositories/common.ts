@@ -3,7 +3,7 @@ import { SchemaLike } from 'joi'
 import { Datastore, Query } from '@google-cloud/datastore'
 import { ErrorType, newGlobalError } from '../entities/error'
 import { logger, ShioLogger, newLogger } from '@shio-bot/foundation';
-import { MessageProvider, IncomingMessage } from '../entities/asset';
+import { MessageProvider, IncomingMessage } from '@shio-bot/foundation/entities';
 import { entity } from '@google-cloud/datastore/build/src/entity';
 
 export class DatastoreBaseRepository {
@@ -19,8 +19,8 @@ export class DatastoreBaseRepository {
    * if latest index is kind
    * datastore will auto assign ID to key
    * #### example
-   * `allocateKey(['book',4912800129, 'episode'])` << auto ID generate
-   * `allocateKey(['book', 491828392,'episode', 'episode-a'])` << use Name as ID
+   * `allocateKey(['book', 4912800129, 'episode'])` << auto ID generate
+   * `allocateKey(['book', 491828392, 'episode', 'episode-a'])` << use Name as ID
    */
   async allocateKey(...paths: (string | number)[]) {
     let ids = await this.db.allocateIds(this.db.key([...paths]), 1)
@@ -32,7 +32,7 @@ export class DatastoreBaseRepository {
   }
 
   parseIdToDatastoreId(value: string): string | number {
-    if (Number.isInteger(parseInt(value))) {
+    if (Number.isInteger(+value)) {
       return parseInt(value)
     } else {
       return value

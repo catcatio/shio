@@ -143,6 +143,8 @@ export class CloudPubsubTransport<T> implements ChannelTransport<T>, ChannelMana
           pushEndpoint: pushEndpointHost + this.notificationPath
         }
       })
+    } else {
+
     }
   }
 

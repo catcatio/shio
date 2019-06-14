@@ -1,6 +1,6 @@
 import { endpointFn, EndpointFunctionAncestor } from './default'
-import { PurchaseItemEventMessageIntentKind, ReservePaymentMessage } from '../entities/asset'
 import * as uuid from 'uuid/v4'
+import { PurchaseItemEventMessageIntentKind, ReservePaymentMessage } from '@shio-bot/foundation/entities';
 
 export const PurchaseItemEventMessageIntentEndpoint = (ancestor: EndpointFunctionAncestor) =>
   endpointFn(PurchaseItemEventMessageIntentKind, async message => {

@@ -1,4 +1,3 @@
-export * from '@shio-bot/foundation/entities'
 import { AssetMetadata } from "@shio-bot/foundation/entities";
 import { CommonAttributes } from '@shio-bot/foundation';
 

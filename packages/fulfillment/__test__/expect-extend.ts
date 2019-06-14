@@ -1,5 +1,5 @@
 
-import { MessageFulfillment, OutgoingMessage } from '../app/entities/asset';
+import { MessageFulfillment, OutgoingMessage } from '@shio-bot/foundation/entities';
 import { NarrowUnion } from '../app/endpoints/default';
 
 declare global {

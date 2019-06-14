@@ -2,14 +2,16 @@ import { Datastore, DatastoreOptions } from "@google-cloud/datastore";
 import { FunctionOption, composeFunctionOptions } from "../type-utilities";
 
 type ShioDatastoreOption = FunctionOption<DatastoreOptions>
-export function WithDatastoreAPIEndpoint(apiEndpoint: string): FunctionOption<DatastoreOptions> {
+export function WithDatastoreAPIEndpoint(apiEndpoint?: string): FunctionOption<DatastoreOptions> {
   return (option) => {
-    option.apiEndpoint = apiEndpoint
+    if (apiEndpoint) {
+      option.apiEndpoint = apiEndpoint
+    }
     return option
   }
 }
 
-export const WithDatastoreNameSpace = (namespace: string):ShioDatastoreOption => (option) => {
+export const WithDatastoreNameSpace = (namespace: string): ShioDatastoreOption => (option) => {
   option.namespace = namespace
   return option
 }

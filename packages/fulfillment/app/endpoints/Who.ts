@@ -1,5 +1,5 @@
 import { EndpointFunctionAncestor, endpointFn } from "./default";
-import { WhoMessageIntentKind, createOutgoingFromIncomingMessage, WhoMessageFulfilmentKind } from "../entities/asset";
+import { WhoMessageIntentKind, createOutgoingFromIncomingMessage, WhoMessageFulfilmentKind } from "@shio-bot/foundation/entities";
 import { newLogger } from "@shio-bot/foundation";
 import { WithOperationOwner, WithIncomingMessage } from "../repositories";
 

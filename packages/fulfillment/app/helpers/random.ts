@@ -1,5 +1,5 @@
 import { CreateAssetInput } from "../repositories/asset";
-import { AssetMetadata, AssetMetadataBookKind } from "../entities/asset";
+import { AssetMetadata, AssetMetadataBookKind } from "@shio-bot/foundation/entities";
 import { v1 } from 'uuid'
 export function randomAssetMetadata(): AssetMetadata {
   return {

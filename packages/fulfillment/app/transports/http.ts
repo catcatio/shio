@@ -1,7 +1,8 @@
 import * as express from 'express'
 import { validate, object, string, any } from 'joi';
-import { GetItemDownloadUrlEventMessageIntentSchema, GetItemDownloadUrlEventMessageFulfillmentKind, validateMessageIntent, MessageProvider } from '../entities/asset';
+import { GetItemDownloadUrlEventMessageIntentSchema, GetItemDownloadUrlEventMessageFulfillmentKind, validateMessageIntent, MessageProvider } from '@shio-bot/foundation/entities';
 import { FulfillmentEndpoint } from '../endpoints';
+import { isGlobError, ErrorType } from '../entities/error';
 const nanoid = require('nanoid')
 
 export function registerHttpTransports(http: express.Application, endpoints: FulfillmentEndpoint) {
@@ -35,25 +36,46 @@ export function registerHttpTransports(http: express.Application, endpoints: Ful
     const [provider, providerId] = authInfo.value!.split(' ')
 
     const requestId = req.headers['x-request-id']
-    const output = await endpoints[value.name]({
-      intent: value,
-      languageCode: 'th',
-      original: "",
-      provider: provider as MessageProvider,
-      requestId: typeof  requestId  === 'string' ? requestId : nanoid(5),
-      source: {
-        type: 'user',
-        userId: providerId
-      },
-      type: 'textMessage',
-      timestamp: Date.now(),
-      userProfile: {
-        displayName: providerId,
-        userId: providerId
-      }
-    })
+    try {
+      const output = await endpoints[value.name]({
+        intent: value,
+        languageCode: 'th',
+        original: "",
+        provider: provider as MessageProvider,
+        requestId: typeof requestId === 'string' ? requestId : nanoid(5),
+        source: {
+          type: 'user',
+          userId: providerId
+        },
+        type: 'textMessage',
+        timestamp: Date.now(),
+        userProfile: {
+          displayName: providerId,
+          userId: providerId
+        }
+      })
 
-    res.json(output).status(200).end()
+      res.json(output).status(200).end()
+    } catch (e) {
+      if (isGlobError(e)) {
+        switch (e.errorType) {
+          case ErrorType.Auth:
+            res.status(401).json(e)
+            break
+          case ErrorType.Input:
+            res.status(400).json(e)
+            break
+          case ErrorType.Internal:
+            res.status(500).json(e)
+            break
+          case ErrorType.NotFound:
+            res.status(404).json(e)
+            break
+        }
+        return
+      }
+      res.status(500).json(e)
+    }
   })
 
 

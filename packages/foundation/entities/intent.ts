@@ -2,6 +2,10 @@ import { AssetMetadata } from './asset'
 import * as Joi from 'joi'
 import { MessageProvider } from "./message";
 
+function JoiKind(kind: string) {
+  return Joi.string().only(kind).required()
+}
+
 export const WhoMessageIntentKind = 'who'
 export const WhoMessageIntentSchema = Joi.object().keys({
   name: Joi.string().only(WhoMessageIntentKind).required(),
@@ -23,6 +27,28 @@ export interface WhoMessageFulfillment {
   }
 }
 
+export const DescribeItemMessageIntentKind = 'describe-item'
+export const DescribeItemMessageIntentSchema = Joi.object().keys({
+  name: JoiKind(DescribeItemMessageIntentKind),
+  parameters: Joi.object().keys({
+    id: Joi.string().required(),
+  })
+})
+export interface DescribeItemMessageIntent {
+  name: typeof DescribeItemMessageIntentKind
+  parameters: {
+    id: string
+  }
+}
+
+export const DescribeItemMessageFulfillmentKind = 'describe-item'
+export interface DescribeItemMessageFulfillment{
+  name: typeof DescribeItemMessageFulfillmentKind
+  parameters: {
+    id: string
+    asset: AssetMetadata
+  }
+}
 
 export const GetItemDownloadUrlEventMessageIntentKind = 'get-item-download-url'
 export const GetItemDownloadUrlEventMessageIntentSchema = Joi.object().keys({
@@ -145,6 +171,7 @@ export type MessageIntent =
   | GetItemDownloadUrlEventMessageIntent
   | WhoMessageIntent
   | PurchaseItemEventMessageIntent
+  | DescribeItemMessageIntent
 
 export type MessageFulfillment =
   | FollowEventMessageFulfillment
@@ -152,14 +179,15 @@ export type MessageFulfillment =
   | ListItemEventMessageFulfillment
   | GetItemDownloadUrlEventMessageFulfillment
   | WhoMessageFulfillment
-
+  | DescribeItemMessageFulfillment
 
 export function validateMessageIntent(intent: any): { value: MessageIntent, error: Joi.ValidationError } {
   return Joi.alternatives([
     ListItemEventMessageIntentSchema,
     FollowEventMessageIntentSchema,
     GetItemDownloadUrlEventMessageIntentSchema,
-    WhoMessageIntentSchema
+    WhoMessageIntentSchema,
+    DescribeItemMessageIntentSchema
   ]).validate(intent)
 
 }

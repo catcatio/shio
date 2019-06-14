@@ -1,11 +1,10 @@
 import { Server, ServerCredentials } from "grpc";
-import { GCPFileStorage, createDatastoreInstance, WithDatastoreNameSpace, GetEnvString, WithDatastoreProjectId, newLogger } from "@shio-bot/foundation";
+import { GCPFileStorage, createDatastoreInstance, WithDatastoreNameSpace, GetEnvString, WithDatastoreProjectId, newLogger, GetEnvConfig } from "@shio-bot/foundation";
 import { DatastoreAssetRepository } from "../../fulfillment/app";
 import { FulfillmentManager } from "./endpoints/fulfillment-manager";
 import { FulfillmentManagerService } from "../__generated__/fulfillment_grpc_pb";
 import { FulfillmentManagerUseCase } from "./usecase/fulfillment";
-import { getFulfillmentDevelopmentConstant } from '@shio-bot/fulfillment'
-import { randomIncomingMessage, randomOutgoingMessage, randomListItemEventMessageIntent, randomFollowMessageFulfillment } from "@shio-bot/foundation/entities/__test__/random";
+import { createGCPFileStorage } from "@shio-bot/foundation/storage/gcp";
 
 const log = newLogger()
 async function createComponent(projectId: string, datastoreNamespace: string, storageName: string) {
@@ -14,7 +13,7 @@ async function createComponent(projectId: string, datastoreNamespace: string, st
   log.info("Datastore namespace: " + datastoreNamespace)
   log.info("Storage name: " + storageName)
 
-  const storage = new GCPFileStorage(storageName)
+  const storage = await createGCPFileStorage(storageName)
   const datastore = await createDatastoreInstance(
     WithDatastoreNameSpace(datastoreNamespace),
     WithDatastoreProjectId(projectId),
@@ -30,12 +29,12 @@ async function createComponent(projectId: string, datastoreNamespace: string, st
 }
 async function bootstrap() {
   const s = new Server()
-  const defaultConstant = getFulfillmentDevelopmentConstant()
+  const defaultConstant = GetEnvConfig()
 
   const { fulfillmentManager } = await createComponent(
     GetEnvString('SHIO_MANAGEMENT_PROJECT_ID', defaultConstant.projectId),
     GetEnvString('SHIO_MANAGEMENT_DATASTORE_NAMESPACE', defaultConstant.datastoreNamespace),
-    GetEnvString('SHIO_MANAGEMENT_STORAGE_NAME', defaultConstant.storageName)
+    GetEnvString('SHIO_MANAGEMENT_STORAGE_NAME', defaultConstant.bucketName)
   )
   s.addService(FulfillmentManagerService, fulfillmentManager)
   s.bind("0.0.0.0:9199", ServerCredentials.createInsecure())

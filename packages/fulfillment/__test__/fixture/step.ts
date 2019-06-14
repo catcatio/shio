@@ -1,4 +1,4 @@
-import { MessageProvider, IncomingMessage, OutgoingMessage, MessageIntent } from "../../app/entities/asset";
+import { MessageProvider, IncomingMessage, OutgoingMessage, MessageIntent } from "@shio-bot/foundation/entities";
 import { randomIncomingMessage } from "@shio-bot/foundation/entities/__test__/random";
 
 export type FixtureContext = {

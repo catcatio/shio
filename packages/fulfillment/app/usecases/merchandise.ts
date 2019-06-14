@@ -1,6 +1,7 @@
-import { Asset, PaginationResult } from "../entities/asset";
+import { PaginationResult } from "@shio-bot/foundation/entities";
 import { ACLRepository, UserRepository, WithOperationOwner, WithPagination, WithSystemOperation, OperationOption, composeOperationOptions } from "../repositories";
 import { AssetRepository } from "../repositories/asset";
+import { Asset } from "../entities/asset";
 
 
 interface MerchandiseListItemInput {

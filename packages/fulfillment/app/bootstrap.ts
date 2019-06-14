@@ -23,39 +23,40 @@ import { DefaultMerchandiseUseCase } from './usecases/merchandise';
 import { DatastoreAssetRepository } from './repositories/asset';
 import { registerHttpTransports } from './transports/http';
 import { DefaultInventoryUseCase } from './usecases/inventory';
+import { createGCPFileStorage } from '@shio-bot/foundation/storage/gcp';
 
 export async function bootstrap(config: Config) {
   const log = newLogger()
 
   log.info('Connecting to datastore....')
-  const datastoreOptions = [WithDatastoreProjectId(config.projectId), WithDatastoreNameSpace(config.datastoreNamespace)]
-  if (config.datastoreEndpoint) {
-    datastoreOptions.push(WithDatastoreAPIEndpoint(config.datastoreEndpoint))
-  }
+  const datastoreOptions = [
+    WithDatastoreProjectId(config.projectId),
+    WithDatastoreNameSpace(config.datastoreNamespace),
+    WithDatastoreAPIEndpoint(config.datastoreEndpoint)
+  ]
 
   log.info('Connecting to pubsub....')
-  const pubsubOptions: PubsubOption[] = [WithPubsubProjectId(config.projectId)]
-  if (config.pubsubEndpoint) {
-    pubsubOptions.push(WithPubsubEndpoint(config.pubsubEndpoint))
-  }
+  const pubsubOptions: PubsubOption[] = [
+    WithPubsubProjectId(config.projectId),
+    WithPubsubEndpoint(config.pubsubEndpoint)
+  ]
 
   const datastore = await createDatastoreInstance(...datastoreOptions)
   const cloudpubsub = await createCloudPubSubInstance(...pubsubOptions)
-  const storage = new GCPFileStorage(config.projectId)
+  const storage = await createGCPFileStorage(config.bucketName)
+  await storage.LoadKey()
 
   const acl = new DatastoreACLRepository(datastore)
-  const pubsub = new CloudPubsubMessageChannelTransport({
+
+  const messagePubsub = new CloudPubsubMessageChannelTransport({
     pubsub: cloudpubsub,
     serviceName: 'fulfillment'
   })
-  // await pubsub.PrepareTopic()
-  await pubsub.CreateIncomingSubscriptionConfig(config.host)
+
   const paymentPubsub = new CloudPubsubPaymentChannelTransport({
     pubsub: cloudpubsub,
     serviceName: 'fulfillment'
   })
-  // await paymentPubsub.PrepareTopic()
-  await paymentPubsub.CreateIncomingSubscriptionConfig(config.host)
 
   log.info('prepare data....')
   await acl.prepare()
@@ -64,22 +65,22 @@ export async function bootstrap(config: Config) {
   const assetRepository = new DatastoreAssetRepository(datastore, storage)
   const userRepository = new DatastoreUserRepository(datastore)
 
-  const inventoryUseCase = new DefaultInventoryUseCase(storage,assetRepository,acl)
+  const inventoryUseCase = new DefaultInventoryUseCase(storage, assetRepository, acl)
   const boardingUsecase = new DefaultBoardingUsecase(userRepository, acl)
-  const merchandiseUseCase = new DefaultMerchandiseUseCase(acl,userRepository,assetRepository)
+  const merchandiseUseCase = new DefaultMerchandiseUseCase(acl, userRepository, assetRepository)
 
   const endpoints = new DefaultFulfillmentEndpoint(boardingUsecase, merchandiseUseCase, inventoryUseCase)
   log.info("🎉 endpoint intial!")
 
   log.info('registry pubsub...')
-  registerPubsub(pubsub, paymentPubsub, endpoints)
+  registerPubsub(messagePubsub, paymentPubsub, endpoints)
   log.info('🎉 pubsub transport registered!')
 
   const app = express()
   registerHttpTransports(app, endpoints)
 
   app.use(express.json())
-  app.use('/', pubsub.NotificationRouter)
+  app.use('/', messagePubsub.NotificationRouter)
   app.use('/', paymentPubsub.NotificationRouter)
   app.get('/', (_, res) => res.status(200).send('ok'))
   log.info(`start server on port ${config.port}`)
@@ -88,8 +89,8 @@ export async function bootstrap(config: Config) {
   return {
     close: async () => {
       log.info('gracefully shutting down service....')
-      pubsub.UnsubscribeAllIncomingMessage()
-      pubsub.UnsubscribeAllOutgoingMessage()
+      messagePubsub.UnsubscribeAllIncomingMessage()
+      messagePubsub.UnsubscribeAllOutgoingMessage()
       paymentPubsub.UnsubscribeAll()
       await new Promise(resolve => {
         server.close(() => {
@@ -100,6 +101,6 @@ export async function bootstrap(config: Config) {
 
       log.info('Service is shutdown!!')
     },
-    pubsub
+    pubsub: messagePubsub
   }
 }

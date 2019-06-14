@@ -1,15 +1,13 @@
-import { Asset } from '../entities/asset'
 import { PaginationResult, AssetMetadataBookKind } from '@shio-bot/foundation/entities'
 import { PartialCommonAttributes, Omit, newResourceTag } from '../entities'
 import { Datastore } from '@google-cloud/datastore'
 import { DatastoreBaseRepository, OperationOption, composeOperationOptions, WithSystemOperation } from './common'
 import { toJSON, applyFilter } from '../helpers/datastore'
-import { ACLRepository } from './acl';
-import { tags } from 'joi';
 import { entity } from '@google-cloud/datastore/build/src/entity';
 import { FileStorage } from '@shio-bot/foundation';
 import { newGlobalError, ErrorType } from '../entities/error';
 import { join } from 'path';
+import { Asset } from '../entities/asset';
 
 export type AssetRepositoryOperationOption = OperationOption<Asset>
 export type CreateAssetInput = Omit<PartialCommonAttributes<Asset>, 'id' | 'aclTag'> & { id?: string }

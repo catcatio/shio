@@ -1,12 +1,12 @@
 import * as express from 'express'
 import * as bodyParser from 'body-parser'
 import { FulfillmentConnector } from './helpers/fullfillment-connector';
-import { MessageProvider, WhoMessageFulfillment } from '@shio-bot/foundation/entities';
+import { WhoMessageFulfillment } from '@shio-bot/foundation/entities';
 import * as next from 'next'
 import config from '../next.config'
 import { UnauthorizedError } from '../common/error';
 import { createSessionMiddleware } from './middlewares/session';
-import { GetProfilePath, GetBookDetailPath } from '../common/service-connector';
+import { GetProfilePath, GetAssetDetailPath } from '../common/service-connector';
 
 
 
@@ -15,6 +15,22 @@ function isRequestWithUserOrThrow(req: express.Request): req is express.Request 
     return true
   }
   throw UnauthorizedError
+}
+
+
+type handlerRequestWithUser = Parameters<express.Handler>[0] & { user: WhoMessageFulfillment['parameters'] }
+type handlerResponse = Parameters<express.Handler>[1]
+type handlerNext = Parameters<express.Handler>[2]
+function routeHandlerWithUser(handle: (req: handlerRequestWithUser, res: handlerResponse, next: handlerNext) => ReturnType<express.Handler>): express.Handler {
+  return async (req, res, next) => {
+    if (isRequestWithUserOrThrow(req)) {
+      try {
+        await handle(req, res, next)
+      } catch (e) {
+        res.status(500).send(e)
+      }
+    }
+  }
 }
 
 
@@ -29,16 +45,30 @@ export async function bootstrap(fulfillmentEndpointUrl: string, port: number, ho
   APIRouter.use(sessionMiddleware)
   APIRouter.use(bodyParser.json())
 
-  APIRouter.get(GetBookDetailPath, (req, res) => {
-    if (isRequestWithUserOrThrow(req)) {
+  APIRouter.get(GetAssetDetailPath, routeHandlerWithUser(async (req, res) => {
+    const assetId = req.query['assetId']
+    if (typeof assetId !== 'string') {
+      return res.status(400).json({ message: "asset id not found" })
+    }
+    const asset = await fulfillment.getAsset(req.user.provider, req.user.providerId, assetId)
+    if (!asset) {
+      return res.status(404).json({ message: "asset not found" })
+    }
 
-    }
-  })
-  APIRouter.get(GetProfilePath, (req, res) => {
-    if (isRequestWithUserOrThrow(req)) {
-      res.json(req.user)
-    }
-  })
+    const download = await fulfillment.getAssetDownloadableUrl(req.user.provider, req.user.providerId, assetId)
+
+    return res.json({
+      data: {
+        meta: asset.parameters,
+        download: download.paramters,
+      },
+      path: GetAssetDetailPath
+    })
+  }))
+
+  APIRouter.get(GetProfilePath, routeHandlerWithUser((req, res) => {
+    res.json(req.user)
+  }))
 
 
   const view = next({
@@ -72,6 +102,13 @@ export async function bootstrap(fulfillmentEndpointUrl: string, port: number, ho
       view.render(req, res, '/profile', getViewQueryStringAttribute(req))
     }
   })
+
+  app.get('/view/asset', sessionMiddleware, routeHandlerWithUser((req, res) => {
+    view.render(req, res, '/asset', {
+      ...getViewQueryStringAttribute(req),
+      assetId: req.query['assetId'],
+    })
+  }))
 
   app.all('*', (req, res) => {
     if (req.headers['content-type'] !== 'application/json') {

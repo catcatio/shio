@@ -30,7 +30,8 @@ export function createSessionMiddleware(fulfillment: FulfillmentConnector) {
       if (e === UnauthorizedError) {
         res.status(401).end("UnauthorizedError")
       } else {
-        throw e
+        // throw e
+        res.status(500).send(e).end()
       }
     }
   }

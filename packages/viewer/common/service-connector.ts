@@ -1,16 +1,31 @@
 
 import * as fetch from 'isomorphic-fetch'
-import { WhoMessageFulfillment, MessageProvider } from '@shio-bot/foundation/entities';
+import { WhoMessageFulfillment, MessageProvider, DescribeItemMessageFulfillment, GetItemDownloadUrlEventMessageFulfillment } from '@shio-bot/foundation/entities';
 
-export const GetProfilePath = '/my-profile'
-export const GetBookDetailPath = '/book/:bookId'
-
-export type ShioViewerServiceAPIPath = typeof GetProfilePath | typeof GetBookDetailPath
+export type NarrowUnion<T, N> = T extends { path: N } ? T : never
+export type ShioServiceResult = GetProfileResult | GetAssetDetailResult
+export type ShioViewerServiceAPIPath = ShioServiceResult['path']
+export type ShioViewerServiceQueryObject = { [key: string]: string | number }
 export type ShioServiceConnectorCredential = {
   provider: MessageProvider
   providerUserId: string
 }
-export type ShioViewerServiceQueryObject = { [key: string]: string | number }
+
+
+export const GetProfilePath = '/my-profile'
+export type GetProfileResult = {
+  path: typeof GetProfilePath
+  data: WhoMessageFulfillment['parameters']
+}
+
+export const GetAssetDetailPath = '/asset'
+export type GetAssetDetailResult = {
+  path: typeof GetAssetDetailPath
+  data: {
+    meta: DescribeItemMessageFulfillment['parameters'],
+    download: GetItemDownloadUrlEventMessageFulfillment['paramters']
+  }
+}
 
 export class ServiceConnector {
 
@@ -39,7 +54,7 @@ export class ServiceConnector {
     }
   }
 
-  async request<Result>(method: "GET" | "POST", path: ShioViewerServiceAPIPath, query?: ShioViewerServiceQueryObject, body?: any): Promise<Result> {
+  async request<P extends ShioViewerServiceAPIPath>(method: "GET" | "POST", path: P, query?: ShioViewerServiceQueryObject, body?: any): Promise<NarrowUnion<ShioServiceResult, P>> {
     let url: URL
     if (typeof window !== 'undefined') {
       url = new URL(this.hostURL + path)
@@ -82,11 +97,16 @@ export class ServiceConnector {
     }
   }
 
-
-  async getProfile(): Promise<WhoMessageFulfillment['parameters']> {
-    const result = await this.request<WhoMessageFulfillment['parameters']>('GET', GetProfilePath)
-    return result
+  async getAsset(assetId: string): Promise<GetAssetDetailResult['data']> {
+    const result = await this.request('GET', GetAssetDetailPath, {
+      assetId: assetId,
+    })
+    return result.data
   }
 
+  async getProfile(): Promise<GetProfileResult['data']> {
+    const result = await this.request('GET', GetProfilePath)
+    return result.data
+  }
 
 }

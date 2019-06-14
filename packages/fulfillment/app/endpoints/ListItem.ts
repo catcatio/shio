@@ -1,5 +1,5 @@
 import { endpointFn, EndpointFunctionAncestor } from "./default";
-import { ListItemEventMessageIntentKind, createOutgoingFromIncomingMessage, ListItemEventMessageFulfillmentKind } from "../entities/asset";
+import { ListItemEventMessageIntentKind, createOutgoingFromIncomingMessage, ListItemEventMessageFulfillmentKind } from "@shio-bot/foundation/entities";
 import { WithOperationOwner } from "../repositories";
 
 

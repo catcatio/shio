@@ -1,22 +1,12 @@
 import { Config } from '../app/config'
-import { GetEnvStringOrThrow, GetEnvString, newLogger } from '@shio-bot/foundation'
-import { bootstrap, getFulfillmentDevelopmentConstant } from '../app'
+import { newLogger, GetEnvConfig } from '@shio-bot/foundation'
+import { bootstrap } from '../app'
 
 export function LoadConfig(): Config {
-  const defaultConstant = getFulfillmentDevelopmentConstant()
+  const envConfig = GetEnvConfig()
 
   const option: Config = {
-    projectId: GetEnvString('SHIO_FULFILLMENT_PROJECT_ID',defaultConstant.projectId),
-    datastoreNamespace: GetEnvString('SHIO_FULFILLMENT_DATASTORE_NAMESPACE', defaultConstant.datastoreNamespace),
-    host: GetEnvStringOrThrow('SHIO_FULFILLMENT_HOST'),
-    port: GetEnvStringOrThrow('PORT'),
-  }
-  if (GetEnvString('SHIO_FULFILLMENT_DATASTORE_LOCAL') === '1') {
-    option.datastoreEndpoint = 'http://localhost:5445'
-  }
-
-  if (GetEnvString('SHIO_FULFILLMENT_PUBSUB_LOCAL') === '1') {
-    option.pubsubEndpoint = 'http://localhost:8085'
+    ...envConfig,
   }
 
   return option
