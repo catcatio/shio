@@ -17,7 +17,7 @@ export const PurchaseItemEventMessageIntentEndpoint = (ancestor: EndpointFunctio
         productName: asset.meta.title,
         productDescription: asset.meta.description,
         productImageUrl: 'https://static.reeeed.com/book/cjn66col600cw08027wemah6s/shareThumbnailImage-medium.jpg', // optional
-        amount: 120, // unit price
+        amount: asset.price || 0, // unit price
         currency: 'THB',
         source: message.source
       }
