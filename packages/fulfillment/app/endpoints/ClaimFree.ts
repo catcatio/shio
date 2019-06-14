@@ -1,5 +1,5 @@
 import { EndpointFunctionAncestor, endpointFn } from './default'
-import { ClaimFreeItemEventMessageIntentKind, createOutgoingFromIncomingMessage, ClaimFreeItemEventMessageFulfillmentKind } from '../entities/asset'
+import { ClaimFreeItemEventMessageIntentKind, createOutgoingFromIncomingMessage, ClaimFreeItemEventMessageFulfillmentKind } from '@shio-bot/foundation/entities'
 
 export const ClaimFreeItemEventMessageIntentEndpoint = (ancestor: EndpointFunctionAncestor) =>
   endpointFn(ClaimFreeItemEventMessageIntentKind, async message => {

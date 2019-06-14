@@ -15,7 +15,9 @@ import {
   PurchaseItemEventMessageIntentKind,
   PurchaseItemEventMessageIntent,
   ClaimFreeItemEventMessageFulfillmentKind,
-  ClaimFreeItemEventMessageFulfillment
+  ClaimFreeItemEventMessageFulfillment,
+  DescribeItemMessageFulfillmentKind,
+  DescribeItemMessageFulfillment
 } from '@shio-bot/foundation/entities'
 import { FlexMessageBuilder, FlexComponentBuilder } from './lineMessageBuilder'
 import { FlexImage, Message } from '@line/bot-sdk'
@@ -243,5 +245,12 @@ export class LineFulfillmentParser implements MessageFulfillmentParser<Message> 
       .addFooter()
       .addComponents(footerBlock)
       .build()
+  };
+
+  [DescribeItemMessageFulfillmentKind]: FulfillmentparserFunc<Message, typeof DescribeItemMessageFulfillmentKind> = (f: DescribeItemMessageFulfillment) => {
+    return {
+      type: 'text',
+      text: 'describe-item'
+    }
   }
 }
