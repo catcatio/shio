@@ -1,95 +1,16 @@
 import { ReservePaymentListener, Payment } from '../types'
 import { ReservePaymentMessage, ReservePaymentResultMessage } from '@shio-bot/foundation/entities'
-import { PaymentClientProvider, LineReservePaymentRequest, PaymentClient, MessagingClientProvider } from '@shio-bot/chatengine'
+import {
+  PaymentClientProvider,
+  LineReservePaymentRequest,
+  PaymentClient,
+  MessagingClientProvider,
+  MessagingClient,
+  LineMessageClientSendCustomMessagesInput
+} from '@shio-bot/chatengine'
 import { PaymentRepository } from '../repositories'
 import { newLogger } from '@shio-bot/foundation'
-
-const formatPaymentMessage = (title: string, imageUrl: string, amount: number, currency: string, paymentWeb: string, paymentApp: string) => {
-  let a = {
-    type: 'bubble',
-    hero: {
-      type: 'image',
-      url: `${imageUrl}`,
-      size: 'full',
-      aspectRatio: '20:13',
-      aspectMode: 'cover',
-      action: {
-        type: 'uri',
-        uri: 'http://linecorp.com/'
-      }
-    },
-    body: {
-      type: 'box',
-      layout: 'vertical',
-      contents: [
-        {
-          type: 'text',
-          text: `${title}`,
-          weight: 'bold',
-          size: 'xl'
-        },
-        {
-          type: 'box',
-          layout: 'vertical',
-          margin: 'lg',
-          spacing: 'sm',
-          contents: [
-            {
-              type: 'box',
-              layout: 'baseline',
-              spacing: 'sm',
-              contents: [
-                {
-                  type: 'text',
-                  text: 'Price',
-                  color: '#aaaaaa',
-                  size: 'sm',
-                  flex: 1
-                },
-                {
-                  type: 'text',
-                  text: `${amount} ${currency}`,
-                  wrap: true,
-                  color: '#666666',
-                  size: 'sm',
-                  flex: 5
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    footer: {
-      type: 'box',
-      layout: 'vertical',
-      spacing: 'sm',
-      contents: [
-        {
-          type: 'button',
-          style: 'link',
-          height: 'sm',
-          action: {
-            type: 'uri',
-            label: 'Pay with LINE Pay',
-            uri: `${paymentWeb}`
-          }
-        },
-        {
-          type: 'spacer',
-          size: 'sm'
-        }
-      ],
-      flex: 0
-    }
-  }
-
-  return {
-    type: 'flex',
-    altText: 'pay with line pay',
-    contents: a
-  }
-}
+import { LinePayParser } from '../helpers/linePayParser'
 
 export const reservePaymentHandler = (
   confirmUrl: string,
@@ -113,6 +34,13 @@ export const reservePaymentHandler = (
       return
     }
 
+    let messageParser
+    const messagingClient: MessagingClient = cp.get(payload.provider === 'linepay' ? 'line' : '')
+
+    if (payload.provider === 'linepay') {
+      messageParser = new LinePayParser()
+    }
+
     let request: LineReservePaymentRequest = {
       productName: payload.productName,
       productImageUrl: payload.productImageUrl,
@@ -123,15 +51,23 @@ export const reservePaymentHandler = (
       langCd: 'th' // payment screen language
     }
 
+    const input: LineMessageClientSendCustomMessagesInput = {
+      provider: 'line',
+      replyToken: '',
+      to: payload.source ? payload.source.userId : '',
+      message: ''
+    }
     // store to memcache
-    await client
-      .reserve(request)
-      .then(async response => {
-        let result: ReservePaymentResultMessage = {
-          type: 'ReservePaymentResult',
-          provider: 'linepay',
-          isCompleted: false
-        }
+    try {
+      let result: ReservePaymentResultMessage = {
+        type: 'ReservePaymentResult',
+        provider: 'linepay',
+        isCompleted: false
+      }
+
+      if (payload.amount) {
+        const response = await client.reserve(request)
+
         console.log(response)
         if (response.returnCode != '0000') {
           console.error('failed to reserve payment: ', response)
@@ -152,30 +88,20 @@ export const reservePaymentHandler = (
             }
           : undefined
 
-        const m = formatPaymentMessage(
-          payload.productName,
-          payload.productImageUrl ? payload.productImageUrl : '',
-          payload.amount,
-          payload.currency,
-          response.info['paymentUrl'].web,
-          response.info['paymentUrl'].app
-        )
-        console.log(`payload: ${JSON.stringify(m)}`)
-        // HACK: to remove
-        payload.source &&
-          cp.get('line').sendCustomMessages({
-            provider: 'line',
-            replyToken: '',
-            to: payload.source.userId,
-            message: m
-          })
-        result.isCompleted = true
-        await p.confirmPayment(result)
-        return paymentRepository.push(response.info.transactionId, payload)
-      })
-      .catch(err => {
-        log.error(`failed to reserve payment ${payload.orderId}: ${err}`)
-      })
+        await paymentRepository.push(response.info.transactionId, payload)
+      }
+
+      result.isCompleted = true
+      input.message = messageParser[result.type](result, payload)
+      console.log(`payload: ${JSON.stringify(input.message)}`)
+      await p.confirmPayment(result)
+    } catch (err) {
+      input.message = 'something wrong, cannot reserve payment'
+      log.error(`failed to reserve payment ${payload.orderId}: ${err}`)
+    } finally {
+      await messagingClient.sendCustomMessages(input).catch(err => console.log(err))
+      return
+    }
 
     //NC:TODO: handle failure case, reply to confirm payment channel
   }

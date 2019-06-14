@@ -36,5 +36,10 @@ export interface Payment {
 }
 
 export type NarrowUnion<T, N> = T extends { name: N } ? T : never
-export type parserFunc<M, F> = (fulfillment: NarrowUnion<MessageFulfillment, F>) => M
-export type MessageProviderParser<T> = { [key in MessageFulfillment['name']]: parserFunc<T, key> }
+export type FulfillmentparserFunc<M, F> = (fulfillment: NarrowUnion<MessageFulfillment, F>) => M
+export type PaymentParserFunc<M, P> = (message: NarrowUnion<PaymentMessage, P>, payload?: any) => M
+
+export type PaymentMessage = ConfirmPaymentMessage | ReservePaymentMessage
+
+export type MessageFulfillmentParser<T> = { [key in MessageFulfillment['name']]: FulfillmentparserFunc<T, key> }
+export type MessagePaymentParser<T> = { [key in PaymentMessage['type']]: PaymentParserFunc<T, key> }

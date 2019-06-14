@@ -1,8 +1,9 @@
-import { PaymentConfirmationPayload, ConfirmTransaction, MessagingClientProvider } from '@shio-bot/chatengine'
+import { PaymentConfirmationPayload, ConfirmTransaction, MessagingClientProvider, MessagingClient, LineMessageClientSendCustomMessagesInput } from '@shio-bot/chatengine'
 import { Payment } from '../types'
 import { newLogger } from '@shio-bot/foundation'
 import { ConfirmPaymentResultMessage } from '@shio-bot/foundation/entities'
 import { PaymentRepository } from '../repositories'
+import { LinePayParser } from '../helpers/linePayParser'
 
 export const confirmPaymentHandler = (p: Payment, cp: MessagingClientProvider, paymentRepository: PaymentRepository) => {
   const log = newLogger()
@@ -20,6 +21,14 @@ export const confirmPaymentHandler = (p: Payment, cp: MessagingClientProvider, p
     //   log.info(`orderId [${payload.orderId}] mismatch: (actual: ${reservePayment.orderId})`)
     //   return await confirmTransaction(null as any, new Error('mismatch information'))
     // }
+
+    let messageParser
+    const messagingClient: MessagingClient = cp.get(reservePayment.provider === 'linepay' ? 'line' : '')
+
+    if (reservePayment.provider === 'linepay') {
+      messageParser = new LinePayParser()
+    }
+
     let c: ConfirmPaymentResultMessage = {
       type: 'ConfirmPaymentResult',
       provider: payload.provider,
@@ -30,46 +39,33 @@ export const confirmPaymentHandler = (p: Payment, cp: MessagingClientProvider, p
       isCompleted: false
     }
 
+    const input: LineMessageClientSendCustomMessagesInput = {
+      provider: 'line',
+      replyToken: '',
+      to: reservePayment && reservePayment.source ? reservePayment.source.userId : '',
+      message: ''
+    }
     // call confirm payment to server
-    await confirmTransaction(
-      {
-        transactionId: payload.transactionId,
-        amount: reservePayment.amount,
-        currency: reservePayment.currency
-      },
-      null as any
-    )
-      .then(response => {
-        console.log(response)
-        // send success reply to fulfillment
-        // HACK: to remove
-        reservePayment &&
-          reservePayment.source &&
-          cp.get('line').sendMessage({
-            provider: 'line',
-            replyToken: '',
-            to: reservePayment.source.userId,
-            text: 'purchase completed'
-          })
-
-        c.isCompleted = true
-        return p.confirmPayment(c)
-      })
-      .catch(err => {
-        log.info(`failed to confirm transaction: ${err}`)
-        // send failure reply to fulfillment
-        // HACK: to remove
-        reservePayment &&
-          reservePayment.source &&
-          cp.get('line').sendMessage({
-            provider: 'line',
-            replyToken: '',
-            to: reservePayment.source.userId,
-            text: 'purchase failed'
-          })
-        c.isCompleted = false
-        return p.confirmPayment(c)
-      })
+    try {
+      const response = await confirmTransaction(
+        {
+          transactionId: payload.transactionId,
+          amount: reservePayment.amount,
+          currency: reservePayment.currency
+        },
+        null as any
+      )
+      input.message = messageParser[c.type](c, reservePayment)
+      console.log(response)
+      c.isCompleted = true
+    } catch (err) {
+      log.info(`failed to confirm transaction: ${err}`)
+      input.message = { type: 'text', text: 'purchase failed' }
+      c.isCompleted = false
+    } finally {
+      await messagingClient.sendCustomMessages(input).catch(err => console.log(err))
+      return p.confirmPayment(c)
+    }
   }
 
   return {
