@@ -1,4 +1,3 @@
-import config from './config'
 import {
   createCloudPubSubInstance,
   WithPubsubProjectId,
@@ -7,7 +6,8 @@ import {
   GetEnvString,
   newLogger,
   MessageChannelTransport,
-  UnPromise
+  UnPromise,
+  GetEnvConfig
 } from '@shio-bot/foundation'
 import { OutgoingMessage, IncomingMessage } from '@shio-bot/foundation/entities'
 import { MessageFulfillment } from '@shio-bot/foundation/entities/intent'
@@ -34,6 +34,7 @@ export function expectFulfillment(message: OutgoingMessage) {
 }
 
 export const createPubsubIntegrationClient = async () => {
+  const config = GetEnvConfig()
   const ps = await createCloudPubSubInstance(WithPubsubProjectId(config.projectId), WithPubsubEndpoint(config.pubsubEndpoint))
   const log = newLogger().withUserId('integration-test')
 
@@ -73,6 +74,7 @@ export const createPubsubIntegrationClient = async () => {
           ack()
         })
 
+        log.info(`send message... (${m.intent.name})`)
         pubsub.PublishIncoming(m)
       })
     },

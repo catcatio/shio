@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { PubSub, Topic, Subscription } from '@google-cloud/pubsub'
 import { newLogger, ShioLogger } from '../../logger'
+import { URL } from 'url';
 const nanoid = require('nanoid')
 
 export type SubscribeListener<T> = (message: T, acknowledge: () => void) => Promise<void> | void
@@ -50,7 +51,7 @@ export class CloudPubsubTransport<T> implements ChannelTransport<T>, ChannelMana
 
   private listenerFunction: SubscribeListener<T>
   Subscribe(listener: SubscribeListener<T>): void {
-    this.log.info('Handle incoming message register at POST ' + this.notificationPath)
+    this.log.info('Handle subscription register at POST ' + this.notificationPath)
     this.listenerFunction = listener
   }
 
@@ -135,12 +136,14 @@ export class CloudPubsubTransport<T> implements ChannelTransport<T>, ChannelMana
   // eg. on migration script, cron, or deployment manager
 
   async CreateSubscriptionConfig(pushEndpointHost: string) {
-    this.log.info(`Update ${this.subscription.name} subscription config endpoint ${pushEndpointHost}`)
+    const notificationUrl = new URL(pushEndpointHost)
+    notificationUrl.pathname = this.notificationPath
+    this.log.info(`Update ${this.subscription.name} subscription config endpoint ${notificationUrl.href}`)
     const isExists = await this.subscription.exists()
     if (!isExists[0]) {
       await this.topic.createSubscription(this.subscription.name, {
         pushConfig: {
-          pushEndpoint: pushEndpointHost + this.notificationPath
+          pushEndpoint: notificationUrl.href
         }
       })
     } else {

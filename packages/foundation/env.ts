@@ -23,7 +23,7 @@ export function GetEnvConfig() {
   let datastoreEndpoint: undefined | string
   if (isLocal === "1") {
     pubsubEndpoint = "http://localhost:8085"
-    datastoreEndpoint = "http://localhost:5455"
+    datastoreEndpoint = "http://localhost:5545"
   }
 
 
@@ -32,7 +32,7 @@ export function GetEnvConfig() {
     datastoreNamespace: GetEnvString("SHIO_DATASTORE_NAMESPACE", "shio-development"),
     bucketName: GetEnvString("SHIO_BUCKET_NAME", "shio-development"),
     port: GetEnvString("SHIO_PORT", "8080"),
-    host: GetEnvString("SHIO_HOST", hostUrl.port),
+    host: GetEnvString("SHIO_HOST", hostUrl.href),
     pubsubEndpoint,
     datastoreEndpoint
   }

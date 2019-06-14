@@ -43,6 +43,7 @@ export async function bootstrap(config: Config) {
 
   const datastore = await createDatastoreInstance(...datastoreOptions)
   const cloudpubsub = await createCloudPubSubInstance(...pubsubOptions)
+
   const storage = await createGCPFileStorage(config.bucketName)
   await storage.LoadKey()
 

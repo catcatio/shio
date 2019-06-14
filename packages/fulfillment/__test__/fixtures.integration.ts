@@ -4,8 +4,7 @@ import { UnPromise, INTEGRATION_USER } from '../app/entities'
 import { follow } from './fixture/boarding'
 import { FollowEventMessageFulfillmentKind, ListItemEventMessageIntentParameterFilter, ListItemEventMessageFulfillmentKind } from '@shio-bot/foundation/entities'
 import { listItem } from './fixture/list-item'
-import config from './config'
-import { createDatastoreInstance, WithDatastoreAPIEndpoint, WithDatastoreNameSpace, WithDatastoreProjectId, FileStorage, LocalFileStorage } from '@shio-bot/foundation'
+import { createDatastoreInstance, WithDatastoreAPIEndpoint, WithDatastoreNameSpace, WithDatastoreProjectId, FileStorage, LocalFileStorage, GetEnvConfig } from '@shio-bot/foundation'
 import { DatastoreAssetRepository, WithSystemOperation, WithOperationOwner } from '../app'
 import { randomCreateAssetInput, randomAssetMetadata } from '../app/helpers/random'
 import { Datastore } from '@google-cloud/datastore'
@@ -20,6 +19,7 @@ describe('fulfillment service integration test', () => {
   jest.setTimeout(60 * 1000)
 
   beforeAll(async () => {
+    const config = GetEnvConfig()
     outgoingPubsub = await createPubsubIntegrationClient()
     storage = new LocalFileStorage()
     datastore = await createDatastoreInstance(
