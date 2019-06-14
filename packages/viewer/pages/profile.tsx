@@ -8,7 +8,7 @@ import { ServiceConnector } from '../common/service-connector';
 export default class ProfilePage extends BasePage<{ profile: WhoMessageFulfillment['parameters'] }>  {
 
   static async getInitialProps(c: NextContext<Record<string, string | string[]>, {}>) {
-    const p = await super.getInitialProps(c)
+    const p = await BasePage.getInitialProps(c)
     const { hostUrl, loopbackUrl, provider, providerUserId } = p
     const service = ServiceConnector
       .getInstance(hostUrl, loopbackUrl)

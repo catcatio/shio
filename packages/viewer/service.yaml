@@ -1,0 +1,6 @@
+runtime: nodejs10 
+service: viewer
+
+includes:
+  ## please create env.yaml from env.example.yaml to deploy
+  - env.yaml

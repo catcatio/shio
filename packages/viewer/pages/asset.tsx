@@ -1,14 +1,13 @@
 import * as React from 'react'
 import { NextContext } from 'next'
 import { BasePage } from '../components/BasePage';
-import { DescribeItemMessageFulfillment } from '@shio-bot/foundation/entities';
 import { ServiceConnector, GetAssetDetailResult } from '../common/service-connector';
 
 
 export default class AssetPage extends BasePage<{ asset: GetAssetDetailResult['data'] }>  {
 
   static async getInitialProps(c: NextContext<Record<string, string | string[]>, {}>) {
-    const p = await super.getInitialProps(c)
+    const p = await BasePage.getInitialProps(c)
     const { hostUrl, loopbackUrl, provider, providerUserId } = p
     const service = ServiceConnector
       .getInstance(hostUrl, loopbackUrl)

@@ -4,10 +4,14 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development yarn ts-node cmd/local.ts"
+    "dev": "NODE_ENV=development yarn ts-node cmd/local.ts",
+    "start": "node cmd/gcp.js",
+    "build": "yarn clean && next build && yarn tsc",
+    "clean": "sh ../../scripts/clean.bash",
+    "gcp-deploy": "yarn build"
   },
   "dependencies": {
-    "@shio-bot/foundation": "^1.1.0",
+    "@shio-bot/foundation": "^1.1.5",
     "isomorphic-fetch": "^2.2.1",
     "next": "^8.1.0",
     "react": "^16.8.6",
@@ -19,6 +23,8 @@
     "@types/react": "^16.8.20",
     "@types/react-dom": "^16.8.4",
     "@zeit/next-sass": "^1.0.1",
-    "@zeit/next-typescript": "^1.1.1"
+    "@zeit/next-typescript": "^1.1.1",
+    "ts-node": "^8.2.0",
+    "typescript": "^3.5.2"
   }
 }

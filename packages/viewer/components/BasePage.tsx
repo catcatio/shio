@@ -1,7 +1,5 @@
 import * as React from 'react'
-
 import { NextContext } from 'next'
-import { ServiceConnector } from '../common/service-connector';
 import { isMessageProvider } from '../common/type-guard';
 
 

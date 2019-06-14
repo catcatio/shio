@@ -52,6 +52,7 @@ export class ServiceConnector {
     if (ServiceConnector.isCredential(service)) {
       return service
     }
+    throw new Error('credential is invalid')
   }
 
   async request<P extends ShioViewerServiceAPIPath>(method: "GET" | "POST", path: P, query?: ShioViewerServiceQueryObject, body?: any): Promise<NarrowUnion<ShioServiceResult, P>> {

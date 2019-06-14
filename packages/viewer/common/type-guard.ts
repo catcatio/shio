@@ -4,4 +4,5 @@ export function isMessageProvider(value: any): MessageProvider | null {
   if (value === 'line' || value === 'facebook') {
     return value
   }
+  return null
 }

@@ -36,7 +36,7 @@ function routeHandlerWithUser(handle: (req: handlerRequestWithUser, res: handler
 
 
 
-export async function bootstrap(fulfillmentEndpointUrl: string, port: number, host: string) {
+export async function bootstrap(fulfillmentEndpointUrl: string, port: number | string, host: string) {
   const fulfillment = new FulfillmentConnector(fulfillmentEndpointUrl)
   const app = express()
   const sessionMiddleware = createSessionMiddleware(fulfillment)
