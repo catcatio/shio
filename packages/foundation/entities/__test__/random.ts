@@ -48,7 +48,7 @@ export function randomPurchaseItemIntent(): PurchaseItemEventMessageIntent {
   return {
     name: 'purchase-item',
     parameters: {
-      merchantTitle: 'spongebob squarepants'
+      assetId: 'spongebob squarepants'
     }
   }
 }
