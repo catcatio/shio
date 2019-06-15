@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@shio-bot/chatengine": "^1.0.5",
-    "@shio-bot/foundation": "^1.1.6",
+    "@shio-bot/foundation": "^1.1.9",
     "express": "^4.17.1"
   },
   "devDependencies": {

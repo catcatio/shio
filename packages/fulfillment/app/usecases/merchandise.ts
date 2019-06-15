@@ -1,4 +1,4 @@
-import { PaginationResult, AssetMetadata, ReservePaymentResultMessageType, ReservePaymentMessageType, ReservePaymentMessage, AssetMetadataBookKind, AssetMetadataEventKind } from '@shio-bot/foundation/entities'
+import { PaginationResult, AssetMetadata, ReservePaymentResultMessageType, ReservePaymentMessageType, ReservePaymentMessage, AssetMetadataBookKind, AssetMetadataEventKind, IncommingMessageSource } from '@shio-bot/foundation/entities'
 import { Asset } from '../entities/asset'
 import { ACLRepository, UserRepository, WithOperationOwner, WithPagination, WithSystemOperation, OperationOption, composeOperationOptions } from '../repositories'
 import { AssetRepository } from '../repositories/asset'
@@ -22,7 +22,7 @@ interface MerchandisePurchaseItemOutput {
 export interface MerchandiseUseCase {
   listItem(input: MerchandiseListItemInput, ...options: OperationOption[]): Promise<PaginationResult<Asset>>
   findAssetByIdOrThrow(assetId: string, ...options: OperationOption[]): Promise<Asset>
-  requestPurchaseItem(assetId: string, ...options: OperationOption[]): Promise<MerchandisePurchaseItemOutput>
+  requestPurchaseItem(assetId: string, source: IncommingMessageSource , ...options: OperationOption[]): Promise<MerchandisePurchaseItemOutput>
   commitPurchaseItem(txId: string, method: string, amount: number, ...options: OperationOption<any>[]): Promise<void>
 
 }
@@ -77,7 +77,7 @@ export class DefaultMerchandiseUseCase implements MerchandiseUseCase {
     }
 
   }
-  async requestPurchaseItem(assetId: string, ...options: OperationOption<any>[]): Promise<MerchandisePurchaseItemOutput> {
+  async requestPurchaseItem(assetId: string,source: IncommingMessageSource, ...options: OperationOption<any>[]): Promise<MerchandisePurchaseItemOutput> {
     const option = composeOperationOptions(...options)
     option.logger.withFields({ assetId }).info("request purchase item")
 
@@ -108,6 +108,7 @@ export class DefaultMerchandiseUseCase implements MerchandiseUseCase {
       productName: asset.meta.title,
       provider: 'linepay',
       type: ReservePaymentMessageType,
+      source,
     }
 
     // ถ้า Asset เป็นชนิด Book

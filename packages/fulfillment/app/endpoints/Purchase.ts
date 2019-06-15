@@ -18,10 +18,8 @@ export const PurchaseItemEventMessageIntentEndpoint = (ancestor: EndpointFunctio
     const user = await ancestor.getSessionFromIncomingMessageOrThrow(message)
     await ancestor.merchandise.requestPurchaseItem(
       assetId,
+      message.source,
       WithOperationOwner(user.id),
       WithIncomingMessage(message),
     )
-
-    return createOutgoingFromIncomingMessage(message, [ ])
-
   })

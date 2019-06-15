@@ -21,7 +21,20 @@ export const reservePaymentHandler = (
 ): ReservePaymentListener => {
   let log = newLogger()
   return async (payload: ReservePaymentMessage): Promise<void> => {
+
+    if (!payload.source) {
+      log.error("invalid payload source")
+      log.info(JSON.stringify(payload))
+      return
+    }
+
     let client: PaymentClient
+    const { amount, productName, orderId } = payload
+    log
+      .withFields({
+        amount, productName, orderId
+      })
+      .info('reserve payment process....')
     try {
       client = provider.get(payload.provider)
       if (!client) {
@@ -83,9 +96,9 @@ export const reservePaymentHandler = (
         result.transactionId = response.info.transactionId
         result.paymentUrl = response.info['paymentUrl']
           ? {
-              web: response.info['paymentUrl'].web,
-              app: response.info['paymentUrl'].app
-            }
+            web: response.info['paymentUrl'].web,
+            app: response.info['paymentUrl'].app
+          }
           : undefined
 
         await paymentRepository.push(response.info.transactionId, payload)
@@ -93,7 +106,7 @@ export const reservePaymentHandler = (
 
       result.isCompleted = true
       input.message = messageParser[result.type](result, payload)
-      console.log(`payload: ${JSON.stringify(input.message)}`)
+      console.log(`payload: ${JSON.stringify(input)}`)
       await p.confirmPayment(result)
     } catch (err) {
       input.message = 'something wrong, cannot reserve payment'

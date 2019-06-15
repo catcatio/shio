@@ -61,8 +61,6 @@ export function registerPubsub(pubsub: MessageChannelTransport, paymentPubsub: P
         - ReservePaymentResultMessage
         - ConfirmPaymentResultMessage
     */
-
-
     log.info(JSON.stringify(message))
     ack()
   })

@@ -41,6 +41,7 @@
   "scripts": {
     "dev": "yarn ts-node ./app/index.ts",
     "build-deps": "lerna run build --scope=@shio-bot/fulfillment && lerna run build --scope=@shio-bot/foundation",
-    "shio": "yarn ts-node ./cmd/index.ts"
+    "shio": "yarn ts-node ./cmd/index.ts",
+    "gen": "sh ./scripts/protoc.sh"
   }
 }

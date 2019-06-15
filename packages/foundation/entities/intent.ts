@@ -119,6 +119,7 @@ export interface ListItemEventMessageFulfillment {
       id: string
       meta: AssetMetadata
       price?: number
+      coverImageURL?: string
     }[]
   }
 }
