@@ -15,7 +15,8 @@ export const getLocalhostUrl = () => {
 
 export function GetEnvConfig() {
   const hostUrl = new URL(getLocalhostUrl())
-  hostUrl.port = "8080"
+  const port = GetEnvString("PORT", "8080")
+  hostUrl.port = port
 
   const isLocal = GetEnvString("SHIO_LOCAL", "1")
 
@@ -31,7 +32,7 @@ export function GetEnvConfig() {
     projectId: GetEnvString("SHIO_PROJECT_ID", "catcat-development"),
     datastoreNamespace: GetEnvString("SHIO_DATASTORE_NAMESPACE", "shio-development"),
     bucketName: GetEnvString("SHIO_BUCKET_NAME", "shio-development"),
-    port: GetEnvString("PORT", "8080"),
+    port,
     host: GetEnvString("SHIO_HOST", hostUrl.href),
     pubsubEndpoint,
     datastoreEndpoint
