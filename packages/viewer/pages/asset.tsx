@@ -2,17 +2,20 @@ import * as React from 'react'
 import { NextContext } from 'next'
 import { BasePage } from '../components/BasePage';
 import { ServiceConnector, GetAssetDetailResult } from '../common/service-connector';
+import Link from 'next/link'
 
 
 export default class AssetPage extends BasePage<{ asset: GetAssetDetailResult['data'] }>  {
 
   static async getInitialProps(c: NextContext<Record<string, string | string[]>, {}>) {
-    const p = await BasePage.getInitialProps(c)
-    const { hostUrl, loopbackUrl, provider, providerUserId } = p
+    const p = await BasePage.getInitialPropsWithCredentialOrThrow(c)
+    const { hostUrl, loopbackUrl, provider, providerAccessToken, providerUserId } = p
     const service = ServiceConnector
       .getInstance(hostUrl, loopbackUrl)
       .withCredential({
-        provider, providerUserId
+        provider,
+        providerAccessToken,
+        providerUserId,
       })
     const assetId = c.query['assetId']
     if (typeof assetId !== 'string') {

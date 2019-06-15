@@ -1,9 +1,14 @@
 # Viewer module page
 
-```
-/view/asset/?provider=line&provider.userId=N0001&assetId=F8RcpTvieD
-```
 
+## Line liff
+main entry is `./pages/line-liff-entry.ts`
+- View profile
 ```
-/view/profile/?provider=line&provider.userId=N0001
+pageName=profile
+```
+- View asset
+```
+pageName=asset
+assetId=<string>
 ```
