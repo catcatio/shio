@@ -68,10 +68,7 @@ export const logger = newLogger()
  */
 export function newLogger(logOutput?: any[]): ShioLogger {
   const defaultLogOutput: any[] = []
-
-  if (process.env['SHIO_LOG_DISABLE_CONSOLE'] !== '1') {
-    defaultLogOutput.push(new transports.Console())
-  }
+  defaultLogOutput.push(new transports.Console())
 
   if (process.env['SHIO_LOG_TRANSPORT_STACKDRIVER'] === '1') {
     const stackdriverTransport = new LoggingWinston({})
