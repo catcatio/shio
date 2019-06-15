@@ -65,6 +65,7 @@ export class DatastoreACLRepository implements ACLRepository {
 
   async CreatePermission(userId: string, tag: ResourceTag, permission: Permission, ...opts: ACLRepositoryOperationOption[]): Promise<void> {
     const options = composeOperationOptions(...opts)
+    options.logger.withFields({ userId, tag: tag.toString(), permission }).info("grant new permission")
     await this.IsGrantedOrThrow(options.operationOwnerId, newResourceTag('acl'), Permission.WRITER)
     const key = this.getACLKey(userId, tag)
     const [existACL]: [ACL | undefined] = await this.db.get(key)

@@ -10,7 +10,9 @@ import {
   WithDatastoreProjectId,
   WithPubsubEndpoint,
   WithPubsubProjectId,
-  GCPFileStorage
+  GCPFileStorage,
+  FileStorage,
+  LocalFileStorage
 } from '@shio-bot/foundation'
 import * as express from 'express'
 import { Config } from './config'
@@ -24,6 +26,8 @@ import { DatastoreAssetRepository } from './repositories/asset';
 import { registerHttpTransports } from './transports/http';
 import { DefaultInventoryUseCase } from './usecases/inventory';
 import { createGCPFileStorage } from '@shio-bot/foundation/storage/gcp';
+import { join } from 'path';
+import { DatastoreTransactionRepository } from './repositories/transaction';
 
 export async function bootstrap(config: Config) {
   const log = newLogger()
@@ -44,8 +48,15 @@ export async function bootstrap(config: Config) {
   const datastore = await createDatastoreInstance(...datastoreOptions)
   const cloudpubsub = await createCloudPubSubInstance(...pubsubOptions)
 
-  const storage = await createGCPFileStorage(config.bucketName)
-  await storage.LoadKey()
+  log.info("verify GCP storage...")
+  let storage: FileStorage
+  if (!config.dev) {
+    storage = await createGCPFileStorage(config.bucketName)
+    await (storage as GCPFileStorage).LoadKey()
+  } else {
+    log.info('using local storage in Development mode')
+    storage = new LocalFileStorage(join(__dirname, '.storage'))
+  }
 
   const acl = new DatastoreACLRepository(datastore)
 
@@ -65,10 +76,11 @@ export async function bootstrap(config: Config) {
 
   const assetRepository = new DatastoreAssetRepository(datastore, storage)
   const userRepository = new DatastoreUserRepository(datastore)
+  const txRepository = new DatastoreTransactionRepository(datastore)
 
   const inventoryUseCase = new DefaultInventoryUseCase(storage, assetRepository, acl)
   const boardingUsecase = new DefaultBoardingUsecase(userRepository, acl)
-  const merchandiseUseCase = new DefaultMerchandiseUseCase(acl, userRepository, assetRepository)
+  const merchandiseUseCase = new DefaultMerchandiseUseCase(acl, userRepository, assetRepository, txRepository, paymentPubsub)
 
   const endpoints = new DefaultFulfillmentEndpoint(boardingUsecase, merchandiseUseCase, inventoryUseCase)
   log.info("🎉 endpoint intial!")

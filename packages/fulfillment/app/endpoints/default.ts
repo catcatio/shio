@@ -9,9 +9,9 @@ export type NarrowUnion<T, N> = T extends { name: N } ? T : never
 export type EndpointFuntion = ReturnType<typeof endpointFn>
 export function endpointFn<IntentName extends MessageIntent['name']>(
   intentName: IntentName,
-  handler: (message: IncomingMessage & { intent: NarrowUnion<MessageIntent, IntentName> }) => Promise<OutgoingMessage | ReservePaymentMessage | void>
+  handler: (message: IncomingMessage & { intent: NarrowUnion<MessageIntent, IntentName> }) => Promise<OutgoingMessage | void>
 ) {
-  return async (message: IncomingMessage): Promise<OutgoingMessage | ReservePaymentMessage | void> => {
+  return async (message: IncomingMessage): Promise<OutgoingMessage | void> => {
     if (message.intent.name === intentName) {
       return handler(message as any)
     } else {

@@ -14,6 +14,7 @@ export default async () => {
 
   const app = await bootstrap({
     ...config,
+    dev: true
   })
   global.app = app
 }

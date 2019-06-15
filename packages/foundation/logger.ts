@@ -6,7 +6,7 @@ interface ShioLoggerMeta {
   userId?: string
   requestId?: string
   provider?: MessageProvider
-  fields?: { [key: string]: string }
+  fields?: { [key: string]: string | number }
 }
 export class ShioLogger {
   private logger: Logger

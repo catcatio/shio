@@ -11,7 +11,7 @@ export async function createGCPFileStorage(bucketName: string, options?: Storage
     await storage.PutObject(".shiosniff", foo)
   } catch (e) {
     console.error(e)
-    console.error("maybe bucket is not exists?")
+    console.error(`maybe bucket ${bucketName} is not exists?`)
     process.exit(2)
   }
   return storage

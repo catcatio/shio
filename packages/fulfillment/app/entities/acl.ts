@@ -27,6 +27,9 @@ export class ResourceTag {
   type: string
   id: string
   prefix: string
+  static fromAclAble(v: {aclTag: string}){
+    return ResourceTag.fromAclTag(v.aclTag)
+  }
   static fromAclTag(v: string) {
     const seq = v.split("::")
     const tag = new ResourceTag({

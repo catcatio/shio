@@ -1,14 +1,51 @@
 import { SYSTEM_USER } from '../entities'
 import { SchemaLike } from 'joi'
-import { Datastore, Query } from '@google-cloud/datastore'
+import { Datastore, Query, DatastoreRequest, Transaction } from '@google-cloud/datastore'
 import { ErrorType, newGlobalError } from '../entities/error'
 import { logger, ShioLogger, newLogger } from '@shio-bot/foundation'
 import { MessageProvider, IncomingMessage } from '@shio-bot/foundation/entities'
 import { entity } from '@google-cloud/datastore/build/src/entity'
 
-export class DatastoreBaseRepository {
-  db: Datastore
-  constructor(db: Datastore) {
+export interface Transactionalable<T> {
+  begin(): Promise<T>
+  commit(): Promise<void>
+  rollback(): Promise<void>
+}
+
+export class DatastoreBaseRepository<Transactional extends DatastoreBaseRepository = any> {
+  db: DatastoreRequest
+
+  begin(): Promise<Transactional> {
+    throw new Error('transactional begin function is not implemented')
+  }
+
+  private isTransactional(db: DatastoreRequest): db is Transaction {
+    if (typeof db.commit === 'function') {
+      return true
+    }
+    return false
+  }
+  async commit() {
+    const tx = this.db
+    if (this.isTransactional(tx)) {
+      await tx.commit()
+      return
+    }
+    throw new Error('commit invalid transaction....')
+  }
+  async rollback() {
+    const tx = this.db
+    if (this.isTransactional(tx)) {
+      await tx.rollback()
+      return
+    }
+    throw new Error('commit invalid transaction....')
+  }
+
+  constructor(db: DatastoreRequest) {
+    if (this.isTransactional(db)) {
+      console.log('use transactional mode in datastore...')
+    }
     this.db = db
   }
 
@@ -23,7 +60,7 @@ export class DatastoreBaseRepository {
    * `allocateKey(['book', 491828392, 'episode', 'episode-a'])` << use Name as ID
    */
   async allocateKey(...paths: (string | number)[]) {
-    let ids = await this.db.allocateIds(this.db.key([...paths]), 1)
+    let ids = await this.db.allocateIds(this.db.key([...paths.map(this.parseIdToDatastoreId)]), 1)
     if (ids[0] < 1) {
       throw newGlobalError(ErrorType.Internal, 'ID allocation error, please try again')
     }
@@ -31,9 +68,16 @@ export class DatastoreBaseRepository {
     return key
   }
 
-  parseIdToDatastoreId(value: string): string | number {
+  key(...path: (string | number)[]) {
+    if (this.db.datastore) {
+      return this.db.datastore.key(path.map(this.parseIdToDatastoreId))
+    }
+    return this.db.key(path.map(this.parseIdToDatastoreId))
+  }
+
+  parseIdToDatastoreId(value: string | number): string | number {
     if (Number.isInteger(+value)) {
-      return parseInt(value)
+      return parseInt(value + "")
     } else {
       return value
     }
@@ -110,21 +154,21 @@ export function composeOperationOptions<T>(...opt: OperationOption<T>[]) {
 }
 
 export function WithWhere<T>(condition: WhereConditions<Partial<T>>): OperationOption<T> {
-  return function(opts) {
+  return function (opts) {
     opts.where.push(condition)
     return opts
   }
 }
 
 export function WithSystemOperation<T>(): OperationOption<T> {
-  return function(opts) {
+  return function (opts) {
     opts.operationOwnerId = SYSTEM_USER
     return opts
   }
 }
 
 export function WithKey(id: string): OperationOption<any> {
-  return function(opts) {
+  return function (opts) {
     opts.key = id
     return opts
   }
@@ -132,7 +176,7 @@ export function WithKey(id: string): OperationOption<any> {
 
 // config operation attribute with incoming message object
 export function WithIncomingMessage(msg: IncomingMessage): OperationOption<any> {
-  return function(opts) {
+  return function (opts) {
     opts.provider = msg.provider
     opts.requestId = msg.requestId
     return opts
@@ -140,14 +184,14 @@ export function WithIncomingMessage(msg: IncomingMessage): OperationOption<any> 
 }
 
 export function WithPagination<T = any>(limit: number = 5, offset: number = 10): OperationOption<T> {
-  return function(opts) {
+  return function (opts) {
     opts.limit = limit
     opts.offset = offset
     return opts
   }
 }
 export function WithOperationOwner<T>(userId: string): OperationOption<T> {
-  return function(opts) {
+  return function (opts) {
     opts.operationOwnerId = userId
     return opts
   }
