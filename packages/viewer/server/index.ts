@@ -6,7 +6,7 @@ import * as next from 'next'
 import config from '../next.config'
 import { UnauthorizedError } from '../common/error';
 import { createSessionMiddleware } from './middlewares/session';
-import { GetProfilePath, GetAssetDetailPath } from '../common/service-connector';
+import { GetProfilePath, GetAssetDetailPath, ShioServiceConnectorCredential, ShioBaseInitialProps } from '../common/service-connector';
 
 
 
@@ -67,7 +67,10 @@ export async function bootstrap(fulfillmentEndpointUrl: string, port: number | s
   }))
 
   APIRouter.get(GetProfilePath, routeHandlerWithUser((req, res) => {
-    res.json(req.user)
+    res.json({
+      data: req.user,
+      path: GetProfilePath
+    })
   }))
 
 
@@ -86,29 +89,36 @@ export async function bootstrap(fulfillmentEndpointUrl: string, port: number | s
   const hostUrl = new URL(host)
   hostUrl.pathname = 'api'
 
-  function getViewQueryStringAttribute(req: express.Request) {
-    if (isRequestWithUserOrThrow(req)) {
-      return {
-        provider: req.user.provider,
-        providerUserId: req.user.providerId,
-        loopbackUrl: loopbackUrl.href,
-        hostUrl: hostUrl.href
-      }
+  function getInitialPropsFromServer(req: express.Request): ShioBaseInitialProps {
+    return {
+      loopbackUrl: loopbackUrl.href,
+      hostUrl: hostUrl.href,
+      lineSDK: 'https://d.line-scdn.net/liff/1.0/sdk.js',
+      provider: req.query['provider'],
+      ...req.query,
     }
   }
 
-  app.get('/view/profile', sessionMiddleware, (req, res) => {
-    if (isRequestWithUserOrThrow(req)) {
-      view.render(req, res, '/profile', getViewQueryStringAttribute(req))
-    }
+  app.get('/view/profile', (req, res) => {
+    const initProps = getInitialPropsFromServer(req)
+    view.render(req, res, '/profile', {
+      ...initProps
+    })
   })
 
-  app.get('/view/asset', sessionMiddleware, routeHandlerWithUser((req, res) => {
-    view.render(req, res, '/asset', {
-      ...getViewQueryStringAttribute(req),
-      assetId: req.query['assetId'],
+  app.get('/view/asset', (req, res) => {
+    const initProps = getInitialPropsFromServer(req)
+    view.render(req, res, '/asset', { ...initProps })
+  })
+
+  app.get('/view/line-liff-entry', (req, res) => {
+    const initProps = getInitialPropsFromServer(req)
+    initProps.provider = 'line'
+    view.render(req, res, '/line-liff-entry', {
+      ...initProps,
+      ...req.query
     })
-  }))
+  })
 
   app.all('*', (req, res) => {
     if (req.headers['content-type'] !== 'application/json') {

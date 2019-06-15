@@ -2,6 +2,16 @@
 import * as fetch from 'isomorphic-fetch'
 import { WhoMessageFulfillment, MessageProvider, DescribeItemMessageFulfillment, GetItemDownloadUrlEventMessageFulfillment } from '@shio-bot/foundation/entities';
 
+export type ShioBaseInitialProps = {
+  provider: MessageProvider
+  loopbackUrl: string
+  hostUrl: string
+  lineSDK: string
+
+  providerUserId?: string
+  providerAccessToken?: string
+}
+
 export type NarrowUnion<T, N> = T extends { path: N } ? T : never
 export type ShioServiceResult = GetProfileResult | GetAssetDetailResult
 export type ShioViewerServiceAPIPath = ShioServiceResult['path']
@@ -9,6 +19,7 @@ export type ShioViewerServiceQueryObject = { [key: string]: string | number }
 export type ShioServiceConnectorCredential = {
   provider: MessageProvider
   providerUserId: string
+  providerAccessToken: string
 }
 
 

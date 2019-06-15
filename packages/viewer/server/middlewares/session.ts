@@ -16,6 +16,11 @@ export function createSessionMiddleware(fulfillment: FulfillmentConnector) {
       return
     }
 
+
+    // @TODO: require verify 
+    // provider access token
+    // from x-provider-token header
+
     // perform basic header validate
     const user = await fulfillment.getUserProfile(provider, providerUserId)
     if (!user) {

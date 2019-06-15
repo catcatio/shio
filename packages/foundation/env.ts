@@ -31,7 +31,7 @@ export function GetEnvConfig() {
     projectId: GetEnvString("SHIO_PROJECT_ID", "catcat-development"),
     datastoreNamespace: GetEnvString("SHIO_DATASTORE_NAMESPACE", "shio-development"),
     bucketName: GetEnvString("SHIO_BUCKET_NAME", "shio-development"),
-    port: GetEnvString("SHIO_PORT", "8080"),
+    port: GetEnvString("PORT", "8080"),
     host: GetEnvString("SHIO_HOST", hostUrl.href),
     pubsubEndpoint,
     datastoreEndpoint

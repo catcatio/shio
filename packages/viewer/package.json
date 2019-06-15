@@ -6,12 +6,14 @@
   "scripts": {
     "dev": "NODE_ENV=development yarn ts-node cmd/local.ts",
     "start": "node cmd/gcp.js",
-    "build": "yarn clean && next build && yarn tsc",
+    "build": "yarn clean && NODE_ENV=development yarn ts-node ./next.build.ts && yarn tsc",
     "clean": "sh ../../scripts/clean.bash",
-    "gcp-deploy": "yarn build"
+    "gcp-deploy": "yarn build && gcloud app deploy service.yaml"
   },
   "dependencies": {
-    "@shio-bot/foundation": "^1.1.5",
+    "@shio-bot/foundation": "^1.1.7",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
     "isomorphic-fetch": "^2.2.1",
     "next": "^8.1.0",
     "react": "^16.8.6",

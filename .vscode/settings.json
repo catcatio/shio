@@ -11,7 +11,7 @@
       "when": "$(basename).ts"
     },
     "**/*.js": {
-      "when": "$(basename).ts"
+      "when": "$(basename).ts",
     },
     "**/*.js.map": {
       "when": "$(basename)"
