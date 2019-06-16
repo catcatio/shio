@@ -6,10 +6,10 @@ export interface Payment {
 }
 
 export enum TransactionStatus {
-  WAITING_FOR_PAYMENT,
-  CANCELED,
-  FAILED,
-  COMPLETED,
+  WAITING_FOR_PAYMENT = 'wating-payment',
+  CANCELED = 'cancel',
+  FAILED = 'failed',
+  COMPLETED = 'completed',
 }
 
 export interface Transaction {
@@ -17,6 +17,7 @@ export interface Transaction {
   assetId: string
   status: TransactionStatus
   price: number
+  userId: string
 
   /**
    * stellar://

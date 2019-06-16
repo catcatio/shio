@@ -1,31 +1,42 @@
 import { OutgoingMessage } from '@shio-bot/foundation/entities'
-import { MessagingClientProvider, LineMessageClientSendCustomMessagesInput } from '@shio-bot/chatengine/types'
-import { FulfillmentListener } from '../types'
-import { LineFulfillmentParser } from '../helpers/lineFulfillmentParser'
-import { Message } from '@line/bot-sdk'
+import { MessagingClientProvider, LineMessageClientSendCustomMessagesInput, MessageClientSendCustomMessagesInput } from '@shio-bot/chatengine/types'
+import { FulfillmentListener, MessageFulfillmentParserList } from '../types'
+import { Message } from '@line/bot-sdk';
 
-export const fulfillmentMessageHandler = (messagingClientProvider: MessagingClientProvider): FulfillmentListener => {
+
+type ChatProviderMessageFulfillmentParser = {
+  line: () => MessageFulfillmentParserList<Message>
+  facebook: () => MessageFulfillmentParserList<any>
+}
+
+export const fulfillmentMessageHandler = (messagingClientProvider: MessagingClientProvider, fulfillmentParser: ChatProviderMessageFulfillmentParser): FulfillmentListener => {
   return async (message: OutgoingMessage): Promise<void> => {
     console.log('OutgoingMessage', JSON.stringify(message))
-    let messageParser
-    if (message.provider === 'line') {
-      messageParser = new LineFulfillmentParser()
-    }
+    let messagingClient = messagingClientProvider.get(message.provider)
+    let messageParser = fulfillmentParser[message.provider]()
 
-    let messages: Message[] = []
+    let messages: unknown[] = []
     message.fulfillment.forEach(f => {
-      messages.push(messageParser[f.name](f))
+      const parseFn = messageParser[f.name]
+      if (typeof parseFn !== 'function'){
+        console.error(`Parser function not found\nonly ${Object.keys(messageParser).join(',')} is avaliable for ${message.provider}`)
+        return
+      }
+      messages.push(parseFn(f as any))
     })
 
-    let input: LineMessageClientSendCustomMessagesInput = {
-      provider: 'line',
+    if (message.provider !== 'line') {
+      throw Error('unsupport fulfilment message provider')
+    }
+
+    let input: MessageClientSendCustomMessagesInput = {
+      provider: message.provider,
       replyToken: message.replyToken || '',
       to: message.source.userId,
       message: messages
     }
 
     try {
-      let messagingClient = messagingClientProvider.get(message.provider)
       let result = await messagingClient.sendCustomMessages(input).catch(err => console.error(err))
       console.log(result)
     } catch (err) {

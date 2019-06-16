@@ -15,11 +15,11 @@ import { WithOperationOwner, WithIncomingMessage } from '../repositories';
 export const PurchaseItemEventMessageIntentEndpoint = (ancestor: EndpointFunctionAncestor) =>
   endpointFn(PurchaseItemEventMessageIntentKind, async message => {
     const { assetId } = message.intent.parameters
-    const user = await ancestor.getSessionFromIncomingMessageOrThrow(message)
+    const session = await ancestor.getSessionFromIncomingMessageOrThrow(message)
     await ancestor.merchandise.requestPurchaseItem(
       assetId,
       message.source,
-      WithOperationOwner(user.id),
+      WithOperationOwner(session.userId),
       WithIncomingMessage(message),
     )
   })

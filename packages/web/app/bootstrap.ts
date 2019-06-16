@@ -12,6 +12,7 @@ import { payment } from './payment'
 import { reservePaymentHandler } from './handlers/reservePaymentHandler'
 import { confirmPaymentHandler } from './handlers/confirmPaymentHandler'
 import { paymentRepository } from './repositories'
+import { LineFulfillmentParser } from './helpers/lineFulfillmentParser';
 
 const pubsubPath = '/pubsub'
 
@@ -53,7 +54,21 @@ export async function bootstrap(config: Configurations) {
   let intentDetector = chatEngine.intentDetectorProvider.get(config.intentProvider)
 
   let inMsgHandler = intentMessageHandler(ff, intentDetector, chatEngine.messagingClientProvider)
-  let outMsgHandler = fulfillmentMessageHandler(chatEngine.messagingClientProvider)
+
+  if (!config.chatEngine.line) {
+    console.error('line config setting invalid')
+    return process.exit(2)
+  }
+
+  let outMsgHandler = fulfillmentMessageHandler(chatEngine.messagingClientProvider, {
+    line: () => new LineFulfillmentParser({
+      setting: config.chatEngine.line!
+    }),
+    facebook: () => {
+      throw new Error("Method unimplemented")
+    }
+   })
+
   await msgPubsub.CreateOutgoingSubscriptionConfig(`${config.host}${pubsubPath}`)
   ff.onFulfillment(outMsgHandler)
 

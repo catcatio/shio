@@ -9,6 +9,15 @@ export type CurrencyUSD = 'USD'
 
 export type Currency = CurrencyTHB | CurrencyTWD | CurrencyJPY | CurrencyUSD
 
+export function isReservePaymentMessage(value: any): value is ReservePaymentMessage {
+  if (!value) {
+    return false
+  }
+  if (value['type'] === ReservePaymentMessageType) {
+    return true
+  }
+  return false
+}
 export const ReservePaymentMessageType = 'ReservePayment'
 export interface ReservePaymentMessage {
   type: typeof ReservePaymentMessageType

@@ -1,4 +1,4 @@
-import { MessageProvider, IncomingMessage, OutgoingMessage, MessageIntent } from "@shio-bot/foundation/entities";
+import { MessageProvider, IncomingMessage, OutgoingMessage, MessageIntent, ReservePaymentMessage } from "@shio-bot/foundation/entities";
 import { randomIncomingMessage } from "@shio-bot/foundation/entities/__test__/random";
 
 export type FixtureContext = {
@@ -6,7 +6,7 @@ export type FixtureContext = {
   userId: string
   variables: { [key: string]: string }
 }
-export type FixtureExpect = (outgoingMesage: OutgoingMessage, ctx: FixtureContext) => void
+export type FixtureExpect = (outgoingMesage: OutgoingMessage | ReservePaymentMessage, ctx: FixtureContext) => void
 export type FixtureStep = (ctx: FixtureContext) => {
   incomingMessage: IncomingMessage,
   expect: FixtureExpect

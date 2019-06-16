@@ -1,12 +1,13 @@
 import { PaginationResult, AssetMetadata, ReservePaymentResultMessageType, ReservePaymentMessageType, ReservePaymentMessage, AssetMetadataBookKind, AssetMetadataEventKind, IncommingMessageSource } from '@shio-bot/foundation/entities'
 import { Asset } from '../entities/asset'
-import { ACLRepository, UserRepository, WithOperationOwner, WithPagination, WithSystemOperation, OperationOption, composeOperationOptions } from '../repositories'
+import { ACLRepository, UserRepository, WithOperationOwner, WithPagination, WithSystemOperation, OperationOption, composeOperationOptions, WithWhere } from '../repositories'
 import { AssetRepository } from '../repositories/asset'
 import { ErrorType, newGlobalError } from '../entities/error'
 import { TransactionRepository } from '../repositories/transaction';
-import { TransactionStatus } from '../entities/transaction';
+import { TransactionStatus, Transaction } from '../entities/transaction';
 import { ResourceTag, Permission } from '../entities';
 import { PaymentChannelTransport } from '@shio-bot/foundation/transports/pubsub';
+import { logger } from '@shio-bot/foundation';
 
 interface MerchandiseListItemInput {
   merchandiseId?: string
@@ -27,10 +28,16 @@ interface MerchandiseCommitPurchaseItemOutput {
   status: TransactionStatus
   description: string
 }
+
+
+/**
+ * Merchandise use case
+ * user Id โดยทั้งหมดจะต้องอ้างอิงจาก OperationOwner
+ */
 export interface MerchandiseUseCase {
   listItem(input: MerchandiseListItemInput, ...options: OperationOption[]): Promise<PaginationResult<Asset>>
   findAssetByIdOrThrow(assetId: string, ...options: OperationOption[]): Promise<Asset>
-  requestPurchaseItem(assetId: string, source: IncommingMessageSource , ...options: OperationOption[]): Promise<MerchandiseRequestPurchaseItemOutput>
+  requestPurchaseItem(assetId: string, source: IncommingMessageSource, ...options: OperationOption[]): Promise<MerchandiseRequestPurchaseItemOutput>
   commitPurchaseItem(txId: string, method: string, amount: number, ...options: OperationOption<any>[]): Promise<MerchandiseCommitPurchaseItemOutput>
 
 }
@@ -54,28 +61,54 @@ export class DefaultMerchandiseUseCase implements MerchandiseUseCase {
   async commitPurchaseItem(txId: string, method: string, amount: number, ...options: OperationOption<any>[]): Promise<MerchandiseCommitPurchaseItemOutput> {
     const option = composeOperationOptions(...options)
     option.logger.withFields({ txId, method, amount }).info('confirm payment to transaction')
-
-    const tx = await this.Transaction.begin()
-    const purchaseTransaction = await this.Transaction.findById(txId)
-    if (!purchaseTransaction) {
-      await tx.rollback()
-      throw newGlobalError(ErrorType.NotFound, `tx id not found (${txId})`)
+    if (!txId) {
+      throw newGlobalError(ErrorType.Input, 'tx ID is required to commit purchase item')
     }
 
-    await tx.createPayment(purchaseTransaction.id, method, amount)
+    /**
+     * ใช้ atomic เพื่อทำ commit transaction
+     * ประกอบด้วย
+     * - หา transaction
+     * - สร้าง payment ให้ transaction
+     */
+    const tx = await this.Transaction.begin()
+    const purchaseTransaction = await this.Transaction.findById(option.operationOwnerId, txId)
+    if (!purchaseTransaction) {
+      // transaction นี้ไม่มีอยู่จริง
+      await tx.rollback()
+      throw newGlobalError(ErrorType.NotFound, `tx id not found (${txId})`)
+    } else if (purchaseTransaction.status !== TransactionStatus.WAITING_FOR_PAYMENT) {
+
+      /**
+       * หาก Transaction ไม่ใช่ WAITING_FOR_PAYMENT
+       * จะไม่ให้มีการดำเนินการต่อ
+       */
+      await tx.rollback()
+      throw newGlobalError(ErrorType.Forbidden, `tx (${txId}) status is not WAITING_FOR_PAYMENT`)
+    }
+
+    await tx.createPayment(option.operationOwnerId, purchaseTransaction.id, method, amount)
     const asset = await this.findAssetByIdOrThrow(purchaseTransaction.assetId)
 
+    /**
+     * ในกรณีที่จ่ายมาเท่ากับราคาของ asset หรือมากกว่า
+     * จะให้ granted ไปเลย แล้ว stamp transaction
+     * เป็น status COMPLETED
+     * และเพิ่ม Acl Viewer ให้กับ user 
+     */
     if (amount >= purchaseTransaction.price) {
-      await tx.updateById(purchaseTransaction.id, {
-        describeURLs: [],
+
+      await tx.updateById(option.operationOwnerId, purchaseTransaction.id, {
+        ...purchaseTransaction,
         status: TransactionStatus.COMPLETED,
       })
       await this.Acl.CreatePermission(option.operationOwnerId, ResourceTag.fromAclable(asset), Permission.VIEWER, WithSystemOperation())
       await tx.commit()
+
       return {
         assetId: asset.id,
         assetMeta: asset.meta,
-        completed:false,
+        completed: false,
         status: purchaseTransaction.status,
         description: `payment completed`,
         txId: purchaseTransaction.id,
@@ -91,7 +124,7 @@ export class DefaultMerchandiseUseCase implements MerchandiseUseCase {
       return {
         assetId: asset.id,
         assetMeta: asset.meta,
-        completed:false,
+        completed: false,
         status: purchaseTransaction.status,
         description: `payment invalid, amount require is ${purchaseTransaction.price} but receive ${amount}`,
         txId: purchaseTransaction.id,
@@ -99,7 +132,7 @@ export class DefaultMerchandiseUseCase implements MerchandiseUseCase {
     }
 
   }
-  async requestPurchaseItem(assetId: string,source: IncommingMessageSource, ...options: OperationOption<any>[]): Promise<MerchandiseRequestPurchaseItemOutput> {
+  async requestPurchaseItem(assetId: string, source: IncommingMessageSource, ...options: OperationOption<any>[]): Promise<MerchandiseRequestPurchaseItemOutput> {
     const option = composeOperationOptions(...options)
     option.logger.withFields({ assetId }).info("request purchase item")
 
@@ -114,8 +147,8 @@ export class DefaultMerchandiseUseCase implements MerchandiseUseCase {
       price: asset.price + ""
     }).info("buy item...")
 
-    const tx = await this.Transaction.create(asset.id, asset.price || 0, ...options)
-    option.logger.withFields({tx: tx.id}).info("transaction created!")
+    const tx = await this.Transaction.create(option.operationOwnerId, asset.id, asset.price || 0, ...options)
+    option.logger.withFields({ tx: tx.id }).info("transaction created!")
 
     /**
      * หลังจากสร้าง Transaction แล้ว
@@ -157,9 +190,37 @@ export class DefaultMerchandiseUseCase implements MerchandiseUseCase {
     }
   }
 
-  public async listItem({ limit, merchandiseId, offset }: MerchandiseListItemInput, ...options: OperationOption[]): Promise<PaginationResult<Asset>> {
+  public async listItem({ limit, merchandiseId, offset }: MerchandiseListItemInput, ...options: OperationOption[]): Promise<PaginationResult<Asset & { isOwnByOperationOwner?: boolean }>> {
     const option = composeOperationOptions(...options)
-    return this.Asset.findMany(WithPagination(limit, offset), WithOperationOwner(option.operationOwnerId))
+    const assetResults = await this.Asset.findMany(WithPagination(limit, offset), WithOperationOwner(option.operationOwnerId))
+
+
+    /**
+     * เพิ่ม parameter สำหรับบอกว่า
+     * ผู้ที่เรียกดู listItem เคยซื้อสินค้านี้ไว้แล้ว
+     * หรือเปล่า
+     */
+    assetResults.records = await Promise.all(assetResults.records.map(async (asset) => {
+      const transactionResult = await this.Transaction.findMany(WithWhere<Transaction>({
+        status: {
+          Equal: TransactionStatus.COMPLETED
+        },
+        userId: {
+          Equal: option.operationOwnerId,
+        },
+        assetId: {
+          Equal: asset.id
+        }
+      }))
+
+      return {
+        ...asset,
+        isOwnByOperationOwner: transactionResult.length > 0
+      }
+    }))
+
+
+    return assetResults
   }
 
   public async findAssetByIdOrThrow(assetId: string, ...options: OperationOption[]): Promise<Asset> {

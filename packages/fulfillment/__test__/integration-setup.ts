@@ -9,7 +9,6 @@ export default async () => {
   const  config = GetEnvConfig()
   const { pubsub } = await createPubsubIntegrationClient()
   await pubsub.Purge()
-  await pubsub.PrepareTopic()
   await pubsub.CreateIncomingSubscriptionConfig(config.host)
 
   const app = await bootstrap({

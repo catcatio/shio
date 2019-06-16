@@ -1,6 +1,6 @@
 
 import { endpointFn, EndpointFunctionAncestor } from "./default";
-import { FollowEventMessageIntentKind, createOutgoingFromIncomingMessage } from "@shio-bot/foundation/entities";
+import { FollowEventMessageIntentKind, createOutgoingFromIncomingMessage, FollowEventMessageFulfillmentKind } from "@shio-bot/foundation/entities";
 import { WithSystemOperation, WithIncomingMessage } from "../repositories";
 import { GlobalError } from "../entities/error";
 import { UsecaseErrorMessages } from "../usecases";
@@ -19,7 +19,7 @@ export const FollowEventMessageIntentEndpoint = (ctx: EndpointFunctionAncestor) 
 
     return createOutgoingFromIncomingMessage(message, [
       {
-        name: 'follow',
+        name: FollowEventMessageFulfillmentKind,
         parameters: {
           chatSessionId: output.userChatSession.id,
           userId: output.user.id,
@@ -32,7 +32,7 @@ export const FollowEventMessageIntentEndpoint = (ctx: EndpointFunctionAncestor) 
     if (e instanceof GlobalError) {
       return createOutgoingFromIncomingMessage(message, [
         {
-          name: 'follow',
+          name: FollowEventMessageFulfillmentKind,
           parameters: {
             isCompleted: false,
             isExists: e.message === UsecaseErrorMessages.USER_ALREADY_EXISTED,

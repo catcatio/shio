@@ -4,7 +4,8 @@ export enum ErrorType {
   Auth = 'unauthorize',
   NotFound = 'notfound',
   Input = 'badinput',
-  Internal = 'internal'
+  Internal = 'internal',
+  Forbidden = 'forbidden'
 }
 
 export class GlobalError extends Error {

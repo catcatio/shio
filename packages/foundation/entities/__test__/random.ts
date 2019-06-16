@@ -6,7 +6,9 @@ import {
   ListItemEventMessageIntent,
   ListItemEventMessageIntentKind,
   ListItemEventMessageIntentParameterFilter,
-  PurchaseItemEventMessageIntent
+  PurchaseItemEventMessageIntent,
+  FollowEventMessageFulfillmentKind,
+  FollowEventMessageIntentKind
 } from '../intent'
 import { IncomingMessage, OutgoingMessage } from '../message'
 import { ulid } from 'ulid'
@@ -27,7 +29,7 @@ export function randomListItemEventMessageIntent(): ListItemEventMessageIntent {
 
 export function randomFollowMessageIntent(): FollowEventMessageIntent {
   return {
-    name: 'follow',
+    name: FollowEventMessageIntentKind,
     parameters: {
       displayName: 'AIM'
     }
@@ -35,7 +37,7 @@ export function randomFollowMessageIntent(): FollowEventMessageIntent {
 }
 export function randomFollowMessageFulfillment(): FollowEventMessageFulfillment {
   return {
-    name: 'follow',
+    name: FollowEventMessageFulfillmentKind,
     parameters: {
       isExists: false,
       isCompleted: true,
@@ -67,7 +69,7 @@ export function randomIncomingMessage(intent: MessageIntent = randomFollowMessag
       displayName: `i am ${uuid().toString()}`
     },
     timestamp: Date.now(),
-    type: 'follow',
+    type: FollowEventMessageIntentKind,
     original: {},
     requestId: ulid().toString()
   }

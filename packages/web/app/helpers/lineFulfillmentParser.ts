@@ -1,4 +1,4 @@
-import { MessageFulfillmentParser, FulfillmentparserFunc } from '../types'
+import { MessageFulfillmentParserList, FulfillmentparserFunc } from '../types'
 import {
   ListItemEventMessageFulfillmentKind,
   FollowEventMessageFulfillmentKind,
@@ -17,12 +17,23 @@ import {
   ClaimFreeItemEventMessageFulfillmentKind,
   ClaimFreeItemEventMessageFulfillment,
   DescribeItemMessageFulfillmentKind,
-  DescribeItemMessageFulfillment
+  DescribeItemMessageFulfillment,
+  MessageFulfillment
 } from '@shio-bot/foundation/entities'
 import { FlexMessageBuilder, FlexComponentBuilder } from './lineMessageBuilder'
 import { FlexImage, Message } from '@line/bot-sdk'
+import { LineSettings } from '@shio-bot/chatengine';
+type LineFulfillmentParserOption = {
+  setting: LineSettings
+}
+export class LineFulfillmentParser implements MessageFulfillmentParserList<Message> {
 
-export class LineFulfillmentParser implements MessageFulfillmentParser<Message> {
+  private options: LineFulfillmentParserOption
+  constructor(options: LineFulfillmentParserOption) {
+    this.options = options
+  }
+
+
   [ListItemEventMessageFulfillmentKind]: FulfillmentparserFunc<Message, typeof ListItemEventMessageFulfillmentKind> = (f: ListItemEventMessageFulfillment) => {
     const lineTemplate: FlexMessageBuilder = new FlexMessageBuilder()
     const template = lineTemplate.flexMessage(`book shelf`).addCarousel()
@@ -31,7 +42,7 @@ export class LineFulfillmentParser implements MessageFulfillmentParser<Message> 
       switch (asset.meta.kind) {
         case AssetMetadataBookKind: {
           const heroBlock = FlexComponentBuilder.flexImage()
-            .setUrl('https://static.reeeed.com/book/cjn66col600cw08027wemah6s/shareThumbnailImage-small.jpg' || asset.meta.coverImageURL)
+            .setUrl(asset.meta.coverImageURL)
             .setSize('full')
             .setAspectRatio('20:13')
             .setAspectMode('cover')
@@ -78,19 +89,32 @@ export class LineFulfillmentParser implements MessageFulfillmentParser<Message> 
               assetId: asset.id
             }
           }
+
+          let actionButton = FlexComponentBuilder.flexButton()
+            .setStyle('primary')
+          if (asset.isOwnByOperationOwner) {
+            actionButton = actionButton.setAction({
+              type: 'uri',
+              label: "Open",
+              uri: this.options.setting.liff.viewAsset + '?assetId=' + asset.id,
+            }).setColor("#47B881")
+          } else if (asset.price) {
+            actionButton = actionButton.setAction({
+              type: 'postback',
+              data: JSON.stringify(purchaseIntent),
+              label: "BUY"
+            }).setColor('#1070CA')
+          } else if (!asset.price) {
+            actionButton = actionButton.setAction({
+              type: 'postback',
+              data: JSON.stringify(purchaseIntent),
+              label: "Get for free"
+            }).setColor('#007489')
+          }
+
           const footerBlock = FlexComponentBuilder.flexBox()
             .setLayout('vertical')
-            .addContents(
-              FlexComponentBuilder.flexButton()
-                .setStyle('primary')
-                .setColor('#718792')
-                .setAction({
-                  type: 'postback',
-                  data: JSON.stringify(purchaseIntent),
-                  label: asset.price ? 'BUY' : 'FREE' //asset.price ? 'BUY' : 'FREE'
-                })
-                .build()
-            )
+            .addContents(actionButton.build())
             .build()
 
           template
@@ -114,12 +138,6 @@ export class LineFulfillmentParser implements MessageFulfillmentParser<Message> 
     }
   };
 
-  [UnfollowEventMessageIntentKind]: FulfillmentparserFunc<Message, typeof UnfollowEventMessageIntentKind> = f => {
-    return {
-      type: 'text',
-      text: 'Unfollow'
-    }
-  };
 
   [ErrorEventMessageFulfillmentKind]: FulfillmentparserFunc<Message, typeof ErrorEventMessageFulfillmentKind> = (f: ErrorEventMessageFulfillment) => {
     return {

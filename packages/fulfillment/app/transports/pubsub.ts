@@ -1,7 +1,7 @@
 import { newLogger, MessageChannelTransport, UnPromise } from '@shio-bot/foundation'
 import { FulfillmentEndpoint } from '../endpoints'
 import {
-  createOutgoingFromIncomingMessage,
+  createOutgoingFromIncomingMessage, ErrorEventMessageFulfillmentKind,
 } from '@shio-bot/foundation/entities'
 import { newGlobalError, ErrorType } from '../entities/error'
 import { PaymentChannelTransport } from '@shio-bot/foundation/transports/pubsub'
@@ -44,7 +44,7 @@ export function registerPubsub(pubsub: MessageChannelTransport, paymentPubsub: P
     } catch (e) {
       await pubsub.PublishOutgoing(
         createOutgoingFromIncomingMessage(message, {
-          name: 'error',
+          name: ErrorEventMessageFulfillmentKind,
           parameters: {
             reason: e.toString() + '\n' + e.stack
           }

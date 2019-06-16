@@ -1,7 +1,8 @@
 import { Configuration as ChatEngineSettings } from '@shio-bot/chatengine/types'
-import { OutgoingMessage, IncomingMessage, ReservePaymentMessage, ConfirmPaymentMessage, MessageFulfillment } from '@shio-bot/foundation/entities'
+import { OutgoingMessage, IncomingMessage, ReservePaymentMessage, ConfirmPaymentMessage, MessageFulfillment, ListItemEventMessageFulfillmentKind, ListItemEventMessageFulfillment } from '@shio-bot/foundation/entities'
 import express = require('express')
 import { ClientConfig } from '@google-cloud/pubsub/build/src/pubsub'
+import { parse, Message } from 'protobufjs';
 
 export type Configurations = {
   serviceName: string
@@ -36,10 +37,13 @@ export interface Payment {
 }
 
 export type NarrowUnion<T, N> = T extends { name: N } ? T : never
-export type FulfillmentparserFunc<M, F> = (fulfillment: NarrowUnion<MessageFulfillment, F>) => M
+export type FulfillmentparserFunc<M, F extends MessageFulfillment['name']> = (fulfillment: NarrowUnion<MessageFulfillment, F>) => M
 export type PaymentParserFunc<M, P> = (message: NarrowUnion<PaymentMessage, P>, payload?: any) => M
 
 export type PaymentMessage = ConfirmPaymentMessage | ReservePaymentMessage
 
-export type MessageFulfillmentParser<T> = { [key in MessageFulfillment['name']]: FulfillmentparserFunc<T, key> }
+export type MessageFulfillmentParserList<T> = {
+  [key in MessageFulfillment['name']]: FulfillmentparserFunc<T, key>
+}
+
 export type MessagePaymentParser<T> = { [key in PaymentMessage['type']]: PaymentParserFunc<T, key> }
