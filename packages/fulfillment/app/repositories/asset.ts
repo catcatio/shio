@@ -32,6 +32,9 @@ class AssetStorageRepository {
     switch (url.protocol) {
       case 'gs:':
         return this.Storage.GetObjectUrl(join(url.pathname, fileName))
+      case 'http:':
+      case 'https':
+        return join(describeUrl, fileName)
       default:
         throw newGlobalError(ErrorType.Input, `protocol ${url.protocol} not support`)
     }

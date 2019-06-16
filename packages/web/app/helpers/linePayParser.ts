@@ -87,9 +87,7 @@ export class LinePayParser implements MessagePaymentParser<Message> {
         const claimFreeItemIntent: ClaimFreeItemEventMessageIntent = {
           name: ClaimFreeItemEventMessageIntentKind,
           parameters: {
-            productName: rp.productName,
-            productDescription: rp.productDescription,
-            productImageUrl: rp.productImageUrl
+            orderId: rp.orderId
           }
         }
 

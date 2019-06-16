@@ -1,18 +1,28 @@
 import { EndpointFunctionAncestor, endpointFn } from './default'
-import { ClaimFreeItemEventMessageIntentKind, createOutgoingFromIncomingMessage, ClaimFreeItemEventMessageFulfillmentKind } from '@shio-bot/foundation/entities'
+import { ClaimFreeItemEventMessageIntentKind, createOutgoingFromIncomingMessage, ClaimFreeItemEventMessageFulfillmentKind, ClaimFreeItemEventMessageFulfillment, AssetMetadataBookKind } from '@shio-bot/foundation/entities'
+import { WithOperationOwner } from '../repositories';
 
 export const ClaimFreeItemEventMessageIntentEndpoint = (ancestor: EndpointFunctionAncestor) =>
   endpointFn(ClaimFreeItemEventMessageIntentKind, async message => {
-    const { productName, productDescription, productImageUrl } = message.intent.parameters
+    const { orderId } = message.intent.parameters
+
+    const user = await ancestor.getSessionFromIncomingMessageOrThrow(message)
+    const result = await ancestor.merchandise.commitPurchaseItem(orderId, 'free', 0, WithOperationOwner(user.id))
+
+    const fulfilmentParams: ClaimFreeItemEventMessageFulfillment['parameters'] = {
+      assetId: orderId,
+      productName: result.assetMeta.title,
+    }
+
+    if (result.assetMeta.kind === AssetMetadataBookKind) {
+      fulfilmentParams.productImageUrl = result.assetMeta.coverImageURL
+      fulfilmentParams.productDescription = result.assetMeta.description
+    }
 
     return createOutgoingFromIncomingMessage(message, [
       {
         name: ClaimFreeItemEventMessageFulfillmentKind,
-        parameters: {
-          productName,
-          productDescription,
-          productImageUrl: productImageUrl || 'https://static.reeeed.com/book/cjn66col600cw08027wemah6s/shareThumbnailImage-medium.jpg'
-        }
+        parameters: fulfilmentParams
       }
     ])
   })

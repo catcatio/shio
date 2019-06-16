@@ -173,6 +173,10 @@ export type LineSettings = {
   clientConfig: LineClientConfig
   sendToConsole?: boolean
   routerPath?: string
+  liff: {
+    viewProfile: string
+    viewAsset: string
+  }
 }
 
 export type DialogFlowSettings = {

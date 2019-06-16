@@ -21,8 +21,6 @@ export class GCPFileStorage implements FileStorage {
   private log: ShioLogger
 
   async GetObjectUrl(key: string): Promise<string> {
-
-
     const [url] = await this.bucket
       .file(key)
       .getSignedUrl({
@@ -66,8 +64,9 @@ export class GCPFileStorage implements FileStorage {
         })
     })
   }
-  PutObject(key: string, data: Buffer): Promise<FileStorageObject> {
+  PutObject(key: string, data: Buffer, makePublic = false): Promise<FileStorageObject> {
     return new Promise<FileStorageObject>((resolve, reject) => {
+      this.log.info(`upload file to ${this.bucket.name} ${key} public=${makePublic}`)
       let fileStream = this.bucket.file(key).createWriteStream()
       fileStream
         .once('error', err => {
@@ -76,13 +75,35 @@ export class GCPFileStorage implements FileStorage {
         })
         .on('finish', () => {
           const pathInfo = parse(key)
-          const uri = new URL(`gs://${join(this.bucket.name, key)}`)
-          resolve(
-            {
+          if (makePublic) {
+            /**
+             * ถ้าหากมีการทำ public access
+             * GCP storage จะส่ง https url 
+             * ให้เอาไปใช้ได้เลยโดยไม่ต้องกลับมาขอ downalodable URL
+             */
+            this.log.info("make " + key + " to public accessable")
+            this.bucket.file(key).makePublic().then()
+            const link = `https://storage.googleapis.com/${join(this.bucket.name, key)}`
+            const uri = new URL(link)
+            resolve({
               path: pathInfo,
               href: uri.href,
-            }
-          )
+            })
+          } else {
+
+            /**
+             * ถ้าต้องเป็น private access จะบันทึกเป็น gs:
+             * เพื่อบังคับให้ต้อง sign ก่อนที่จะเอาไปดาวโหลดได้
+             */
+            const uri = new URL(`gs://${join(this.bucket.name, key)}`)
+            resolve(
+              {
+                path: pathInfo,
+                href: uri.href,
+              }
+            )
+          }
+
         })
         .end(data, () => { })
     })

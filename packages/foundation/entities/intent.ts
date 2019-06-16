@@ -191,9 +191,7 @@ export const ClaimFreeItemEventMessageIntentKind = 'claim-free-item'
 export interface ClaimFreeItemEventMessageIntent {
   name: typeof ClaimFreeItemEventMessageIntentKind
   parameters: {
-    productName: string
-    productDescription?: string
-    productImageUrl?: string
+    orderId: string
   }
 }
 export const ClaimFreeItemEventMessageIntentSchema = Joi.object().keys({
@@ -209,10 +207,11 @@ export const ClaimFreeItemEventMessageIntentSchema = Joi.object().keys({
     .required()
 })
 
-export const ClaimFreeItemEventMessageFulfillmentKind = 'claim-free-item'
+export const ClaimFreeItemEventMessageFulfillmentKind = 'claim-free-item-completed'
 export interface ClaimFreeItemEventMessageFulfillment {
   name: typeof ClaimFreeItemEventMessageFulfillmentKind
   parameters: {
+    assetId: string,
     productName: string
     productDescription?: string
     productImageUrl?: string

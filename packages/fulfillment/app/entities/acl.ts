@@ -27,7 +27,7 @@ export class ResourceTag {
   type: string
   id: string
   prefix: string
-  static fromAclAble(v: {aclTag: string}){
+  static fromAclable(v: {aclTag: string}){
     return ResourceTag.fromAclTag(v.aclTag)
   }
   static fromAclTag(v: string) {

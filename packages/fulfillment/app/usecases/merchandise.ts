@@ -13,17 +13,25 @@ interface MerchandiseListItemInput {
   limit?: number
   offset?: number
 }
-interface MerchandisePurchaseItemOutput {
+interface MerchandiseRequestPurchaseItemOutput {
   meta: AssetMetadata
   price: number
   id: string
   txId: string
 }
+interface MerchandiseCommitPurchaseItemOutput {
+  assetId: string
+  assetMeta: AssetMetadata
+  txId: string
+  completed: boolean
+  status: TransactionStatus
+  description: string
+}
 export interface MerchandiseUseCase {
   listItem(input: MerchandiseListItemInput, ...options: OperationOption[]): Promise<PaginationResult<Asset>>
   findAssetByIdOrThrow(assetId: string, ...options: OperationOption[]): Promise<Asset>
-  requestPurchaseItem(assetId: string, source: IncommingMessageSource , ...options: OperationOption[]): Promise<MerchandisePurchaseItemOutput>
-  commitPurchaseItem(txId: string, method: string, amount: number, ...options: OperationOption<any>[]): Promise<void>
+  requestPurchaseItem(assetId: string, source: IncommingMessageSource , ...options: OperationOption[]): Promise<MerchandiseRequestPurchaseItemOutput>
+  commitPurchaseItem(txId: string, method: string, amount: number, ...options: OperationOption<any>[]): Promise<MerchandiseCommitPurchaseItemOutput>
 
 }
 
@@ -43,7 +51,7 @@ export class DefaultMerchandiseUseCase implements MerchandiseUseCase {
     this.paymentChannel = paymentChannel
   }
 
-  async commitPurchaseItem(txId: string, method: string, amount: number, ...options: OperationOption<any>[]): Promise<void> {
+  async commitPurchaseItem(txId: string, method: string, amount: number, ...options: OperationOption<any>[]): Promise<MerchandiseCommitPurchaseItemOutput> {
     const option = composeOperationOptions(...options)
     option.logger.withFields({ txId, method, amount }).info('confirm payment to transaction')
 
@@ -55,15 +63,23 @@ export class DefaultMerchandiseUseCase implements MerchandiseUseCase {
     }
 
     await tx.createPayment(purchaseTransaction.id, method, amount)
+    const asset = await this.findAssetByIdOrThrow(purchaseTransaction.assetId)
 
     if (amount >= purchaseTransaction.price) {
       await tx.updateById(purchaseTransaction.id, {
         describeURLs: [],
         status: TransactionStatus.COMPLETED,
       })
-      const asset = await this.findAssetByIdOrThrow(purchaseTransaction.assetId)
-      await this.Acl.CreatePermission(option.operationOwnerId, ResourceTag.fromAclAble(asset), Permission.VIEWER, WithSystemOperation())
+      await this.Acl.CreatePermission(option.operationOwnerId, ResourceTag.fromAclable(asset), Permission.VIEWER, WithSystemOperation())
       await tx.commit()
+      return {
+        assetId: asset.id,
+        assetMeta: asset.meta,
+        completed:false,
+        status: purchaseTransaction.status,
+        description: `payment completed`,
+        txId: purchaseTransaction.id,
+      }
     } else {
       await tx.commit()
 
@@ -72,12 +88,18 @@ export class DefaultMerchandiseUseCase implements MerchandiseUseCase {
       // ให้จ่ายจนกว่ายอดจะถึง แต่ตอนนี้
       // ให้ปัดข้ามไปก่อน
       // @TODO implement sum of payment and check if
-      // it consist with transaction
-      throw newGlobalError(ErrorType.Input, `payment invalid, amount require is ${purchaseTransaction.price} but receive ${amount}`)
+      return {
+        assetId: asset.id,
+        assetMeta: asset.meta,
+        completed:false,
+        status: purchaseTransaction.status,
+        description: `payment invalid, amount require is ${purchaseTransaction.price} but receive ${amount}`,
+        txId: purchaseTransaction.id,
+      }
     }
 
   }
-  async requestPurchaseItem(assetId: string,source: IncommingMessageSource, ...options: OperationOption<any>[]): Promise<MerchandisePurchaseItemOutput> {
+  async requestPurchaseItem(assetId: string,source: IncommingMessageSource, ...options: OperationOption<any>[]): Promise<MerchandiseRequestPurchaseItemOutput> {
     const option = composeOperationOptions(...options)
     option.logger.withFields({ assetId }).info("request purchase item")
 
@@ -113,12 +135,9 @@ export class DefaultMerchandiseUseCase implements MerchandiseUseCase {
 
     // ถ้า Asset เป็นชนิด Book
     // ให้เอา cover image ที่อยู่ใน packet มาใช้เป็น
-    // ภาพ cover ภายใน reserve message
-    // โดยต้องเอา URL เปลี่ยนเป็น Downloadable URL ก่อน
     if (asset.meta.kind === AssetMetadataBookKind) {
 
-      const downloadableCoverImageUrl = await this.Asset.AssetStorage.getDownloadUrlFromDescribeUrl(asset.meta.coverImageURL, "")
-      reservePaymentMessage.productImageUrl = downloadableCoverImageUrl
+      reservePaymentMessage.productImageUrl = asset.meta.coverImageURL
       reservePaymentMessage.productDescription = asset.meta.description
 
     } else if (asset.meta.kind === AssetMetadataEventKind) {

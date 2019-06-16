@@ -8,7 +8,7 @@ export interface FileStorageObject {
 
 export interface FileStorage {
   GetObject(key: string): Promise<Buffer>
-  PutObject(key: string, data: Buffer): Promise<FileStorageObject>
+  PutObject(key: string, data: Buffer, makePublic?: boolean): Promise<FileStorageObject>
   RemoveObject(key: string): Promise<void>
   GetJSONObject<T>(key: string): Promise<T>
   GetObjectUrl(key: string): Promise<string>

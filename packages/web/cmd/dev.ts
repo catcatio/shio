@@ -13,7 +13,11 @@ function loadConfig(): Configurations {
           channelSecret: 'dev_channel_secret',
           channelId: 'dev_channel_id'
         },
-        sendToConsole: true
+        sendToConsole: true,
+        liff: {
+          viewAsset: "http://localhost:3000/view/asset",
+          viewProfile: "http://localhost/view/profile"
+        }
       },
       fluke: {
         intentMap: {

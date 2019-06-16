@@ -20,11 +20,11 @@ async function unzip(value: Buffer): Promise<UnzipResult> {
 
 async function getFileNameFromZipOrThrow(zip: Buffer, fileName: string): Promise<Buffer> {
   const contents = await unzip(zip)
-  const pdfContent = contents.files.find(f => f.path === 'content.pdf')
-  if (!pdfContent) {
+  const file = contents.files.find(f => f.path === fileName)
+  if (!file) {
     throw new Error(fileName + " not found in package")
   }
-  const pdfBuffer = await pdfContent.buffer()
+  const pdfBuffer = await file.buffer()
   return pdfBuffer
 }
 
@@ -34,7 +34,6 @@ export class FulfillmentManagerUseCase {
   private Asset: AssetRepository
   private Storage: FileStorage
   private log = newLogger().withUserId("shio-management")
-  private BookAssetFileNames = ['content.pdf', 'cover.jpg']
 
   constructor(Asset: AssetRepository, Storage: FileStorage) {
     this.Asset = Asset
@@ -64,8 +63,8 @@ export class FulfillmentManagerUseCase {
 
     const describePath = join("/assets/books", id)
 
-
-    const requireFileBuffers = await Promise.all(this.BookAssetFileNames.map(async f => {
+    const BookAssetFileNames = ['content.pdf', 'cover.jpg']
+    const requireFileBuffers = await Promise.all(BookAssetFileNames.map(async f => {
       const buf = await getFileNameFromZipOrThrow(zipFileBuffer, f)
       return {
         f, buf
@@ -74,8 +73,11 @@ export class FulfillmentManagerUseCase {
 
     log.info("upload book asset source....")
     await this.Storage.PutObject(join(describePath, "source.zip"), zipFileBuffer)
-    const [pdf, cover] =  await Promise.all(requireFileBuffers.map(async ({ f, buf }) => {
+    const [pdf, cover] = await Promise.all(requireFileBuffers.map(async ({ f, buf }) => {
       log.info('upload ' + f)
+      if (f === 'cover.jpg') {
+        return await this.Storage.PutObject(join(describePath, f), buf, true)
+      }
       return await this.Storage.PutObject(join(describePath, f), buf)
     }))
     log.info("Upload complete, writing a record of asset...")
