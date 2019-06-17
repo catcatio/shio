@@ -1,7 +1,14 @@
 import { FlexMessage, FlexImage } from '@line/bot-sdk'
 import { FlexMessageBuilder, FlexComponentBuilder } from '@shio-bot/chatengine/line/helpers/lineMessageBuilder'
 import { ReceiptInformation, ReserveInformation, Product } from '../../types'
-import { ClaimFreeItemEventMessageIntent, ClaimFreeItemEventMessageIntentKind } from '@shio-bot/foundation/entities'
+import {
+  ClaimFreeItemEventMessageIntent,
+  ClaimFreeItemEventMessageIntentKind,
+  AssetMetadataBookKind,
+  PurchaseItemEventMessageIntent,
+  PurchaseItemEventMessageIntentKind,
+  ListItemEventMessageFulfillment
+} from '@shio-bot/foundation/entities'
 
 export const createReceiptFlexMessage = (info: ReceiptInformation): FlexMessage => {
   const lineTemplate: FlexMessageBuilder = new FlexMessageBuilder()
@@ -253,4 +260,112 @@ export const createPaymentFlexMessage = (info: ReserveInformation): FlexMessage 
     .addFooter()
     .addComponents(createFooterBlock())
     .build()
+}
+
+export const createListAssetFlexMessage = (assets: ListItemEventMessageFulfillment['parameters']['assets'], liffViewAssetUrl: string): FlexMessage => {
+  const lineTemplate: FlexMessageBuilder = new FlexMessageBuilder()
+  let template = lineTemplate.flexMessage(`book shelf`).addCarousel()
+
+  assets.forEach(asset => {
+    if (asset.meta.kind === AssetMetadataBookKind) {
+      const bookMetadata = asset.meta
+      const createHeroBlock = () =>
+        FlexComponentBuilder.flexImage()
+          .setUrl(bookMetadata.coverImageURL)
+          .setSize('full')
+          .setAspectRatio('20:13')
+          .setAspectMode('cover')
+          .build() as FlexImage
+
+      const createBodyTitleBlock = () =>
+        FlexComponentBuilder.flexBox()
+          .setLayout('vertical')
+          .addContents(
+            FlexComponentBuilder.flexText()
+              .setText(bookMetadata.title)
+              .setWrap(true)
+              .setWeight('bold')
+              .build(),
+            FlexComponentBuilder.flexText()
+              .setText(bookMetadata.description)
+              .setWrap(true)
+              .build()
+          )
+          .build()
+
+      const createBodyPriceBlock = () =>
+        FlexComponentBuilder.flexBox()
+          .setLayout('baseline')
+          .setMargin('xxl')
+          .setSpacing('sm')
+          .addContents(
+            FlexComponentBuilder.flexText()
+              .setText('Price')
+              .setFlex(1)
+              .build(),
+            FlexComponentBuilder.flexText()
+              .setText(asset.price ? `${asset.price} THB` : 'FREE') //asset.price ? '120 THB' : 'FREE'
+              .setWrap(true)
+              .setColor('#666666')
+              .setWeight('bold')
+              .setFlex(5)
+              .setAlign('end')
+              .build()
+          )
+          .build()
+
+      const createFooterBlock = () => {
+        const purchaseIntent: PurchaseItemEventMessageIntent = {
+          name: PurchaseItemEventMessageIntentKind,
+          parameters: {
+            assetId: asset.id
+          }
+        }
+
+        let actionButton = FlexComponentBuilder.flexButton().setStyle('primary')
+        if (asset.isOwnByOperationOwner) {
+          actionButton = actionButton
+            .setAction({
+              type: 'uri',
+              label: 'Open',
+              uri: liffViewAssetUrl + '?assetId=' + asset.id
+            })
+            .setColor('#47B881')
+        } else if (asset.price) {
+          actionButton = actionButton
+            .setAction({
+              type: 'postback',
+              data: JSON.stringify(purchaseIntent),
+              label: 'BUY'
+            })
+            .setColor('#1070CA')
+        } else if (!asset.price) {
+          actionButton = actionButton
+            .setAction({
+              type: 'postback',
+              data: JSON.stringify(purchaseIntent),
+              label: 'Get for free'
+            })
+            .setColor('#007489')
+        }
+
+        return FlexComponentBuilder.flexBox()
+          .setLayout('vertical')
+          .addContents(actionButton.build())
+          .build()
+      }
+
+      const bodies = asset.isOwnByOperationOwner ? [createBodyTitleBlock()] : [createBodyTitleBlock(), createBodyPriceBlock()]
+      template = template
+        .addBubble()
+        .addHero(createHeroBlock())
+        .addBody()
+        .setLayout('vertical')
+        .addComponents(...bodies)
+        .addFooter()
+        .addComponents(createFooterBlock())
+    }
+  })
+
+  return template.build()
 }
