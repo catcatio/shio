@@ -10,7 +10,7 @@ import {
 } from '@shio-bot/chatengine'
 import { PaymentRepository } from '../repositories'
 import { newLogger } from '@shio-bot/foundation'
-import { LinePayParser } from '../helpers/linePayParser'
+import { LinePayParser } from '../helpers/line/paymentParser'
 
 export const reservePaymentHandler = (
   confirmUrl: string,

@@ -1,15 +1,10 @@
-import { createCloudPubSubInstance, WithPubsubProjectId, WithPubsubEndpoint, CloudPubsubMessageChannelTransport, GetEnvString, GetEnvConfig } from "@shio-bot/foundation";
-import { CloudPubsubPaymentChannelTransport } from "@shio-bot/foundation/transports/pubsub";
-
+import { createCloudPubSubInstance, WithPubsubProjectId, WithPubsubEndpoint, CloudPubsubMessageChannelTransport, GetEnvString, GetEnvConfig } from '@shio-bot/foundation'
+import { CloudPubsubPaymentChannelTransport } from '@shio-bot/foundation/transports/pubsub'
 
 async function prepare() {
-
   const envConfig = GetEnvConfig()
 
-  const ps = await createCloudPubSubInstance(
-    WithPubsubProjectId(envConfig.projectId),
-    WithPubsubEndpoint(envConfig.pubsubEndpoint)
-  )
+  const ps = await createCloudPubSubInstance(WithPubsubProjectId(envConfig.projectId), WithPubsubEndpoint(envConfig.pubsubEndpoint))
 
   const pubsub = new CloudPubsubMessageChannelTransport({
     pubsub: ps,
@@ -24,8 +19,6 @@ async function prepare() {
   })
   await paymentPubsub.PrepareTopic()
   await paymentPubsub.CreateIncomingSubscriptionConfig(envConfig.host)
-
 }
-
 
 prepare()

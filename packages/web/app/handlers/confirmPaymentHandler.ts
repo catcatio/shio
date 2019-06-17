@@ -3,7 +3,7 @@ import { Payment } from '../types'
 import { newLogger } from '@shio-bot/foundation'
 import { ConfirmPaymentResultMessage } from '@shio-bot/foundation/entities'
 import { PaymentRepository } from '../repositories'
-import { LinePayParser } from '../helpers/linePayParser'
+import { LinePayParser } from '../helpers/line/paymentParser'
 
 export const confirmPaymentHandler = (p: Payment, cp: MessagingClientProvider, paymentRepository: PaymentRepository) => {
   const log = newLogger()

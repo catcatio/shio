@@ -1,20 +1,24 @@
 import { EndpointFunctionAncestor, endpointFn } from './default'
-import { ClaimFreeItemEventMessageIntentKind, createOutgoingFromIncomingMessage, ClaimFreeItemEventMessageFulfillmentKind, ClaimFreeItemEventMessageFulfillment, AssetMetadataBookKind } from '@shio-bot/foundation/entities'
-import { WithOperationOwner, WithIncomingMessage } from '../repositories';
+import {
+  ClaimFreeItemEventMessageIntentKind,
+  createOutgoingFromIncomingMessage,
+  ClaimFreeItemEventMessageFulfillmentKind,
+  ClaimFreeItemEventMessageFulfillment,
+  AssetMetadataBookKind
+} from '@shio-bot/foundation/entities'
+import { WithOperationOwner, WithIncomingMessage } from '../repositories'
 
 export const ClaimFreeItemEventMessageIntentEndpoint = (ancestor: EndpointFunctionAncestor) =>
   endpointFn(ClaimFreeItemEventMessageIntentKind, async message => {
     const { orderId } = message.intent.parameters
 
     const session = await ancestor.getSessionFromIncomingMessageOrThrow(message)
-    const result = await ancestor.merchandise.commitPurchaseItem(orderId, 'free', 0,
-      WithIncomingMessage(message),
-      WithOperationOwner(session.userId),
-    )
+    const result = await ancestor.merchandise.commitPurchaseItem(orderId, 'free', 0, WithIncomingMessage(message), WithOperationOwner(session.userId))
 
     const fulfilmentParams: ClaimFreeItemEventMessageFulfillment['parameters'] = {
+      orderId,
       assetId: result.assetId,
-      productName: result.assetMeta.title,
+      productName: result.assetMeta.title
     }
 
     if (result.assetMeta.kind === AssetMetadataBookKind) {

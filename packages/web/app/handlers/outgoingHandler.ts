@@ -1,8 +1,7 @@
 import { OutgoingMessage } from '@shio-bot/foundation/entities'
-import { MessagingClientProvider, LineMessageClientSendCustomMessagesInput, MessageClientSendCustomMessagesInput } from '@shio-bot/chatengine/types'
+import { MessagingClientProvider, MessageClientSendCustomMessagesInput } from '@shio-bot/chatengine/types'
 import { FulfillmentListener, MessageFulfillmentParserList } from '../types'
-import { Message } from '@line/bot-sdk';
-
+import { Message } from '@line/bot-sdk'
 
 type ChatProviderMessageFulfillmentParser = {
   line: () => MessageFulfillmentParserList<Message>
@@ -18,7 +17,7 @@ export const fulfillmentMessageHandler = (messagingClientProvider: MessagingClie
     let messages: unknown[] = []
     message.fulfillment.forEach(f => {
       const parseFn = messageParser[f.name]
-      if (typeof parseFn !== 'function'){
+      if (typeof parseFn !== 'function') {
         console.error(`Parser function not found\nonly ${Object.keys(messageParser).join(',')} is avaliable for ${message.provider}`)
         return
       }

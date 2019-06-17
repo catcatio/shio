@@ -2,7 +2,7 @@ import { AssetMetadata } from './asset'
 import * as Joi from 'joi'
 import { MessageProvider } from './message'
 import { join } from 'path'
-import { NarrowUnion } from '../../fulfillment/app/endpoints/default';
+import { NarrowUnion } from '../../fulfillment/app/endpoints/default'
 
 function JoiKind(kind: string) {
   return Joi.string()
@@ -211,7 +211,8 @@ export const ClaimFreeItemEventMessageFulfillmentKind = 'claim-free-item-complet
 export interface ClaimFreeItemEventMessageFulfillment {
   name: typeof ClaimFreeItemEventMessageFulfillmentKind
   parameters: {
-    assetId: string,
+    orderId: string
+    assetId: string
     productName: string
     productDescription?: string
     productImageUrl?: string

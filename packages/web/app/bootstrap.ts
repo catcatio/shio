@@ -12,7 +12,7 @@ import { payment } from './payment'
 import { reservePaymentHandler } from './handlers/reservePaymentHandler'
 import { confirmPaymentHandler } from './handlers/confirmPaymentHandler'
 import { paymentRepository } from './repositories'
-import { LineFulfillmentParser } from './helpers/lineFulfillmentParser';
+import { LineFulfillmentParser } from './helpers/line/fulfillmentParser'
 
 const pubsubPath = '/pubsub'
 
@@ -61,13 +61,14 @@ export async function bootstrap(config: Configurations) {
   }
 
   let outMsgHandler = fulfillmentMessageHandler(chatEngine.messagingClientProvider, {
-    line: () => new LineFulfillmentParser({
-      setting: config.chatEngine.line!
-    }),
+    line: () =>
+      new LineFulfillmentParser({
+        setting: config.chatEngine.line!
+      }),
     facebook: () => {
-      throw new Error("Method unimplemented")
+      throw new Error('Method unimplemented')
     }
-   })
+  })
 
   await msgPubsub.CreateOutgoingSubscriptionConfig(`${config.host}${pubsubPath}`)
   ff.onFulfillment(outMsgHandler)
