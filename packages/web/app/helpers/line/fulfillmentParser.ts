@@ -19,9 +19,8 @@ import {
   DescribeItemMessageFulfillmentKind,
   DescribeItemMessageFulfillment
 } from '@shio-bot/foundation/entities'
-import { FlexMessageBuilder, FlexComponentBuilder } from '@shio-bot/chatengine/line/helpers/lineMessageBuilder'
-import { FlexImage, Message } from '@line/bot-sdk'
-import { createReceiptFlexMessage } from './messageBuilder'
+import { Message } from '@line/bot-sdk'
+import { createReceiptFlexMessage, createListAssetFlexMessage } from './messageBuilder'
 
 export class LineFulfillmentParser implements MessageFulfillmentParserList<Message> {
   private options: LineFulfillmentParserOption
@@ -29,112 +28,8 @@ export class LineFulfillmentParser implements MessageFulfillmentParserList<Messa
     this.options = options
   }
 
-  [ListItemEventMessageFulfillmentKind]: FulfillmentparserFunc<Message, typeof ListItemEventMessageFulfillmentKind> = (f: ListItemEventMessageFulfillment) => {
-    const lineTemplate: FlexMessageBuilder = new FlexMessageBuilder()
-    let template = lineTemplate.flexMessage(`book shelf`).addCarousel()
-
-    f.parameters.assets.forEach(asset => {
-      if (asset.meta.kind === AssetMetadataBookKind) {
-        const bookMetadata = asset.meta
-
-        const createHeroBlock = () =>
-          FlexComponentBuilder.flexImage()
-            .setUrl(bookMetadata.coverImageURL)
-            .setSize('full')
-            .setAspectRatio('20:13')
-            .setAspectMode('cover')
-            .build() as FlexImage
-
-        const createBodyTitleBlock = () =>
-          FlexComponentBuilder.flexBox()
-            .setLayout('vertical')
-            .addContents(
-              FlexComponentBuilder.flexText()
-                .setText(bookMetadata.title)
-                .setWrap(true)
-                .setWeight('bold')
-                .build(),
-              FlexComponentBuilder.flexText()
-                .setText(bookMetadata.description)
-                .setWrap(true)
-                .build()
-            )
-            .build()
-
-        const createBodyPriceBlock = () =>
-          FlexComponentBuilder.flexBox()
-            .setLayout('baseline')
-            .setMargin('xxl')
-            .setSpacing('sm')
-            .addContents(
-              FlexComponentBuilder.flexText()
-                .setText('Price')
-                .setFlex(1)
-                .build(),
-              FlexComponentBuilder.flexText()
-                .setText(asset.price ? `${asset.price} THB` : 'FREE') //asset.price ? '120 THB' : 'FREE'
-                .setWrap(true)
-                .setColor('#666666')
-                .setWeight('bold')
-                .setFlex(5)
-                .setAlign('end')
-                .build()
-            )
-            .build()
-
-        const createFooterBlock = options => {
-          const purchaseIntent: PurchaseItemEventMessageIntent = {
-            name: PurchaseItemEventMessageIntentKind,
-            parameters: {
-              assetId: asset.id
-            }
-          }
-
-          let actionButton = FlexComponentBuilder.flexButton().setStyle('primary')
-          if (asset.isOwnByOperationOwner) {
-            actionButton = actionButton
-              .setAction({
-                type: 'uri',
-                label: 'Open',
-                uri: options.setting.liff.viewAsset + '?assetId=' + asset.id
-              })
-              .setColor('#47B881')
-          } else if (asset.price) {
-            actionButton = actionButton
-              .setAction({
-                type: 'postback',
-                data: JSON.stringify(purchaseIntent),
-                label: 'BUY'
-              })
-              .setColor('#1070CA')
-          } else if (!asset.price) {
-            actionButton = actionButton
-              .setAction({
-                type: 'postback',
-                data: JSON.stringify(purchaseIntent),
-                label: 'Get for free'
-              })
-              .setColor('#007489')
-          }
-
-          return FlexComponentBuilder.flexBox()
-            .setLayout('vertical')
-            .addContents(actionButton.build())
-            .build()
-        }
-
-        template = template
-          .addBubble()
-          .addHero(createHeroBlock())
-          .addBody()
-          .setLayout('vertical')
-          .addComponents(createBodyTitleBlock(), createBodyPriceBlock())
-          .addFooter()
-          .addComponents(createFooterBlock(this.options))
-      }
-    })
-    return template.build()
-  };
+  [ListItemEventMessageFulfillmentKind]: FulfillmentparserFunc<Message, typeof ListItemEventMessageFulfillmentKind> = (f: ListItemEventMessageFulfillment) =>
+    createListAssetFlexMessage(f.parameters.assets, this.options.setting.liff.viewAsset);
 
   [FollowEventMessageFulfillmentKind]: FulfillmentparserFunc<Message, typeof FollowEventMessageFulfillmentKind> = (f: FollowEventMessageFulfillment) => {
     return {
