@@ -1,7 +1,8 @@
 import { Router } from 'express'
 import { PubSub, Topic, Subscription } from '@google-cloud/pubsub'
 import { newLogger, ShioLogger } from '../../logger'
-import { URL } from 'url';
+import { URL } from 'url'
+import { join } from 'path'
 const nanoid = require('nanoid')
 
 export type SubscribeListener<T> = (message: T, acknowledge: () => void) => Promise<void> | void
@@ -137,7 +138,7 @@ export class CloudPubsubTransport<T> implements ChannelTransport<T>, ChannelMana
 
   async CreateSubscriptionConfig(pushEndpointHost: string) {
     const notificationUrl = new URL(pushEndpointHost)
-    notificationUrl.pathname = this.notificationPath
+    notificationUrl.pathname = join(notificationUrl.pathname, this.notificationPath)
     this.log.info(`Update ${this.subscription.name} subscription config endpoint ${notificationUrl.href}`)
     const isExists = await this.subscription.exists()
     if (!isExists[0]) {
@@ -147,7 +148,14 @@ export class CloudPubsubTransport<T> implements ChannelTransport<T>, ChannelMana
         }
       })
     } else {
-
+      const [metadata] = await this.subscription.getMetadata()
+      if (!metadata.pushConfig) {
+        throw new Error('please set subscription push endpoint first')
+      } else {
+        if (metadata.pushConfig.pushEndpoint !== notificationUrl.href) {
+          throw new Error('subscription push endpoint does not match please change manually!!~')
+        }
+      }
     }
   }
 

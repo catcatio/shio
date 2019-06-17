@@ -1,4 +1,5 @@
 import { Entity } from 'dialogflow'
+import { MessageFulfillmentParserList } from '../web/app/types';
 
 export type MessageType =
   | 'textMessage'
@@ -173,6 +174,10 @@ export type LineSettings = {
   clientConfig: LineClientConfig
   sendToConsole?: boolean
   routerPath?: string
+  liff: {
+    viewProfile: string
+    viewAsset: string
+  }
 }
 
 export type DialogFlowSettings = {

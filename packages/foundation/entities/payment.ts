@@ -9,21 +9,34 @@ export type CurrencyUSD = 'USD'
 
 export type Currency = CurrencyTHB | CurrencyTWD | CurrencyJPY | CurrencyUSD
 
+export function isReservePaymentMessage(value: any): value is ReservePaymentMessage {
+  if (!value) {
+    return false
+  }
+  if (value['type'] === ReservePaymentMessageType) {
+    return true
+  }
+  return false
+}
+export const ReservePaymentMessageType = 'ReservePayment'
 export interface ReservePaymentMessage {
-  type: 'ReservePayment'
+  type: typeof ReservePaymentMessageType
   provider: PaymentProvider
   orderId: string
   productName: string
+  productDescription?: string
   productImageUrl?: string
   amount: number
   currency: Currency
   source?: IncommingMessageSource
 }
 
+export const ReservePaymentResultMessageType = 'ReservePaymentResult'
+export const ConfirmPaymentResultMessageType = 'ConfirmPaymentResult'
 export type ConfirmPaymentMessage = ConfirmPaymentResultMessage | ReservePaymentResultMessage
 
 export interface ReservePaymentResultMessage {
-  type: 'ReservePaymentResult'
+  type: typeof ReservePaymentResultMessageType
   provider: PaymentProvider
   transactionId?: string
   paymentUrl?: {
@@ -33,7 +46,7 @@ export interface ReservePaymentResultMessage {
   isCompleted: boolean
 }
 export interface ConfirmPaymentResultMessage {
-  type: 'ConfirmPaymentResult'
+  type: typeof ConfirmPaymentResultMessageType
   provider: PaymentProvider
   orderId: string
   transactionId: string

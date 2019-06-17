@@ -1,4 +1,4 @@
-import { validateMessageIntent } from "../intent";
+import { validateMessageIntent, ClaimFreeItemEventMessageIntent } from "../intent";
 import { randomFollowMessageIntent, randomListItemEventMessageIntent } from "./random";
 
 describe('intent testing', () => {
@@ -11,6 +11,18 @@ describe('intent testing', () => {
     }
     {
       const intent = randomListItemEventMessageIntent()
+      const { value, error } = validateMessageIntent(intent)
+      expect(error).toBeNull()
+      expect(value).toEqual(intent)
+    }
+
+    {
+      const intent: ClaimFreeItemEventMessageIntent = {
+        name: 'claim-free-item',
+        parameters: {
+          orderId: "test"
+        }
+      }
       const { value, error } = validateMessageIntent(intent)
       expect(error).toBeNull()
       expect(value).toEqual(intent)

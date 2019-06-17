@@ -4,11 +4,11 @@ import { createOutgoingFromIncomingMessage, DescribeItemMessageIntentKind, Descr
 
 export const DescribeItemEndpoint = (ancestor: EndpointFunctionAncestor) => endpointFn(DescribeItemMessageIntentKind, async (m) => {
 
-  const user = await ancestor.getSessionFromIncomingMessageOrThrow(m)
+  const session = await ancestor.getSessionFromIncomingMessageOrThrow(m)
   const asset = await ancestor.inventory
     .getBookAsset(
       m.intent.parameters.id,
-      WithOperationOwner(user.id)
+      WithOperationOwner(session.userId)
     )
 
   return createOutgoingFromIncomingMessage(m, [

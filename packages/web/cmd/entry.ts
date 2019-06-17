@@ -1,3 +1,4 @@
+require('@google-cloud/debug-agent').start();
 import { bootstrap } from '../app/bootstrap'
 import { Configurations } from '../app/types'
 import { FileStorage, GCPFileStorage, GetEnvStringOrThrow, atoi } from '@shio-bot/foundation'

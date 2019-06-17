@@ -9,7 +9,9 @@
     "delay": "1500",
     "verbose": false,
     "debug": false,
-    "exec": "node -r ts-node/register ./cmd/local.ts",
+    "execMap": {
+      "ts": "node -r ts-node/register"
+    },
     "ignore": [
       "node_modules",
       "routes.ts",
@@ -23,9 +25,10 @@
   },
   "scripts": {
     "start": "node cmd/entry.js",
-    "dev": "sh ../../scripts/clean.bash && nodemon",
     "dev-remote": "SHIO_LOCAL=0 yarn ts-node ./cmd/entry.ts",
     "prepare-pubsub": "yarn ts-node ./cmd/preparepubsub.ts",
+    "dev": "sh ../../scripts/clean.bash && nodemon ./cmd/local.ts",
+    "dev:debug": "nodemon --inspect=9239 ./cmd/local.ts",
     "build": "yarn tsc",
     "test": "yarn unit && yarn integration",
     "integration": "yarn jest --runInBand --config jest.integration.json",
@@ -40,7 +43,7 @@
   "dependencies": {
     "@google-cloud/datastore": "^3.1.2",
     "@google-cloud/pubsub": "^0.28.1",
-    "@shio-bot/foundation": "^1.1.7",
+    "@shio-bot/foundation": "^1.1.11",
     "dataloader": "^1.4.0",
     "express": "^4.17.1",
     "joi": "^14.3.1",

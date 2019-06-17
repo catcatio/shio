@@ -1,5 +1,5 @@
-import { Configuration as ChatEngineSettings } from '@shio-bot/chatengine/types'
-import { OutgoingMessage, IncomingMessage, ReservePaymentMessage, ConfirmPaymentMessage } from '@shio-bot/foundation/entities'
+import { Configuration as ChatEngineSettings, LineSettings } from '@shio-bot/chatengine/types'
+import { OutgoingMessage, IncomingMessage, ReservePaymentMessage, ConfirmPaymentMessage, MessageFulfillment } from '@shio-bot/foundation/entities'
 import express = require('express')
 import { ClientConfig } from '@google-cloud/pubsub/build/src/pubsub'
 
@@ -33,4 +33,41 @@ export interface Fulfillment {
 export interface Payment {
   onReservePayment(listener: ReservePaymentListener): void
   confirmPayment(msg: ConfirmPaymentMessage): Promise<void>
+}
+
+export type NarrowUnion<T, N> = T extends { name: N } ? T : never
+export type FulfillmentparserFunc<M, F> = (fulfillment: NarrowUnion<MessageFulfillment, F>) => M
+export type PaymentParserFunc<M, P> = (message: NarrowUnion<ConfirmPaymentMessage, P>, reservePayment: NarrowUnion<ConfirmPaymentMessage, ReservePaymentMessage>) => M
+
+export type MessageFulfillmentParserList<T> = { [key in MessageFulfillment['name']]: FulfillmentparserFunc<T, key> }
+export type MessagePaymentParserList<T> = { [key in ConfirmPaymentMessage['type']]: PaymentParserFunc<T, key> }
+
+export type LineFulfillmentParserOption = {
+  setting: LineSettings
+}
+
+export interface Product {
+  name: string
+  description?: string
+  price: number
+  imageUrl: string
+}
+export interface ReserveInformation {
+  totalPrice: number
+  currency: string
+  product: Product
+  orderId: string
+  transactionId?: string
+  paymentUrl: {
+    app: string
+    web: string
+  }
+}
+
+export interface ReceiptInformation {
+  totalPrice: number
+  currency: string
+  product: Product
+  orderId: string
+  transactionId?: string
 }

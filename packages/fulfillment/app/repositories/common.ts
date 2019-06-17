@@ -1,14 +1,51 @@
 import { SYSTEM_USER } from '../entities'
 import { SchemaLike } from 'joi'
-import { Datastore, Query } from '@google-cloud/datastore'
+import { Datastore, Query, DatastoreRequest, Transaction } from '@google-cloud/datastore'
 import { ErrorType, newGlobalError } from '../entities/error'
-import { logger, ShioLogger, newLogger } from '@shio-bot/foundation';
-import { MessageProvider, IncomingMessage } from '@shio-bot/foundation/entities';
-import { entity } from '@google-cloud/datastore/build/src/entity';
+import { logger, ShioLogger, newLogger } from '@shio-bot/foundation'
+import { MessageProvider, IncomingMessage } from '@shio-bot/foundation/entities'
+import { entity } from '@google-cloud/datastore/build/src/entity'
 
-export class DatastoreBaseRepository {
-  db: Datastore
-  constructor(db: Datastore) {
+export interface Transactionalable<T> {
+  begin(): Promise<T>
+  commit(): Promise<void>
+  rollback(): Promise<void>
+}
+
+export class DatastoreBaseRepository<Transactional extends DatastoreBaseRepository = any> {
+  db: DatastoreRequest
+
+  begin(): Promise<Transactional> {
+    throw new Error('transactional begin function is not implemented')
+  }
+
+  private isTransactional(db: DatastoreRequest): db is Transaction {
+    if (typeof db.commit === 'function') {
+      return true
+    }
+    return false
+  }
+  async commit() {
+    const tx = this.db
+    if (this.isTransactional(tx)) {
+      await tx.commit()
+      return
+    }
+    throw new Error('commit invalid transaction....')
+  }
+  async rollback() {
+    const tx = this.db
+    if (this.isTransactional(tx)) {
+      await tx.rollback()
+      return
+    }
+    throw new Error('commit invalid transaction....')
+  }
+
+  constructor(db: DatastoreRequest) {
+    if (this.isTransactional(db)) {
+      console.log('use transactional mode in datastore...')
+    }
     this.db = db
   }
 
@@ -23,7 +60,7 @@ export class DatastoreBaseRepository {
    * `allocateKey(['book', 491828392, 'episode', 'episode-a'])` << use Name as ID
    */
   async allocateKey(...paths: (string | number)[]) {
-    let ids = await this.db.allocateIds(this.db.key([...paths]), 1)
+    let ids = await this.db.allocateIds(this.db.key([...paths.map(this.parseIdToDatastoreId)]), 1)
     if (ids[0] < 1) {
       throw newGlobalError(ErrorType.Internal, 'ID allocation error, please try again')
     }
@@ -31,27 +68,34 @@ export class DatastoreBaseRepository {
     return key
   }
 
-  parseIdToDatastoreId(value: string): string | number {
+  key(...path: (string | number)[]) {
+    if (this.db.datastore) {
+      return this.db.datastore.key(path.map(this.parseIdToDatastoreId))
+    }
+    return this.db.key(path.map(this.parseIdToDatastoreId))
+  }
+
+  parseIdToDatastoreId(value: string | number): string | number {
     if (Number.isInteger(+value)) {
-      return parseInt(value)
+      return parseInt(value + "")
     } else {
       return value
     }
   }
 
-  getIdFromKey(key: entity.Key): { kind: string, id: string } {
+  getIdFromKey(key: entity.Key): { kind: string; id: string } {
     if (key.id) {
       return {
         kind: key.kind,
-        id: key.id,
+        id: key.id
       }
     } else if (key.name) {
       return {
         kind: key.kind,
-        id: key.name,
+        id: key.name
       }
     } else {
-      throw newGlobalError(ErrorType.Input, "invalid key....")
+      throw newGlobalError(ErrorType.Input, 'invalid key....')
     }
   }
 
@@ -104,12 +148,9 @@ export type OperationOption<T = any> = (option: OperationOptions<T>) => Operatio
 
 export function composeOperationOptions<T>(...opt: OperationOption<T>[]) {
   const option = new OperationOptions()
-  return opt.reduce<OperationOptions<T>>(
-    (options, opt) => {
-      return opt(options)
-    },
-    option
-  )
+  return opt.reduce<OperationOptions<T>>((options, opt) => {
+    return opt(options)
+  }, option)
 }
 
 export function WithWhere<T>(condition: WhereConditions<Partial<T>>): OperationOption<T> {

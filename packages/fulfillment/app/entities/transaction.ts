@@ -1,27 +1,23 @@
-enum PaymentStatus {
-  INITIAL,
-  CONFIRM,
-  FAILED
-}
-interface Payment {
+export interface Payment {
+  id: string
   amount: number
-  method: number
-  status: PaymentStatus
+  method: 'linepay' | 'free'
   transactionId: string
 }
 
-enum TransactionStatus {
-  WAITING_FOR_PAYMENT,
-  CANCELED,
-  FAILED,
-  COMPLETED,
+export enum TransactionStatus {
+  WAITING_FOR_PAYMENT = 'wating-payment',
+  CANCELED = 'cancel',
+  FAILED = 'failed',
+  COMPLETED = 'completed',
 }
 
-interface Transaction {
+export interface Transaction {
   id: string
   assetId: string
   status: TransactionStatus
-  paymentId?: string
+  price: number
+  userId: string
 
   /**
    * stellar://

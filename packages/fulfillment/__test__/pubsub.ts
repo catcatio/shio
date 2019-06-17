@@ -7,14 +7,16 @@ import {
   newLogger,
   MessageChannelTransport,
   UnPromise,
-  GetEnvConfig
+  GetEnvConfig,
+  getLocalhostUrl
 } from '@shio-bot/foundation'
-import { OutgoingMessage, IncomingMessage } from '@shio-bot/foundation/entities'
+import { OutgoingMessage, IncomingMessage, ReservePaymentMessage } from '@shio-bot/foundation/entities'
 import { MessageFulfillment } from '@shio-bot/foundation/entities/intent'
 import { NarrowUnion } from '../app/endpoints/default'
 import * as express from 'express'
 import { Server } from 'http'
 import { FixtureStep, FixtureContext } from './fixture'
+import { CloudPubsubPaymentChannelTransport } from '@shio-bot/foundation/transports/pubsub';
 
 export function runFixtureSteps(ctx: FixtureContext, pubsub: UnPromise<ReturnType<typeof createPubsubIntegrationClient>>) {
   return async (...steps: FixtureStep[]) => {
@@ -38,32 +40,48 @@ export const createPubsubIntegrationClient = async () => {
   const ps = await createCloudPubSubInstance(WithPubsubProjectId(config.projectId), WithPubsubEndpoint(config.pubsubEndpoint))
   const log = newLogger().withUserId('integration-test')
 
-  const pubsub = new CloudPubsubMessageChannelTransport({
+  const messageInOut = new CloudPubsubMessageChannelTransport({
     pubsub: ps,
     serviceName: 'integration-test-follow-intent'
   })
 
+  const paymentInOut = new CloudPubsubPaymentChannelTransport({
+    pubsub: ps,
+    serviceName: 'integration-test-follow-intent'
+  })
+
+  await paymentInOut.PrepareTopic()
+  await messageInOut.PrepareTopic()
+
   let resolve: any
   let server: Server
+
   return {
-    pubsub,
+    pubsub: messageInOut,
     async start() {
       const app = express()
       app.use(express.json())
-      app.use('/', pubsub.NotificationRouter)
+      app.use('/', messageInOut.NotificationRouter)
+      app.use('/', paymentInOut.NotificationRouter)
       app.get('/', (req, res) => res.status(200).send('ok'))
       server = app.listen(8091, () => {
         log.info('test server started 8091')
       })
-      await pubsub.CreateOutgoingSubscriptionConfig('http://host.docker.internal:8091')
+      await messageInOut.CreateOutgoingSubscriptionConfig(getLocalhostUrl() + ":8091")
+      await paymentInOut.CreateOutgoingSubscriptionConfig(getLocalhostUrl() + ":8091")
+
     },
-    sendIncomingMessage: (m: IncomingMessage): Promise<OutgoingMessage> => {
+    sendIncomingMessage: (m: IncomingMessage): Promise<OutgoingMessage | ReservePaymentMessage> => {
       if (GetEnvString('FULFILLMENT_INTEGRATION_DEBUG') === '1') {
         jest.setTimeout(1000 * 60 * 60)
       }
-      return new Promise<OutgoingMessage>(async (res, reject) => {
+      return new Promise<OutgoingMessage | ReservePaymentMessage>(async (res, reject) => {
         resolve = res
-        pubsub.SubscribeOutgoing((message, ack) => {
+        paymentInOut.SubscribeOutgoing((msg, ack) => {
+          ack()
+          res(msg)
+        })
+        messageInOut.SubscribeOutgoing((message, ack) => {
           if (message.requestId !== m.requestId) {
             log.info(`IGNORE MESSAGE WITH REQUEST ID ${message.requestId}`)
             reject('INVALID MESSAGE ID')
@@ -75,7 +93,7 @@ export const createPubsubIntegrationClient = async () => {
         })
 
         log.info(`send message... (${m.intent.name})`)
-        pubsub.PublishIncoming(m)
+        messageInOut.PublishIncoming(m)
       })
     },
     clean: async () => {
@@ -85,8 +103,8 @@ export const createPubsubIntegrationClient = async () => {
           r()
         })
       })
-      pubsub.UnsubscribeAllIncomingMessage()
-      pubsub.UnsubscribeAllOutgoingMessage()
+      messageInOut.UnsubscribeAllIncomingMessage()
+      messageInOut.UnsubscribeAllOutgoingMessage()
     }
   }
 }

@@ -30,11 +30,18 @@ export const intentMessageHandler = (fulfillment: Fulfillment, intentDetector: I
     // example:
     // shio bypass list-item "{\"offset\": 5}"
     // shio bypass follow
-    log.info('incoming message: ' + msg.message)
+    log.info('incoming message: ' + JSON.stringify(msg.message, null, 2))
     const byPassMessage = tryBypassMessage(msg.message)
     if (byPassMessage) {
       log.info('bypass intent parser with special command: ' + msg.message)
       const { value, error } = validateMessageIntent(byPassMessage)
+      if (error) {
+        log.error(JSON.stringify(error.details))
+        return
+      }
+      intent = value
+    } else if (msg.type === 'postback') {
+      const { value, error } = validateMessageIntent(JSON.parse(msg.original.postback.data))
       if (error) {
         log.error(JSON.stringify(error.details))
         return

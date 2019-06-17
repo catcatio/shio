@@ -7,7 +7,10 @@
     "delay": "1500",
     "verbose": false,
     "debug": false,
-    "exec": "node --inspect=9239 -r ts-node/register ./cmd/dev.ts",
+    "restartable": "rs",
+    "execMap": {
+      "ts": "node --require ts-node/register"
+    },
     "ignore": [
       "node_modules"
     ],
@@ -20,9 +23,10 @@
   "scripts": {
     "start": "node cmd/entry.js",
     "predev": "yarn build",
-    "dev": "nodemon",
+    "dev": "nodemon ./cmd/dev.ts",
     "prelocal": "yarn build",
-    "local": "node --inspect=9239 -r ts-node/register ./cmd/local.ts ",
+    "local": "nodemon ./cmd/local.ts ",
+    "local:debug": "nodemon --inspect=9239 ./cmd/local.ts",
     "build": "tsc",
     "clean": "find -E . -regex '.*\\.(info|js|map|d\\.ts)' -not -path \"**/node_modules/*\" -not -path  \"./.next/*\" -delete && rm -rf dist",
     "unit": "yarn jest --config jest.unit.json",
@@ -32,8 +36,9 @@
     "gcp-logs": "gcloud app logs tail -s web"
   },
   "dependencies": {
-    "@shio-bot/chatengine": "^1.0.5",
-    "@shio-bot/foundation": "^1.1.4",
+    "@google-cloud/debug-agent": "^4.0.0",
+    "@shio-bot/chatengine": "^1.0.6",
+    "@shio-bot/foundation": "^1.1.11",
     "express": "^4.17.1"
   },
   "devDependencies": {

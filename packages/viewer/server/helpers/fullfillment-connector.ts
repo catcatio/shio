@@ -1,4 +1,4 @@
-import { MessageProvider, OutgoingMessage, WhoMessageFulfilmentKind, WhoMessageFulfillment, MessageIntent, DescribeItemMessageIntentKind, DescribeItemMessageFulfillment, DescribeItemMessageFulfillmentKind, GetItemDownloadUrlEventMessageIntentKind, GetItemDownloadUrlEventMessageFulfillmentKind, GetItemDownloadUrlEventMessageFulfillment } from "@shio-bot/foundation/entities";
+import { MessageProvider, OutgoingMessage, WhoMessageFulfilmentKind, WhoMessageFulfillment, MessageIntent, DescribeItemMessageIntentKind, DescribeItemMessageFulfillment, DescribeItemMessageFulfillmentKind, GetItemDownloadUrlEventMessageIntentKind, GetItemDownloadUrlEventMessageFulfillmentKind, GetItemDownloadUrlEventMessageFulfillment, WhoMessageIntentKind } from "@shio-bot/foundation/entities";
 import { URL } from 'url'
 import * as fetch from 'isomorphic-fetch'
 
@@ -66,11 +66,11 @@ export class FulfillmentConnector {
   }
 
   async getUserProfile(providerName: MessageProvider, providerUserId: string): Promise<WhoMessageFulfillment> {
-    const resp = await this.call<OutgoingMessage>('GET', WhoMessageFulfilmentKind, this.createSessionToken(providerName, providerUserId))
+    const resp = await this.call<OutgoingMessage>('GET', WhoMessageIntentKind, this.createSessionToken(providerName, providerUserId))
     const whoFulfillment = resp.fulfillment.find((f): f is WhoMessageFulfillment => { return f.name === WhoMessageFulfilmentKind })
 
     if (!whoFulfillment) {
-      throw new Error('cannot get user information')
+      throw new Error('cannot get user information\n' + JSON.stringify(resp))
     }
     return whoFulfillment
   }

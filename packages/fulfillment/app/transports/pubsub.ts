@@ -1,19 +1,14 @@
-import { newLogger, MessageChannelTransport } from '@shio-bot/foundation'
+import { newLogger, MessageChannelTransport, UnPromise } from '@shio-bot/foundation'
 import { FulfillmentEndpoint } from '../endpoints'
-import { createOutgoingFromIncomingMessage, OutgoingMessage, ReservePaymentMessage } from '@shio-bot/foundation/entities'
+import {
+  createOutgoingFromIncomingMessage, ErrorEventMessageFulfillmentKind,
+} from '@shio-bot/foundation/entities'
 import { newGlobalError, ErrorType } from '../entities/error'
 import { PaymentChannelTransport } from '@shio-bot/foundation/transports/pubsub'
+import { EndpointFuntion } from '../endpoints/default';
 
 export function registerPubsub(pubsub: MessageChannelTransport, paymentPubsub: PaymentChannelTransport, endpoints: FulfillmentEndpoint) {
   const log = newLogger()
-
-  const isOutgoingMessage = (obj: any): boolean => {
-    return obj && obj.requestId
-  }
-
-  const isReservePaymentMessage = (obj: any): boolean => {
-    return obj && obj.orderId
-  }
 
   pubsub.SubscribeIncoming(async (message, ack) => {
     log
@@ -25,7 +20,7 @@ export function registerPubsub(pubsub: MessageChannelTransport, paymentPubsub: P
         type: message.source.type
       })
       .info(`incoming message begin process...`)
-    let msg: OutgoingMessage | ReservePaymentMessage | void
+    let msg: UnPromise<ReturnType<EndpointFuntion>>
     try {
       const endpoint = endpoints[message.intent.name]
       if (!endpoint) {
@@ -35,22 +30,21 @@ export function registerPubsub(pubsub: MessageChannelTransport, paymentPubsub: P
       // do task and resolve
       // outoging message
       msg = await endpoint(message)
-
       ack()
 
-      // Send outgoing message
-
-      if (isOutgoingMessage(msg)) {
-        log.info('OutgoingMessage')
-        await pubsub.PublishOutgoing(msg as OutgoingMessage)
-      } else if (isReservePaymentMessage(msg)) {
-        log.info('ReservePaymentMessage')
-        await paymentPubsub.PublishReservePayment(msg as ReservePaymentMessage)
+      if (!msg) {
+        return
       }
+      // Send outgoing message
+      // if there are any fulfillment
+      // return from outgoing message
+      log.withFields({ fulfillments: msg.fulfillment.map(f => f.name).join(',') }).info('publish outgoing message')
+      await pubsub.PublishOutgoing(msg)
+
     } catch (e) {
       await pubsub.PublishOutgoing(
         createOutgoingFromIncomingMessage(message, {
-          name: 'error',
+          name: ErrorEventMessageFulfillmentKind,
           parameters: {
             reason: e.toString() + '\n' + e.stack
           }
@@ -68,7 +62,6 @@ export function registerPubsub(pubsub: MessageChannelTransport, paymentPubsub: P
         - ConfirmPaymentResultMessage
     */
     log.info(JSON.stringify(message))
-
     ack()
   })
 }

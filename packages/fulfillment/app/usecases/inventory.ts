@@ -11,12 +11,15 @@ export interface InventoryUseCase {
 
   getAssetDownloadableUrl(assetId: string, contentType: AssetContentType, ...options: OperationOption[]): Promise<string | undefined>
   getBookAsset(assetId: string, ...options: OperationOption[]): Promise<Asset>
-
+  addAssetToInventory(assetId: string, ...options: OperationOption[]): Promise<void>
 }
 
 
 
 export class DefaultInventoryUseCase implements InventoryUseCase {
+  addAssetToInventory(assetId: string, ...options: OperationOption<any>[]): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
 
   async getBookAsset(assetId: string, ...options: OperationOption<any>[]): Promise<Asset> {
     const option = composeOperationOptions(...options)

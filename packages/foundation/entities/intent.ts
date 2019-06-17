@@ -1,21 +1,27 @@
 import { AssetMetadata } from './asset'
 import * as Joi from 'joi'
-import { MessageProvider } from "./message";
+import { MessageProvider } from './message'
+import { join } from 'path'
+import { NarrowUnion } from '../../fulfillment/app/endpoints/default'
 
 function JoiKind(kind: string) {
-  return Joi.string().only(kind).required()
+  return Joi.string()
+    .only(kind)
+    .required()
 }
 
 export const WhoMessageIntentKind = 'who'
 export const WhoMessageIntentSchema = Joi.object().keys({
-  name: Joi.string().only(WhoMessageIntentKind).required(),
+  name: Joi.string()
+    .only(WhoMessageIntentKind)
+    .required(),
   parameters: Joi.object().keys({})
 })
 export interface WhoMessageIntent {
   name: typeof WhoMessageIntentKind
   parameters: {}
 }
-export const WhoMessageFulfilmentKind = 'who'
+export const WhoMessageFulfilmentKind = 'who-fufillment'
 export interface WhoMessageFulfillment {
   name: typeof WhoMessageFulfilmentKind
   parameters: {
@@ -31,7 +37,7 @@ export const DescribeItemMessageIntentKind = 'describe-item'
 export const DescribeItemMessageIntentSchema = Joi.object().keys({
   name: JoiKind(DescribeItemMessageIntentKind),
   parameters: Joi.object().keys({
-    id: Joi.string().required(),
+    id: Joi.string().required()
   })
 })
 export interface DescribeItemMessageIntent {
@@ -42,7 +48,7 @@ export interface DescribeItemMessageIntent {
 }
 
 export const DescribeItemMessageFulfillmentKind = 'describe-item'
-export interface DescribeItemMessageFulfillment{
+export interface DescribeItemMessageFulfillment {
   name: typeof DescribeItemMessageFulfillmentKind
   parameters: {
     id: string
@@ -52,10 +58,14 @@ export interface DescribeItemMessageFulfillment{
 
 export const GetItemDownloadUrlEventMessageIntentKind = 'get-item-download-url'
 export const GetItemDownloadUrlEventMessageIntentSchema = Joi.object().keys({
-  name: Joi.string().only(GetItemDownloadUrlEventMessageIntentKind).required(),
-  parameters: Joi.object().keys({
-    assetId: Joi.string().required(),
-  }).required()
+  name: Joi.string()
+    .only(GetItemDownloadUrlEventMessageIntentKind)
+    .required(),
+  parameters: Joi.object()
+    .keys({
+      assetId: Joi.string().required()
+    })
+    .required()
 })
 export interface GetItemDownloadUrlEventMessageIntent {
   name: typeof GetItemDownloadUrlEventMessageIntentKind
@@ -63,14 +73,13 @@ export interface GetItemDownloadUrlEventMessageIntent {
     assetId: string
   }
 }
-export const GetItemDownloadUrlEventMessageFulfillmentKind = 'get-item-download-url'
+export const GetItemDownloadUrlEventMessageFulfillmentKind = 'get-item-download-url-fulfillment'
 export interface GetItemDownloadUrlEventMessageFulfillment {
   name: typeof GetItemDownloadUrlEventMessageFulfillmentKind
   paramters: {
     url: string
   }
 }
-
 
 export enum ListItemEventMessageIntentParameterFilter {
   RECENT = 'recent',
@@ -97,7 +106,7 @@ export interface ListItemEventMessageIntent {
   }
 }
 
-export const ListItemEventMessageFulfillmentKind = 'list-item'
+export const ListItemEventMessageFulfillmentKind = 'list-item-fulfillment'
 export interface ListItemEventMessageFulfillment {
   name: typeof ListItemEventMessageFulfillmentKind
   parameters: {
@@ -108,19 +117,25 @@ export interface ListItemEventMessageFulfillment {
     hasPrev: boolean
     filter?: ListItemEventMessageIntentParameterFilter
     assets: {
+      isOwnByOperationOwner?: boolean
       id: string
       meta: AssetMetadata
       price?: number
+      coverImageURL?: string
     }[]
   }
 }
 
 export const FollowEventMessageIntentKind = 'follow'
 export const FollowEventMessageIntentSchema = Joi.object().keys({
-  name: Joi.string().only(FollowEventMessageIntentKind).required(),
-  parameters: Joi.object().keys({
-    displayName: Joi.string().required(),
-  }).required()
+  name: Joi.string()
+    .only(FollowEventMessageIntentKind)
+    .required(),
+  parameters: Joi.object()
+    .keys({
+      displayName: Joi.string().required()
+    })
+    .required()
 })
 export interface FollowEventMessageIntent {
   name: typeof FollowEventMessageIntentKind
@@ -137,7 +152,7 @@ export interface UnfollowEventMessageIntent {
   }
 }
 
-export const FollowEventMessageFulfillmentKind = 'follow'
+export const FollowEventMessageFulfillmentKind = 'follow-fulfillment'
 export interface FollowEventMessageFulfillment {
   name: typeof FollowEventMessageFulfillmentKind
   parameters: {
@@ -148,7 +163,7 @@ export interface FollowEventMessageFulfillment {
     description?: string
   }
 }
-export const ErrorEventMessageFulfillmentKind = 'error'
+export const ErrorEventMessageFulfillmentKind = 'error-fulfillment'
 export interface ErrorEventMessageFulfillment {
   name: typeof ErrorEventMessageFulfillmentKind
   parameters: {
@@ -160,7 +175,47 @@ export const PurchaseItemEventMessageIntentKind = 'purchase-item'
 export interface PurchaseItemEventMessageIntent {
   name: typeof PurchaseItemEventMessageIntentKind
   parameters: {
-    merchantTitle: string
+    assetId: string
+  }
+}
+export const PurchaseItemEventMessageIntentSchema = Joi.object().keys({
+  name: Joi.string()
+    .only(PurchaseItemEventMessageIntentKind)
+    .required(),
+  parameters: Joi.object()
+    .keys({
+      assetId: Joi.string().required()
+    })
+    .required()
+})
+
+export const ClaimFreeItemEventMessageIntentKind = 'claim-free-item'
+export interface ClaimFreeItemEventMessageIntent {
+  name: typeof ClaimFreeItemEventMessageIntentKind
+  parameters: {
+    orderId: string
+  }
+}
+export const ClaimFreeItemEventMessageIntentSchema = Joi.object().keys({
+  name: Joi.string()
+    .only(ClaimFreeItemEventMessageIntentKind)
+    .required(),
+  parameters: Joi.object()
+    .keys({
+      orderId: Joi.string().required()
+    })
+    .required()
+})
+
+export const ClaimFreeItemEventMessageFulfillmentKind = 'claim-free-item-completed-fulfillment'
+export interface ClaimFreeItemEventMessageFulfillment {
+  name: typeof ClaimFreeItemEventMessageFulfillmentKind
+  parameters: {
+    orderId: string
+    assetId: string
+    productName: string
+    productDescription?: string
+    productImageUrl?: string
   }
 }
 
@@ -172,6 +227,7 @@ export type MessageIntent =
   | WhoMessageIntent
   | PurchaseItemEventMessageIntent
   | DescribeItemMessageIntent
+  | ClaimFreeItemEventMessageIntent
 
 export type MessageFulfillment =
   | FollowEventMessageFulfillment
@@ -180,15 +236,28 @@ export type MessageFulfillment =
   | GetItemDownloadUrlEventMessageFulfillment
   | WhoMessageFulfillment
   | DescribeItemMessageFulfillment
+  | ClaimFreeItemEventMessageFulfillment
 
-export function validateMessageIntent(intent: any): { value: MessageIntent, error: Joi.ValidationError } {
+export function isIntentOfKind<K extends MessageIntent['name']>(name: K, value: any): value is NarrowUnion<MessageIntent, K> {
+  if (!value) return false
+  if (value['name'] === name) return true
+  return false
+}
+
+export function isFulfillmentOfKind<K extends MessageFulfillment['name']>(name: K, value: any): value is NarrowUnion<MessageFulfillment, K> {
+  if (!value) return false
+  if (value['name'] === name) return true
+  return false
+}
+
+export function validateMessageIntent(intent: any): { value: MessageIntent; error: Joi.ValidationError } {
   return Joi.alternatives([
     ListItemEventMessageIntentSchema,
     FollowEventMessageIntentSchema,
     GetItemDownloadUrlEventMessageIntentSchema,
     WhoMessageIntentSchema,
-    DescribeItemMessageIntentSchema
+    DescribeItemMessageIntentSchema,
+    PurchaseItemEventMessageIntentSchema,
+    ClaimFreeItemEventMessageIntentSchema
   ]).validate(intent)
-
 }
-

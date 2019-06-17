@@ -16,8 +16,8 @@ import { Client as LineClient, ImageMessage, Message, TextMessage, HTTPError } f
 type sendFunc = (replyToken: string, to: string | string[], messages: Message | Message[]) => Promise<any>
 
 export class LineMessagingClient implements MessagingClient {
-  name = 'line'
 
+  name = 'line'
   private lineConfig: LineClientConfig
   private lineClient: LineClient
   private send: sendFunc

@@ -5,10 +5,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "[Manager] Asset add",
+      "name": "[Manager] development",
       "type": "node",
       "request": "launch",
-      "args": ["${workspaceRoot}/packages/management/cmd/index.ts", "asset", "add", "-f", "/Users/rungsikornrungsikavarnich/Desktop/MGA_CH_1.zip"],
+      "args": ["${workspaceRoot}/packages/management/app/index.ts"],
       "cwd": "${workspaceRoot}/packages/management",
       "runtimeArgs": ["-r", "ts-node/register"],
       "protocol": "inspector",
@@ -157,5 +157,13 @@
       "protocol": "inspector",
       "internalConsoleOptions": "openOnSessionStart"
     },
+    {
+      "name": "Node nodemon",
+      "type": "node",
+      "request": "attach",
+      "processId": "${command:PickProcess}",
+      "restart": true,
+      "protocol": "inspector"
+    }
   ]
 }

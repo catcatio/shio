@@ -24,6 +24,9 @@ class MockIntentDetector implements IntentDetector {
   }
 }
 class MockMessagingClient implements MessagingClient {
+  getFulfillmentParser(): import("../../types").MessageFulfillmentParserList<any> {
+    throw new Error("Method not implemented.");
+  }
   name: string; sendImage(input: import("@shio-bot/chatengine").LineMessageClientSendImageInput): Promise<import("@shio-bot/chatengine").LineMessageClientSendImageOutput> {
     throw new Error("Method not implemented.");
   }

@@ -74,6 +74,7 @@ export function registerHttpTransports(http: express.Application, endpoints: Ful
         }
         return
       }
+      console.error(e)
       res.status(500).json(e)
     }
   })
