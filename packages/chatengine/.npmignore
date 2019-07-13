@@ -1,3 +1,9 @@
+# ignore the .ts files
 *.ts
+
+# include the .d.ts files
+!*.d.ts
+
+*.spec.ts
 jest.*.json
 tsconfig.json
