@@ -12,12 +12,9 @@
     "sourceMap": true,
     "jsx": "react",
     "target": "es2015",
-    "lib": ["es2015", "dom"]
+    "lib": ["es2015", "dom"],
+    "preserveSymlinks": true
   },
-  "exclude": [ ],
-  "references": [
-    { "path": "foundation" },
-    { "path": "chatengine" },
-    { "path": "fulfillment" }
-  ]
+  "exclude": [],
+  "references": [{ "path": "foundation" }, { "path": "chatengine" }, { "path": "fulfillment" }]
 }

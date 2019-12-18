@@ -1,6 +1,6 @@
 import { IntentDetector, ParsedMessage, Intent, empty, MessageType, IntentParameters } from '../types'
 import { SessionsClient } from 'dialogflow'
-import structjson from '../utils/dialogflow/structjson'
+// import structjson from '../utils/dialogflow/structjson'
 
 export class DialogflowIntentDetector implements IntentDetector {
   name = 'dialogflow'
@@ -36,8 +36,8 @@ export class DialogflowIntentDetector implements IntentDetector {
         }
       },
       queryParams: {
-        // https://github.com/dialogflow/dialogflow-nodejs-client-v2/issues/9
-        payload: structjson.jsonToStructProto(queryParamsPayload)
+        //   // https://github.com/dialogflow/dialogflow-nodejs-client-v2/issues/9
+        payload: queryParamsPayload
       }
     }
 
